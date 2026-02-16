@@ -45,6 +45,16 @@ if test -d /usr/local/cuda
     set -gx LD_LIBRARY_PATH $cuda_path/lib64 $LD_LIBRARY_PATH
 end
 
+# fzf (only if installed)
+if test -d $HOME/.fzf/bin
+    fish_add_path $HOME/.fzf/bin
+end
+
+# local binaries (e.g., zoxide)
+if test -d $HOME/.local/bin
+    fish_add_path $HOME/.local/bin
+end
+
 # opencode (only if installed)
 if test -d $HOME/.opencode/bin
     fish_add_path $HOME/.opencode/bin
