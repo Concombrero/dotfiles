@@ -52,14 +52,15 @@ FIND (<leader>f)                                | DESCRIPTION
 <leader>fa - Find all files                     | Search all files, including hidden
 <leader>fb - Find buffers                       | Switch between open buffers
 <leader>fc - Find citations                     | Search BibTeX citations
-<leader>ff - Find in project                    | Search text in project files
+<leader>ff - Find files                          | Search files in project/cwd
 <leader>fl - Resume last search                 | Continue previous search
+<leader>fp - Project grep                       | Search text in project files (ivy)
 <leader>fq - Find in quickfix                   | Search within quickfix list
 <leader>fg - Git commit history                 | Browse git commit history
 <leader>fh - Help tags                          | Search Neovim help documentation
 <leader>fk - Keymaps                            | Show all keybindings
 <leader>fr - Registers                          | Show clipboard registers
-<leader>ft - Colorschemes                       | Browse and change themes
+<leader>ft - Todos                               | Search TODO/FIXME/HACK comments
 <leader>fs - Search string                      | Search for string in project
 <leader>fw - Search word under cursor           | Find current word in project
 <leader>fy - Yank history                       | Browse clipboard history
@@ -130,6 +131,7 @@ LSP & LINT (<leader>l)                          | DESCRIPTION
 ----------------------------------------------------------------------------------
 <leader>lb - Buffer diagnostics                 | Show all errors in current file
 <leader>lc - Code action                        | Show available code actions
+<leader>lf - Format buffer                      | Format current buffer via LSP/conform
 <leader>ld - Go to definition                   | Jump to symbol definition
 <leader>lD - Go to declaration                  | Jump to symbol declaration
 <leader>lh - Hover help                         | Show documentation under cursor
@@ -153,7 +155,6 @@ MARKDOWN (<leader>m)                            | DESCRIPTION
 <leader>ml - Run Lectic                         | Run Lectic on current file
 <leader>mn - New Lectic file                    | Create new Lectic file with template
 <leader>ms - Submit selection                   | Submit visual selection with user message
-<leader>mp - Format buffer                      | Format code with conform.nvim
 <leader>mu - Open URL                           | Open URL under cursor
 <leader>ma - Toggle all folds                   | Toggle all folds open/closed
 <leader>mf - Toggle fold                        | Toggle fold under cursor
@@ -347,7 +348,7 @@ return {
         s = { "<cmd>NvimTreeOpen ~/.config/nvim/snippets/<CR>", "snippets edit" },
         S = { "<cmd>TermExec cmd='ssh brastmck@eofe10.mit.edu'<CR>", "ssh" },
       },
-      f = {
+        f = {
         name = "FIND",
         a = { "<cmd>lua require('telescope.builtin').find_files({ no_ignore = true, hidden = true, search_dirs = { '~/' } })<CR>", "all files" },
         b = {
@@ -355,8 +356,9 @@ return {
           "buffers",
         },
         c = { "<cmd>Telescope bibtex format_string=\\citet{%s}<CR>", "citations" },
-        f = { "<cmd>Telescope live_grep theme=ivy<CR>", "project" },
+        f = { "<cmd>Telescope find_files<CR>", "files" },
         l = { "<cmd>Telescope resume<CR>", "last search" },
+        p = { "<cmd>Telescope live_grep theme=ivy<CR>", "project grep" },
         q = { "<cmd>Telescope quickfix<CR>", "quickfix" },
         g = { "<cmd>Telescope git_commits<CR>", "git history" },
         h = { "<cmd>Telescope help_tags<CR>", "help" },
@@ -450,6 +452,7 @@ return {
         c = { "<cmd>lua vim.lsp.buf.code_action()<CR>", "code action" },
         d = { "<cmd>lua vim.lsp.buf.definition()<CR>", "definition" },
         D = { "<cmd>lua vim.lsp.buf.declaration()<CR>", "declaration" },
+        f = { function() require("conform").format({ async = true, lsp_fallback = true }) end, "format buffer" },
         h = { "<cmd>lua vim.lsp.buf.hover()<CR>", "help" },
         i = { "<cmd>Telescope lsp_implementations<CR>", "implementations" },
         k = { "<cmd>LspStop<CR>", "kill lsp" },
@@ -476,8 +479,7 @@ return {
         n = { "<cmd>LecticCreateFile<CR>", "new lectic file" },
         s = { "<cmd>LecticSubmitSelection<CR>", "submit selection with message" },
 
-        -- MARKDOWN/PREVIEW & FORMATTING
-        p = { function() require("conform").format({ async = true, lsp_fallback = true }) end, "format buffer" },
+        -- MARKDOWN/PREVIEW
         -- o = markdown preview (keymap defined in markdown-preview.lua via lazy keys)
         u = { "<cmd>lua OpenUrlUnderCursor()<CR>", "open URL under cursor" },
 
