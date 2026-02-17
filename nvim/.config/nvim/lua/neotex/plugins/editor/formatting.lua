@@ -15,16 +15,6 @@ return {
   "stevearc/conform.nvim",
   event = { "BufWritePre", "BufNewFile" },
   cmd = { "ConformInfo" },
-  keys = {
-    {
-      "<leader>lf", 
-      function()
-        require("conform").format({ async = true, lsp_fallback = true })
-      end,
-      mode = { "n", "v" },
-      desc = "Format buffer or selection"
-    },
-  },
   config = function()
     require("conform").setup({
       -- Define formatters for different file types

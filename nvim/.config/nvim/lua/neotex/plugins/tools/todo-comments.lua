@@ -110,16 +110,5 @@ return {
     if has_telescope then
       telescope.load_extension("todo-comments")
     end
-
-    -- Add which-key mappings
-    local has_which_key, which_key = pcall(require, "which-key")
-    if has_which_key then
-      which_key.register({
-        ["<leader>ft"] = { "<cmd>TodoTelescope<CR>", "todos" },
-      })
-
-      -- Keep TODO actions out of <leader>t so that group can stay Typst-focused.
-      -- TODO commands remain available via <leader>ft, ]t, and [t.
-    end
   end,
 }

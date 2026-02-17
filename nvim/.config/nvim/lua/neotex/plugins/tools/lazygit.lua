@@ -9,13 +9,7 @@ return {
         "LazyGitFilter",
         "LazyGitFilterCurrentFile",
     },
-    -- optional for floating window border decoration
     dependencies = {
         "nvim-lua/plenary.nvim",
     },
-    -- Plugin is loaded when <leader>g triggers LazyGit via which-key,
-    -- or when any LazyGit command is run directly.
-    keys = {
-        { "<leader>g", "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", desc = "lazygit" }
-    }
 }

@@ -29,16 +29,16 @@ ACTIONS (<leader>a)                             | DESCRIPTION
 <leader>ac - Clear VimTex cache                 | Clear LaTeX compilation cache
 <leader>ae - Show VimTex errors                 | Display LaTeX error messages
 <leader>af - Format buffer                      | Format current buffer via LSP
-<leader>ag - Edit glossary                      | Open LaTeX glossary template
+<leader>ag - Edit tex snippets                  | Open tex snippets file
 <leader>ah - Toggle local highlight             | Highlight current word occurrences
 <leader>ak - Clean VimTex aux files             | Remove LaTeX auxiliary files
 <leader>ap - Run Python file                    | Execute current Python file
 <leader>ar - Recalculate list numbers           | Fix numbering in lists
+<leader>as - Edit snippets                      | Open snippets directory
 <leader>at - Format tex file                    | Format LaTeX using latexindent
 <leader>au - Update CWD                         | Change to file's directory
 <leader>av - VimTex context menu                | Show VimTeX context actions
 <leader>aw - Count words                        | Count words in LaTeX document
-<leader>as - Edit snippets                      | Open snippets directory
 <leader>aS - SSH connect                        | Connect to MIT server via SSH
 
 ----------------------------------------------------------------------------------
@@ -262,7 +262,6 @@ return {
       u = { "<cmd>Telescope undo<CR>", "undo" },
       v = { "<cmd>VimtexView<CR>", "view" },
       w = { "<cmd>wa!<CR>", "write" },
-      -- z = { "<cmd>ZenMode<CR>", "zen" },
       a = {
         name = "ACTIONS",
         a = { "<cmd>lua PdfAnnots()<CR>", "annotate" },
@@ -270,8 +269,7 @@ return {
         c = { "<cmd>:VimtexClearCache All<CR>", "clear vimtex" },
         e = { "<cmd>VimtexErrors<CR>", "error report" },
         f = { "<cmd>lua vim.lsp.buf.format()<CR>", "format" },
-        g = { "<cmd>e ~/.config/nvim/templates/Glossary.tex<CR>", "edit glossary" },
-        -- h = { "<cmd>lua _HTOP_TOGGLE()<CR>", "htop" },
+        g = { "<cmd>e ~/.config/nvim/snippets/tex.snippets<CR>", "edit tex snippets" },
         h = { "<cmd>LocalHighlightToggle<CR>", "highlight" },
         k = { "<cmd>VimtexClean<CR>", "kill aux" },
         p = { "<cmd>TermExec cmd='python3 %:p:r.py'<CR>", "python" },
@@ -279,10 +277,7 @@ return {
         u = { "<cmd>cd %:p:h | NvimTreeRefresh | NvimTreeFindFile<CR>", "update cwd" },
         v = { "<plug>(vimtex-context-menu)", "vimtex menu" },
         w = { "<cmd>VimtexCountWords!<CR>", "word count" },
-        -- w = { "<cmd>TermExec cmd='pandoc %:p -o %:p:r.docx'<CR>" , "word"},
-        -- s = { "<cmd>lua function() require('cmp_vimtex.search').search_menu() end<CR>"           , "search citations" },
-        s = { "<cmd>NvimTreeOpen ~/.config/nvim/snippets/<CR>", "snippets edit" },
-        S = { "<cmd>TermExec cmd='ssh brastmck@eofe10.mit.edu'<CR>", "ssh" },
+        s = { "<cmd>e ~/.config/nvim/snippets/<CR>", "snippets edit" },
       },
         f = {
         name = "FIND",

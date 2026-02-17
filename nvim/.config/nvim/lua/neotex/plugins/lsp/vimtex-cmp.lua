@@ -1,5 +1,7 @@
 return {
   "micangl/cmp-vimtex",
+  lazy = true,
+  ft = { "tex", "latex" },
   config = function()
     require('cmp_vimtex').setup({
       additional_information = {

@@ -2,7 +2,8 @@
 return{ 
   {
   'chomosuke/typst-preview.nvim',
-  lazy = false,
+ lazy = true,
+  ft = "typst",
   version = '1.*',
   config = function()
     local data = vim.fn.stdpath('data')
