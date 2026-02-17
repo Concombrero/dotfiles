@@ -388,11 +388,6 @@ return {
       },
       h = {
         name = "AI HELP",
-        -- OpenCode
-        a = { function() require("opencode").ask("@this: ", { submit = true }) end, "ask opencode" },
-        c = { function() require("opencode").select() end, "opencode action" },
-        t = { function() require("opencode").toggle() end, "toggle opencode" },
-
         -- Copilot controls
         e = { "<cmd>Copilot enable<CR>", "copilot enable" },
         d = { "<cmd>Copilot disable<CR>", "copilot disable" },
@@ -404,6 +399,7 @@ return {
         w = { function() require("copilot.suggestion").accept_word() end, "copilot word" },
         x = { function() require("copilot.suggestion").dismiss() end, "copilot dismiss" },
       },
+      o = { name = "OPENCODE" },
       -- LIST MAPPINGS
       j = {
         name = "JUPYTER",
