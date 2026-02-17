@@ -26,6 +26,13 @@ return {
             Comment = { fg = mocha.lavender },
             LineNr = { fg = mocha.overlay1 },
             CursorLineNr = { fg = mocha.lavender },
+            -- Float bg matches editor bg (base) to prevent visible bleed
+            -- around border characters. Catppuccin defaults use "mantle"
+            -- which is darker, but thin border lines don't fill terminal
+            -- cells fully, so the darker bg shows through as a rectangle.
+            NormalFloat = { bg = mocha.base },
+            FloatBorder = { bg = mocha.base },
+            FloatTitle = { bg = mocha.base },
           }
         end,
       },
