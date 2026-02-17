@@ -1,5 +1,6 @@
 return {
   "sudo-tee/opencode.nvim",
+  lazy = true,
   dependencies = {
     "nvim-lua/plenary.nvim",
     { "folke/snacks.nvim", opts = { picker = {} } },

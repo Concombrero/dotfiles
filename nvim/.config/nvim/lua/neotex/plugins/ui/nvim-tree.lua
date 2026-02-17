@@ -1,35 +1,33 @@
--- Create a global module for NvimTree width persistence
--- This ensures the callbacks can always access it across Neovim's runtime
-_G.NvimTreePersistence = _G.NvimTreePersistence or {}
-
--- Initialize the width directly in the global scope (outside of any function)
--- This ensures it's available before any code runs
-if not _G.NvimTreePersistence.width then
-  -- Try to read from a file first if we have one
-  local width_file = vim.fn.stdpath("data") .. "/nvim_tree_width"
-  local width = 30 -- Default width
-
-  -- Try to read the stored width
-  pcall(function()
-    if vim.fn.filereadable(width_file) == 1 then
-      local file_content = vim.fn.readfile(width_file)
-      if file_content and file_content[1] then
-        local stored_width = tonumber(file_content[1])
-        if stored_width and stored_width > 10 and stored_width < 100 then
-          width = stored_width
-        end
-      end
-    end
-  end)
-
-  -- Store the width directly in the global object
-  _G.NvimTreePersistence.width = width
-end
-
 return {
   "nvim-tree/nvim-tree.lua",
+  lazy = true,
+  event = { "VimEnter" },
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
+    -- Create a global module for NvimTree width persistence
+    -- This ensures the callbacks can always access it across Neovim's runtime
+    _G.NvimTreePersistence = _G.NvimTreePersistence or {}
+
+    -- Initialize the width
+    if not _G.NvimTreePersistence.width then
+      local width_file = vim.fn.stdpath("data") .. "/nvim_tree_width"
+      local width = 30
+
+      pcall(function()
+        if vim.fn.filereadable(width_file) == 1 then
+          local file_content = vim.fn.readfile(width_file)
+          if file_content and file_content[1] then
+            local stored_width = tonumber(file_content[1])
+            if stored_width and stored_width > 10 and stored_width < 100 then
+              width = stored_width
+            end
+          end
+        end
+      end)
+
+      _G.NvimTreePersistence.width = width
+    end
+
     local nvimtree = require("nvim-tree")
     local api = require("nvim-tree.api")
 

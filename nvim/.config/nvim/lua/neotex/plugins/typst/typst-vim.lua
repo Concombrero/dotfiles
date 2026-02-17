@@ -4,7 +4,7 @@
 return {
   "kaarmu/typst.vim",
   ft = "typst",
-  lazy = false,   -- you might want to make this true if you only want it to load when a typst file is opened
+  lazy = true,
   config = function()
     -- Typical settings; adjust to your preferences
 

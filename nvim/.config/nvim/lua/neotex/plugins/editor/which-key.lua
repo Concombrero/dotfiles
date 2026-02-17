@@ -407,11 +407,11 @@ return {
 
       t = {
         name = "TYPST",
-        o = { "<cmd>TypstPreview<CR>", "TypstPreview" },
-        p = { "<cmd>TypstPreviewToggle<CR>", "TypstPreviewToggle" },
-        s = { "<cmd>TypstPreviewStop<CR>", "TypstPreviewStop" },
-        f = { "<cmd>TypstPreviewFollowCursorToggle<CR>", "TypstPreviewFollowCursorToggle" },
-        w = { "<cmd>TypstWatch<CR>", "TypstWatch" },
+        o = { "<cmd>TypstPreview<CR>", "preview" },
+        p = { "<cmd>TypstPreviewToggle<CR>", "toggle preview" },
+        s = { "<cmd>TypstPreviewStop<CR>", "stop preview" },
+        f = { "<cmd>TypstPreviewFollowCursorToggle<CR>", "toggle cursor follow" },
+        w = { "<cmd>TypstWatch<CR>", "watch" },
       },
 
     },

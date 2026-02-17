@@ -1,5 +1,7 @@
 return {
   "lervag/vimtex",
+  lazy = true,
+  ft = { "tex", "latex" },
   init = function()
     -- Viewer settings
     vim.g.vimtex_view_method = 'zathura_simple'    -- For Wayland compatibility, avoid xdotool
