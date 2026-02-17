@@ -11,7 +11,7 @@
 -- - diagnostics.lua: LSP diagnostic utilities
 -- - misc.lua: Miscellaneous helper functions
 -- - optimize.lua: Performance optimization utilities
--- - lectic.lua: Functions for Lectic AI integration
+-- - lectic_extras.lua: Functions for Lectic AI integration
 --
 -- Each module follows a consistent pattern with a setup()
 -- function that initializes the module's functionality.

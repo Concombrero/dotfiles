@@ -240,6 +240,6 @@ return {
       desc = "Toggle auto-linting",
     })
     
-    -- Note: vim.diagnostic.config() is set in lspconfig.lua
+    -- Note: vim.diagnostic.config() is set in mason.lua
   end,
 }

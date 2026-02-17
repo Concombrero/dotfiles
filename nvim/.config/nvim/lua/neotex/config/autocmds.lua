@@ -10,7 +10,7 @@ function M.setup()
   api.nvim_create_autocmd(
     "FileType",
     {
-      pattern = { "man", "help", "qf", "lspinfo", "infoview", "NvimTree" }, -- "startuptime",
+      pattern = { "man", "help", "qf", "lspinfo", "NvimTree" }, -- "startuptime",
       callback = function(ev)
         -- Set the window as fixed
         vim.wo.winfixbuf = true

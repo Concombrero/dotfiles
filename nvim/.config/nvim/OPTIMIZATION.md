@@ -15,7 +15,7 @@ This document tracks the current optimization strategy for NeoTex.
 - Most plugins use lazy triggers (`event`, `ft`, `cmd`, `keys`).
 - Mason binaries are added to Neovim PATH at startup for reliable tool resolution.
 - LSP activation is executable-gated to prevent noisy failures.
-- Formatting is centralized in conform.nvim; null-ls is scoped and deduplicated.
+- Formatting is centralized in conform.nvim.
 - Linters are enabled only when their executables are available.
 
 ## Profiling Commands
@@ -49,6 +49,5 @@ Run these before and after changes to validate impact.
 ## Guardrails
 
 - Avoid enabling unknown Mason LSP servers globally.
-- Avoid duplicate source registration in null-ls.
 - Prefer executable checks over unconditional linter/formatter setup.
 - Keep docs aligned after optimization changes (README + AGENTS + module README).

@@ -12,7 +12,7 @@ This file is intentionally concise and points to focused docs in this repo.
 ## Current Feature Set
 
 - LaTeX: VimTeX workflow (build/view/toc/context/citations/templates)
-- Markdown: autolist integration, checkbox helpers, preview support
+- Markdown: checkbox helpers, preview support
 - Typst: tinymist LSP + typst preview tooling
 - Jupyter: jupytext + notebook-navigator + iron.nvim integration
 - LSP: pyright, texlab, tinymist, lua-language-server

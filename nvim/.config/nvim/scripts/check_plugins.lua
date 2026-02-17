@@ -21,12 +21,12 @@ local function get_plugins_by_category()
   
   -- Try to get the categories table
   local categories = {
-    coding = {},
     editor = {},
     lsp = {},
     tools = {},
+    text = {},
     ui = {},
-    extras = {}
+    typst = {},
   }
   
   -- We'll reconstruct our categories by looking at plugin specs

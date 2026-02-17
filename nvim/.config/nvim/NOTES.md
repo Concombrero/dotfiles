@@ -6,7 +6,7 @@ Working notes for NeoTex maintenance and demos.
 
 1. Open dashboard and restore a session.
 2. Show LaTeX workflow: compile (`<leader>b`), view (`<leader>v`), toc (`<leader>i`).
-3. Show Markdown workflow: autolist/checkbox + formatting (`<leader>mp`).
+3. Show Markdown workflow: checkbox + formatting (`<leader>mp`).
 4. Show Git workflow: hunks (`<leader>gj` / `<leader>gk`) and LazyGit (`<leader>gg`).
 5. Show AI workflow from `<leader>h`:
    - OpenCode ask/action/toggle

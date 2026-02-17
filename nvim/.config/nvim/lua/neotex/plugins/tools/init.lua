@@ -3,13 +3,13 @@
 --
 -- This module loads plugins that integrate various tools:
 -- - gitsigns.lua: Git integration
--- - vimtex.lua: LaTeX integration
--- - lean.lua: Lean theorem prover integration
--- - markdown-preview.lua: Markdown preview
+-- - lazygit.lua: LazyGit terminal UI
 -- - mini.lua: Mini plugins collection (pairs, comments, etc.)
 -- - surround.lua: Text surrounding functionality
 -- - todo-comments.lua: Highlight and search TODO comments
 -- - yanky.lua: Enhanced yank and paste functionality
+-- - yazi.lua: Yazi file manager integration
+-- - snacks/: Snacks utility suite (dashboard, notifier, etc.)
 -- - copilot.lua: GitHub Copilot AI completion
 -- - opencode.lua: OpenCode AI coding assistant
 --

@@ -47,7 +47,7 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
 
 ### LSP
 - Servers: `pyright` (Python), `texlab` (LaTeX), `tinymist` (Typst), `lua_ls` (Lua)
-- Uses the modern `vim.lsp.config()` / `vim.lsp.enable()` API (not deprecated lspconfig setup)
+- Uses mason-lspconfig handlers with `require("lspconfig").server.setup()` for server configuration
 - Mason manages LSP server installation
 - `<leader>ls` - Restart LSP, `<leader>lk` - Stop LSP, `<leader>lt` - Start LSP
 
@@ -80,9 +80,9 @@ lua/neotex/
     autocmds.lua                  Autocommands (terminal, markdown, special buffers)
   plugins/
     editor/                       Formatting, linting, telescope, toggleterm, treesitter, which-key
-    lsp/                          lspconfig, mason, none-ls, nvim-cmp, vimtex-cmp
-    tools/                        gitsigns, firenvim, lazygit, mini, surround, todo-comments,
-                                  yanky, yazi, snacks, autolist, opencode, copilot
+    lsp/                          lspconfig, mason, nvim-cmp, vimtex-cmp
+    tools/                        gitsigns, lazygit, mini, surround, todo-comments,
+                                  yanky, yazi, snacks, opencode, copilot
     text/                         vimtex, markdown-preview, jupyter (jupytext, iron, notebook-navigator)
     ui/                           catppuccin theme, bufferline, lualine, nvim-tree, sessions
     typst/                        typst-preview, typst.vim, typst-specific LuaSnip config
@@ -138,7 +138,7 @@ Setup functions return `true` on success for pipeline checking.
 - **Modules**: `snake_case` filenames (e.g., `lectic_extras.lua`, `list_operations.lua`)
 - **Global functions**: `PascalCase` prefixed with `_G.` (e.g., `_G.LoadFoldingState`, `_G.IncrementCheckbox`)
 - **Private functions**: prefix with underscore (`M._load_submodules`)
-- **Constants/flags**: `_G._prevent_cmp_menu`, `_G._last_tab_was_indent`
+- **Constants/flags**: `_G._last_tab_was_indent`
 
 ### Imports and Dependencies
 - Place `require` calls at the top of each file or function scope

@@ -3,7 +3,6 @@
 --
 -- This module loads plugins specifically for text formats and processing:
 -- - vimtex.lua: LaTeX integration
--- - lean.lua: Lean theorem prover integration
 -- - jupyter/: Jupyter notebook integration
 -- - markdown-preview.lua: Markdown preview functionality
 --

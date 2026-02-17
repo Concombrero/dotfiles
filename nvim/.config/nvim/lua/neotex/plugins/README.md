@@ -7,9 +7,9 @@ Plugin specs are organized by domain and loaded through lazy.nvim category impor
 - `editor/`: core editing workflow
   - `which-key.lua`, `formatting.lua`, `linting.lua`, `telescope.lua`, `toggleterm.lua`, `treesitter.lua`
 - `lsp/`: LSP/completion and external tool management
-  - `lspconfig.lua`, `mason.lua`, `none-ls.lua`, `nvim-cmp.lua`, `vimtex-cmp.lua`
+  - `lspconfig.lua`, `mason.lua`, `nvim-cmp.lua`, `vimtex-cmp.lua`
 - `tools/`: utility and integration plugins
-  - git (`gitsigns.lua`, `lazygit.lua`), AI (`opencode.lua`, `copilot.lua`), file tools (`yazi.lua`), editor helpers (`mini.lua`, `surround.lua`, `todo-comments.lua`, `yanky.lua`, `autolist/`, `snacks/`, `firenvim.lua`)
+  - git (`gitsigns.lua`, `lazygit.lua`), AI (`opencode.lua`, `copilot.lua`), file tools (`yazi.lua`), editor helpers (`mini.lua`, `surround.lua`, `todo-comments.lua`, `yanky.lua`, `snacks/`)
 - `text/`: writing-focused plugins
   - `vimtex.lua`, `markdown-preview.lua`, `jupyter/`
 - `ui/`: visual shell around editing

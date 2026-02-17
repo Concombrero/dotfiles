@@ -7,9 +7,8 @@ This directory hosts integrations and utility plugins that extend core editing.
 - Git: `gitsigns.lua`, `lazygit.lua`
 - AI: `opencode.lua`, `copilot.lua`
 - File navigation helpers: `yazi.lua`
-- Text utilities: `mini.lua`, `surround.lua`, `todo-comments.lua`, `yanky.lua`, `autolist/`
+- Text utilities: `mini.lua`, `surround.lua`, `todo-comments.lua`, `yanky.lua`
 - UI utility suite: `snacks/`
-- Browser embedding: `firenvim.lua`
 
 ## Notes
 

@@ -16,12 +16,6 @@ return {
     -- Get default capabilities for LSP clients
     local capabilities = cmp_nvim_lsp.default_capabilities()
 
-    -- Ensure Mason binaries are available
-    local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
-    if vim.fn.isdirectory(mason_bin) == 1 then
-      vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
-    end
-
     -- DIAGNOSTICS CONFIGURATION
     local signs = { Error = "󰅜", Warn = "󰀦", Hint = "󰌵", Info = "󰋽" }
     vim.diagnostic.config({

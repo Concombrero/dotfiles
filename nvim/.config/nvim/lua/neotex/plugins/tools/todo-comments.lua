@@ -74,11 +74,6 @@ return {
         -- TEST = { icon = icon, color = "test" },
       },
 
-      -- LSP integration
-      lsp_client_names = {
-        "null-ls",
-      },
-
       -- Merge keywords from LSP diagnostics sources
       merge_keywords = true,
 

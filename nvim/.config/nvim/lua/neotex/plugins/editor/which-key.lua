@@ -38,7 +38,7 @@ ACTIONS (<leader>a)                             | DESCRIPTION
 <leader>ah - Toggle local highlight             | Highlight current word occurrences
 <leader>ak - Clean VimTex aux files             | Remove LaTeX auxiliary files
 <leader>ap - Run Python file                    | Execute current Python file
-<leader>ar - Recalculate autolist               | Fix numbering in lists
+<leader>ar - Recalculate list numbers           | Fix numbering in lists
 <leader>at - Format tex file                    | Format LaTeX using latexindent
 <leader>au - Update CWD                         | Change to file's directory
 <leader>av - VimTex context menu                | Show VimTeX context actions
@@ -404,10 +404,6 @@ return {
         w = { function() require("copilot.suggestion").accept_word() end, "copilot word" },
         x = { function() require("copilot.suggestion").dismiss() end, "copilot dismiss" },
       },
-      --   HARPOON
-      --   a = { "<cmd>lua require('harpoon.mark').add_file()<cr>", "mark" },
-      --   n = { "<cmd>lua require('harpoon.ui').nav_next()<cr>", "next" },
-      --   p = { "<cmd>lua require('harpoon.ui').nav_prev()<cr>", "previous" },
       -- LIST MAPPINGS
       j = {
         name = "JUPYTER",
@@ -502,9 +498,7 @@ return {
         name = "RUN",
         c = { "<cmd>TermExec cmd='rm -rf ~/.cache/nvim' open=0<CR>", "clear plugin cache" },
         e = { "<cmd>lua require('neotex.util.diagnostics').show_all_errors()<CR>", "show linter errors" },
-        -- h = { "<cmd>Hardtime toggle<cr>", "hardtime" }, -- Hardtime plugin has been deprecated
         k = { "<cmd>TermExec cmd='rm -rf ~/.local/share/nvim/lazy && rm -f ~/.config/nvim/lazy-lock.json' open=0<CR>", "wipe plugins and lock file" },
-        -- m = { "<cmd>MCPHub<cr>", "mcp-hub" }, -- MCP-Hub plugin has been deprecated
         n = { "function() vim.diagnostic.goto_next{popup_opts = {show_header = false}} end", "next" },
         p = { "function() vim.diagnostic.goto_prev{popup_opts = {show_header = false}} end", "prev" },
         r = { "<cmd>ReloadConfig<cr>", "reload configs" },

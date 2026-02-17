@@ -10,7 +10,7 @@
 -- Structure:
 -- - neotex/bootstrap.lua: Handles plugin and feature initialization
 -- - neotex/config/: Core configuration modules
--- - neotex/utils/: Utility functions
+-- - neotex/util/: Utility functions
 -- - neotex/plugins/: Plugin specification and configuration
 -----------------------------------------------------------
 
@@ -46,17 +46,20 @@ end
 -- from plugins that clear `FileExplorer` autocmds conditionally.
 pcall(vim.api.nvim_create_augroup, "FileExplorer", { clear = true })
 
--- Use the Nix-installed MCP-Hub binary if available
-local mcp_hub_path = os.getenv("MCP_HUB_PATH")
-if mcp_hub_path then
-  vim.g.mcp_hub_path = mcp_hub_path
+-- Ensure essential tool directories are on PATH regardless of how Neovim
+-- was launched (desktop entry, session restore, etc.).  Only directories
+-- that actually exist are prepended, and duplicates are skipped.
+local function prepend_to_path(dir)
+  dir = vim.fn.expand(dir)
+  if vim.fn.isdirectory(dir) == 1 and not vim.env.PATH:find(vim.pesc(dir), 1, true) then
+    vim.env.PATH = dir .. ":" .. vim.env.PATH
+  end
 end
 
--- Ensure Mason-installed tools are visible across the whole config.
-local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
-if vim.fn.isdirectory(mason_bin) == 1 then
-  vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
-end
+prepend_to_path(vim.fn.stdpath("data") .. "/mason/bin") -- Mason-installed LSP/tools
+prepend_to_path("~/.local/bin")                         -- pipx, zoxide, user scripts
+prepend_to_path("~/.fzf/bin")                           -- fzf (used by yazi, telescope, etc.)
+prepend_to_path("~/typst-x86_64-unknown-linux-musl")    -- typst binary
 
 -- Load configuration with improved error handling
 local config_ok, config = pcall(require, "neotex.config")

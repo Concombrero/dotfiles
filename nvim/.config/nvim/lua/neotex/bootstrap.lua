@@ -118,8 +118,7 @@ local function setup_lazy()
         { import = "neotex.plugins.lsp" },
         
         -- Phase 2 imports
-        -- coding plugins have been moved to editor directory
-        { import = "neotex.plugins.editor" },  -- editor enhancement plugins (includes former coding plugins)
+        { import = "neotex.plugins.editor" },  -- editor enhancement plugins
         { import = "neotex.plugins.tools" },   -- tool integration plugins
         { import = "neotex.plugins.text" },    -- text format-specific plugins
         { import = "neotex.plugins.ui" },      -- UI enhancement plugins
