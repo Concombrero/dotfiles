@@ -13,9 +13,9 @@ return {
     dependencies = {
         "nvim-lua/plenary.nvim",
     },
-    -- setting the keybinding for LazyGit with 'keys' is recommended in
-    -- order to load the plugin when the command is run for the first time
+    -- Plugin is loaded when <leader>g triggers LazyGit via which-key,
+    -- or when any LazyGit command is run directly.
     keys = {
-        { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" }
+        { "<leader>g", "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", desc = "lazygit" }
     }
 }

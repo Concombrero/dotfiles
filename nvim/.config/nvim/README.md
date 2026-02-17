@@ -11,14 +11,14 @@ This file is intentionally concise and points to focused docs in this repo.
 
 ## Current Feature Set
 
-- LaTeX: VimTeX workflow (build/view/toc/context/citations/templates)
+- LaTeX: VimTeX workflow (build/view/toc/context/citations)
 - Markdown: checkbox helpers, preview support
 - Typst: tinymist LSP + typst preview tooling
 - Jupyter: jupytext + notebook-navigator + iron.nvim integration
 - LSP: pyright, texlab, tinymist, lua-language-server
 - Formatting: conform.nvim (`<leader>mp`) with per-filetype formatters
 - Linting: nvim-lint (`<leader>l` / `<leader>lL`) with executable-aware setup
-- AI: OpenCode actions plus Copilot control from `<leader>h`
+- AI: OpenCode actions (`<leader>o`) plus Copilot control from `<leader>c`
 
 ## Quick Start
 
@@ -31,8 +31,7 @@ This file is intentionally concise and points to focused docs in this repo.
 
 - Plugin management:
   - `:Lazy`
-  - `<leader>rr` reload config (`:ReloadConfig`)
-  - `<leader>rk` wipe lazy plugins + lockfile (full reinstall path)
+  - `:ReloadConfig` to reload config
 - Formatting and linting:
   - `<leader>mp` format buffer/selection
   - `:FormatToggle` / `:FormatToggle buffer`

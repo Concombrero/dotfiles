@@ -22,4 +22,4 @@ This directory contains the startup configuration chain loaded by `neotex.config
 require("neotex.config").setup()
 ```
 
-In practice, use `:ReloadConfig` (`<leader>rr`) during interactive edits.
+In practice, use `:ReloadConfig` during interactive edits.

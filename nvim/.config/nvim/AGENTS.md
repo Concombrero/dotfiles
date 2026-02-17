@@ -18,9 +18,7 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
 - `:Lazy` - Open lazy.nvim UI (install, update, clean, profile plugins)
 - `:Lazy sync` - Install missing plugins and update existing ones
 - `:Lazy update` - Update all plugins
-- `<leader>rk` - Wipe all plugins and lazy-lock.json (full reinstall)
-- `<leader>rc` - Clear plugin cache (`~/.cache/nvim`)
-- `<leader>rr` - Reload Neovim configuration (`:ReloadConfig`)
+- `:ReloadConfig` - Reload Neovim configuration
 
 ### Linting
 - `<leader>l` - Lint current file (nvim-lint `try_lint()`)
@@ -99,7 +97,7 @@ after/ftplugin/                   Filetype overrides: python.lua, tex.lua, markd
 after/ftdetect/                   ipynb.lua (Jupyter notebook detection)
 LuaSnip/                          Lua-based snippets: all.lua, lua.lua, typst.lua
 snippets/                         Snipmate-format: tex.snippets, markdown.snippets, python.snippets
-templates/                        LaTeX document templates
+templates/                        LaTeX document templates (not mapped in which-key)
   scripts/                          Shell/Lua maintenance scripts (plugin/tool checks)
 ```
 

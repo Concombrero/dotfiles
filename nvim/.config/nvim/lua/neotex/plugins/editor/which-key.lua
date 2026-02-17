@@ -2,24 +2,19 @@
 -----------------------------------------------------------
 This module configures the which-key.nvim plugin, which provides a popup menu
 that displays possible keybindings for the key sequence you've started typing.
-This helps remember command mappings and discover new functionality.
 
 The configuration below organizes keybindings into logical groups with descriptive
-labels for each command. The bindings are also documented in README.md.
-
-This specifically addresses the issue with <leader>rk which now properly removes
-both the plugin directory AND the lazy-lock.json file.
+labels for each command.
 
 ----------------------------------------------------------------------------------
 TOP-LEVEL MAPPINGS (<leader>)                   | DESCRIPTION
 ----------------------------------------------------------------------------------
 <leader>b - VimtexCompile                       | Compile LaTeX document
-<leader>c - Create vertical split               | Split window vertically
 <leader>d - Save and delete buffer              | Save file and close buffer
 <leader>e - Toggle NvimTree explorer            | Open/close file explorer
-<leader>j - Jupyter notebook functions          | Jupyter notebook operations
+<leader>g - Open lazygit                        | Launch terminal git interface
+<leader>h - Create vertical split               | Split window vertically
 <leader>i - Open VimtexToc                      | Show LaTeX table of contents
-<leader>k - Maximize split                      | Make current window full screen
 <leader>q - Save all and quit                   | Save all files and exit Neovim
 <leader>u - Open Telescope undo                 | Show undo history with preview
 <leader>v - VimtexView                          | View compiled LaTeX document
@@ -47,6 +42,19 @@ ACTIONS (<leader>a)                             | DESCRIPTION
 <leader>aS - SSH connect                        | Connect to MIT server via SSH
 
 ----------------------------------------------------------------------------------
+COPILOT (<leader>c)                             | DESCRIPTION
+----------------------------------------------------------------------------------
+<leader>ce - Copilot enable                     | Enable Copilot suggestions
+<leader>cd - Copilot disable                    | Disable Copilot suggestions
+<leader>cs - Copilot status                     | Show Copilot status
+<leader>cp - Copilot panel                      | Open Copilot panel
+<leader>cn - Copilot next                       | Next Copilot suggestion
+<leader>cb - Copilot previous                   | Previous Copilot suggestion
+<leader>cl - Copilot line                       | Accept Copilot line
+<leader>cw - Copilot word                       | Accept Copilot word
+<leader>cx - Copilot dismiss                    | Dismiss Copilot suggestion
+
+----------------------------------------------------------------------------------
 FIND (<leader>f)                                | DESCRIPTION
 ----------------------------------------------------------------------------------
 <leader>fa - Find all files                     | Search all files, including hidden
@@ -64,36 +72,6 @@ FIND (<leader>f)                                | DESCRIPTION
 <leader>fs - Search string                      | Search for string in project
 <leader>fw - Search word under cursor           | Find current word in project
 <leader>fy - Yank history                       | Browse clipboard history
-
-----------------------------------------------------------------------------------
-GIT (<leader>g)                                 | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>gb - Checkout branch                    | Switch to another git branch
-<leader>gc - View commits                       | Show commit history
-<leader>gd - View diff                          | Show changes against HEAD
-<leader>gg - Open lazygit                       | Launch terminal git interface
-<leader>gk - Previous hunk                      | Jump to previous change
-<leader>gj - Next hunk                          | Jump to next change
-<leader>gl - Line blame                         | Show git blame for current line
-<leader>gp - Preview hunk                       | Preview current change
-<leader>gs - Git status                         | Show files with changes
-<leader>gt - Toggle blame                       | Toggle line blame display
-
-----------------------------------------------------------------------------------
-AI HELP (<leader>h)                             | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ha - Ask opencode                       | Ask OpenCode with current context
-<leader>hc - OpenCode action                    | Run OpenCode action picker
-<leader>ht - Toggle opencode                    | Toggle OpenCode terminal
-<leader>he - Copilot enable                     | Enable Copilot suggestions
-<leader>hd - Copilot disable                    | Disable Copilot suggestions
-<leader>hs - Copilot status                     | Show Copilot status
-<leader>hp - Copilot panel                      | Open Copilot panel
-<leader>hn - Copilot next                       | Next Copilot suggestion
-<leader>hb - Copilot previous                   | Previous Copilot suggestion
-<leader>hl - Copilot line                       | Accept Copilot line
-<leader>hw - Copilot word                       | Accept Copilot word
-<leader>hx - Copilot dismiss                    | Dismiss Copilot suggestion
 
 ----------------------------------------------------------------------------------
 JUPYTER (<leader>j)                             | DESCRIPTION
@@ -161,41 +139,13 @@ MARKDOWN (<leader>m)                            | DESCRIPTION
 <leader>mt - Toggle folding method              | Switch between manual/smart folding
 
 ----------------------------------------------------------------------------------
-SESSIONS (<leader>S)                            | DESCRIPTION
+SESSIONS (<leader>s)                            | DESCRIPTION
 ----------------------------------------------------------------------------------
-<leader>Ss - Save session                       | Save current session
-<leader>Sd - Delete session                     | Delete a saved session
-<leader>Sl - Load session                       | Load a saved session
-
-PANDOC (<leader>p)                              | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>pw - Convert to Word                    | Convert to .docx format
-<leader>pm - Convert to Markdown                | Convert to .md format
-<leader>ph - Convert to HTML                    | Convert to .html format
-<leader>pl - Convert to LaTeX                   | Convert to .tex format
-<leader>pp - Convert to PDF                     | Convert to .pdf format
-<leader>pv - View PDF                           | Open PDF in document viewer
+<leader>ss - Save session                       | Save current session
+<leader>sd - Delete session                     | Delete a saved session
+<leader>sl - Load session                       | Load a saved session
 
 ----------------------------------------------------------------------------------
-RUN (<leader>r)                                 | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>rc - Clear plugin cache                 | Clear Neovim plugin cache
-<leader>re - Show linter errors                 | Display all errors in floating window
-<leader>rk - Wipe plugins and lock file         | Remove all plugin files AND lazy-lock.json
-<leader>rn - Next error                         | Go to next diagnostic/error
-<leader>rp - Previous error                     | Go to previous diagnostic/error
-<leader>rr - Reload configs                     | Reload Neovim configuration
-<leader>rm - Show messages                      | Display notification history
-
-----------------------------------------------------------------------------------
-SURROUND (<leader>s)                            | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ss - Add surrounding                    | Add surrounding to text (requires motion)
-<leader>sd - Delete surrounding                 | Remove surrounding characters
-<leader>sc - Change surrounding                 | Replace surrounding characters
-<leader>sf - Find surrounding                   | Find surrounding characters
-<leader>sh - Highlight surrounding              | Highlight surrounding characters
-
 TYPST (<leader>t)                               | DESCRIPTION
 ----------------------------------------------------------------------------------
 <leader>to - TypstPreview                       | Start Typst preview
@@ -205,19 +155,7 @@ TYPST (<leader>t)                               | DESCRIPTION
 <leader>tw - TypstWatch                         | Watch and recompile Typst
 
 ----------------------------------------------------------------------------------
-TEMPLATES (<leader>T)                           | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>Tp - PhilPaper.tex                      | Insert philosophy paper template
-<leader>Tl - Letter.tex                         | Insert letter template
-<leader>Tg - Glossary.tex                       | Insert glossary template
-<leader>Th - HandOut.tex                        | Insert handout template
-<leader>Tb - PhilBeamer.tex                     | Insert beamer presentation
-<leader>Ts - SubFile.tex                        | Insert subfile template
-<leader>Tr - Root.tex                           | Insert root document template
-<leader>Tm - MultipleAnswer.tex                 | Insert multiple answer template
-
-----------------------------------------------------------------------------------
-TEXT (<leader>x)                     | DESCRIPTION
+TEXT (<leader>x)                                | DESCRIPTION
 ----------------------------------------------------------------------------------
 <leader>xa - Align                              | Start text alignment
 <leader>xA - Align with preview                 | Start alignment with preview
@@ -314,13 +252,12 @@ return {
       prefix = "<leader>",
       mode = { "n", "v" },
       b = { "<cmd>VimtexCompile<CR>", "build" },
-      c = { "<cmd>vert sb<CR>", "create split" },
+      h = { "<cmd>vert sb<CR>", "create split" },
       d = { "<cmd>update! | lua Snacks.bufdelete()<CR>", "delete buffer" },
       -- d = { "<cmd>update! | bdelete!<CR>", "delete buffer" },
       e = { "<cmd>NvimTreeCustomToggle<CR>", "explorer" },
       -- j = { "<cmd>clo<CR>", "drop split" },
       i = { "<cmd>VimtexTocOpen<CR>", "index" },
-      k = { "<cmd>on<CR>", "max split" },
       q = { "<cmd>wa! | qa!<CR>", "quit" },
       u = { "<cmd>Telescope undo<CR>", "undo" },
       v = { "<cmd>VimtexView<CR>", "view" },
@@ -371,24 +308,9 @@ return {
         -- c = { "<cmd>Telescope commands<CR>", "commands" },
         -- r = { "<cmd>Telescope oldfiles<CR>", "recent" },
       },
-      g = {
-        name = "GIT",
-        -- { '<leader>g', group = ' Git' },
-        b = { "<cmd>Telescope git_branches<CR>", "checkout branch" },
-        c = { "<cmd>Telescope git_commits<CR>", "git commits" },
-        d = { "<cmd>Gitsigns diffthis HEAD<CR>", "diff" },
-        g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
-        k = { "<cmd>Gitsigns prev_hunk<CR>", "prev hunk" },
-        j = { "<cmd>Gitsigns next_hunk<CR>", "next hunk" },
-        l = { "<cmd>Gitsigns blame_line<CR>", "line blame" }, -- TODO: use snacks?
-        p = { "<cmd>Gitsigns preview_hunk<CR>", "preview hunk" },
-        s = { "<cmd>Telescope git_status<CR>", "git status" },
-        t = { "<cmd>Gitsigns toggle_current_line_blame<CR>", "toggle blame" },
-        -- t = { "<cmd>Gitsigns toggle_word_diff<CR>", "toggle word diff" },
-      },
-      h = {
-        name = "AI HELP",
-        -- Copilot controls
+      g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
+      c = {
+        name = "COPILOT",
         e = { "<cmd>Copilot enable<CR>", "copilot enable" },
         d = { "<cmd>Copilot disable<CR>", "copilot disable" },
         s = { "<cmd>Copilot status<CR>", "copilot status" },
@@ -474,39 +396,15 @@ return {
         f = { "za", "toggle fold under cursor" },
         t = { "<cmd>lua ToggleFoldingMethod()<CR>", "toggle folding method" },
       },
-      S = {
+      s = {
         name = "SESSIONS",
         s = { "<cmd>SessionManager save_current_session<CR>", "save" },
         d = { "<cmd>SessionManager delete_session<CR>", "delete" },
         l = { "<cmd>SessionManager load_session<CR>", "load" },
       },
-      p = {
-        name = "PANDOC",
-        w = { "<cmd>TermExec cmd='pandoc %:p -o %:p:r.docx'<CR>", "word" },
-        m = { "<cmd>TermExec cmd='pandoc %:p -o %:p:r.md'<CR>", "markdown" },
-        h = { "<cmd>TermExec cmd='pandoc %:p -o %:p:r.html'<CR>", "html" },
-        l = { "<cmd>TermExec cmd='pandoc %:p -o %:p:r.tex'<CR>", "latex" },
-        p = { "<cmd>TermExec cmd='pandoc %:p -o %:p:r.pdf' open=0<CR>", "pdf" },
-        v = { "<cmd>TermExec cmd='zathura %:p:r.pdf &' open=0<CR>", "view" },
-        -- x = { "<cmd>echo "run: unoconv -f pdf path-to.docx""  , "word to pdf"},
-      },
-      r = {
-        name = "RUN",
-        c = { "<cmd>TermExec cmd='rm -rf ~/.cache/nvim' open=0<CR>", "clear plugin cache" },
-        e = { "<cmd>lua require('neotex.util.diagnostics').show_all_errors()<CR>", "show linter errors" },
-        k = { "<cmd>TermExec cmd='rm -rf ~/.local/share/nvim/lazy && rm -f ~/.config/nvim/lazy-lock.json' open=0<CR>", "wipe plugins and lock file" },
-        n = { "function() vim.diagnostic.goto_next{popup_opts = {show_header = false}} end", "next" },
-        p = { "function() vim.diagnostic.goto_prev{popup_opts = {show_header = false}} end", "prev" },
-        r = { "<cmd>ReloadConfig<cr>", "reload configs" },
-        m = { "<cmd>lua Snacks.notifier.show_history()<cr>", "show messages" },
-        -- d = { "function() vim.diagnostic.open_float(0, { scope = 'line', header = false, focus = false }) end", "diagnostics" },
-      },
-      s = {
-        name = "SURROUND",
-        s = { "<Plug>(nvim-surround-normal)", "surround" },
-        d = { "<Plug>(nvim-surround-delete)", "delete" },
-        c = { "<Plug>(nvim-surround-change)", "change" },
-      },
+
+
+
       t = {
         name = "TYPST",
         o = { "<cmd>TypstPreview<CR>", "TypstPreview" },
@@ -515,41 +413,7 @@ return {
         f = { "<cmd>TypstPreviewFollowCursorToggle<CR>", "TypstPreviewFollowCursorToggle" },
         w = { "<cmd>TypstWatch<CR>", "TypstWatch" },
       },
-      T = {
-        name = "TEMPLATES",
-        p = {
-          "<cmd>read ~/.config/nvim/templates/PhilPaper.tex<CR>",
-          "PhilPaper.tex",
-        },
-        l = {
-          "<cmd>read ~/.config/nvim/templates/Letter.tex<CR>",
-          "Letter.tex",
-        },
-        g = {
-          "<cmd>read ~/.config/nvim/templates/Glossary.tex<CR>",
-          "Glossary.tex",
-        },
-        h = {
-          "<cmd>read ~/.config/nvim/templates/HandOut.tex<CR>",
-          "HandOut.tex",
-        },
-        b = {
-          "<cmd>read ~/.config/nvim/templates/PhilBeamer.tex<CR>",
-          "PhilBeamer.tex",
-        },
-        s = {
-          "<cmd>read ~/.config/nvim/templates/SubFile.tex<CR>",
-          "SubFile.tex",
-        },
-        r = {
-          "<cmd>read ~/.config/nvim/templates/Root.tex<CR>",
-          "Root.tex",
-        },
-        m = {
-          "<cmd>read ~/.config/nvim/templates/MultipleAnswer.tex<CR>",
-          "MultipleAnswer.tex",
-        },
-      },
+
     },
   },
   config = function(_, opts)
@@ -562,11 +426,11 @@ return {
     local icons = {
       -- Top level command icons
       b = "󰖷 ", -- build
-      c = "󰁪 ", -- create split
       d = "󰩺 ", -- delete buffer
       e = "󰙅 ", -- explorer
+      g = "󰊢 ", -- lazygit
+      h = "󰁪 ", -- create split
       i = "󰋽 ", -- index
-      k = "󰖲 ", -- maximize
       q = "󰗼 ", -- quit
       u = "󰕌 ", -- undo
       v = "󰛓 ", -- view
@@ -574,19 +438,15 @@ return {
 
       -- Group icons
       ["ACTIONS"] = "󰌵 ",
-      ["AI HELP"] = "󰚩 ",
+      ["COPILOT"] = "󰚩 ",
       ["FIND"] = "󰍉 ",
-      ["GIT"] = "󰊢 ",
       ["JUPYTER"] = "󰌠 ",
       ["LIST"] = "󰔱 ",
       ["LSP & LINT"] = "󰒕 ",
       ["MARKDOWN"] = "󱀈 ",
-      ["PANDOC"] = "󰈙 ",
-      ["RUN"] = "󰐊 ",
+      ["OPENCODE"] = " ",
       ["SESSIONS"] = "󰆔 ",
-      ["SURROUND"] = "󰅪 ",
       ["TYPST"] = "󰈭 ",
-      ["TEMPLATES"] = "󰈭 ",
       ["TEXT"] = "󰊪 ",
       ["YANK"] = "󰆏 ",
     }
@@ -637,10 +497,10 @@ return {
           icon_to_add = "󰩺 "
         elseif desc == "explorer" then
           icon_to_add = "󰙅 "
+        elseif desc == "lazygit" then
+          icon_to_add = "󰊢 "
         elseif desc == "index" then
           icon_to_add = "󰋽 "
-        elseif desc == "max split" then
-          icon_to_add = "󰖲 "
         elseif desc == "quit" then
           icon_to_add = "󰗼 "
         elseif desc == "undo" then
@@ -655,8 +515,6 @@ return {
           icon_to_add = "󰉣 "
         elseif desc:match("search") or desc:match("find") then
           icon_to_add = "󰍉 "
-        elseif desc:match("git") then
-          icon_to_add = "󰊢 "
         elseif desc:match("file") then
           icon_to_add = "󰈙 "
         elseif desc:match("todo") or desc:match("todos") then
@@ -679,13 +537,5 @@ return {
 
     -- Register the defaults
     wk.register(opts.defaults)
-
-    -- Register visual mode mappings for surround operations
-    wk.register({
-      ["<leader>s"] = {
-        name = "SURROUND",
-        s = { "<Plug>(nvim-surround-visual)", "add surrounding to selection" },
-      }
-    }, { mode = "v" })
   end,
 }
