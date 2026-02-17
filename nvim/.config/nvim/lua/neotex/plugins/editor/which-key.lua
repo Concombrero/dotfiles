@@ -11,7 +11,7 @@ TOP-LEVEL MAPPINGS (<leader>)                   | DESCRIPTION
 ----------------------------------------------------------------------------------
 <leader>b - VimtexCompile                       | Compile LaTeX document
 <leader>d - Save and delete buffer              | Save file and close buffer
-<leader>e - Toggle NvimTree explorer            | Open/close file explorer
+<leader>e - Explorer                             | Open file manager (yazi)
 <leader>g - Open lazygit                        | Launch terminal git interface
 <leader>h - Create vertical split               | Split window vertically
 <leader>i - Open VimtexToc                      | Show LaTeX table of contents
@@ -20,6 +20,7 @@ TOP-LEVEL MAPPINGS (<leader>)                   | DESCRIPTION
 <leader>v - VimtexView                          | View compiled LaTeX document
 <leader>w - Write all files                     | Save all open files
 <leader>x - Text operations                     | Align, split/join, diff operations
+<leader>y - Yank history                         | Browse yank history
 
 ----------------------------------------------------------------------------------
 ACTIONS (<leader>a)                             | DESCRIPTION
@@ -71,7 +72,12 @@ FIND (<leader>f)                                | DESCRIPTION
 <leader>ft - Todos                               | Search TODO/FIXME/HACK comments
 <leader>fs - Search string                      | Search for string in project
 <leader>fw - Search word under cursor           | Find current word in project
-<leader>fy - Yank history                       | Browse clipboard history
+
+----------------------------------------------------------------------------------
+EXPLORER (<leader>e)                            | DESCRIPTION
+----------------------------------------------------------------------------------
+<leader>ef - Yazi here                        | Open file manager at current file
+<leader>ew - Yazi cwd                         | Open file manager at cwd
 
 ----------------------------------------------------------------------------------
 JUPYTER (<leader>j)                             | DESCRIPTION
@@ -166,8 +172,7 @@ TEXT (<leader>x)                                | DESCRIPTION
 ----------------------------------------------------------------------------------
 YANK (<leader>y)                                | DESCRIPTION
 ----------------------------------------------------------------------------------
-<leader>yh - Yank history                       | Browse clipboard history with Telescope
-<leader>yc - Clear history                      | Clear the yank history
+<leader>y - Yank history                        | Browse clipboard history with Telescope
 ]]
 
 return {
@@ -254,9 +259,12 @@ return {
       b = { "<cmd>VimtexCompile<CR>", "build" },
       h = { "<cmd>vert sb<CR>", "create split" },
       d = { "<cmd>update! | lua Snacks.bufdelete()<CR>", "delete buffer" },
-      -- d = { "<cmd>update! | bdelete!<CR>", "delete buffer" },
-      e = { "<cmd>NvimTreeCustomToggle<CR>", "explorer" },
-      -- j = { "<cmd>clo<CR>", "drop split" },
+      e = {
+        name = "EXPLORER",
+        f = { "<cmd>Yazi<CR>", "yazi here" },
+        w = { "<cmd>Yazi cwd<CR>", "yazi cwd" },
+      },
+      g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
       i = { "<cmd>VimtexTocOpen<CR>", "index" },
       q = { "<cmd>wa! | qa!<CR>", "quit" },
       u = { "<cmd>Telescope undo<CR>", "undo" },
@@ -274,7 +282,7 @@ return {
         k = { "<cmd>VimtexClean<CR>", "kill aux" },
         p = { "<cmd>TermExec cmd='python3 %:p:r.py'<CR>", "python" },
         t = { "<cmd>terminal latexindent -w %:p:r.tex<CR>", "tex format" },
-        u = { "<cmd>cd %:p:h | NvimTreeRefresh | NvimTreeFindFile<CR>", "update cwd" },
+        u = { "<cmd>cd %:p:h<CR>", "update cwd" },
         v = { "<plug>(vimtex-context-menu)", "vimtex menu" },
         w = { "<cmd>VimtexCountWords!<CR>", "word count" },
         s = { "<cmd>e ~/.config/nvim/snippets/<CR>", "snippets edit" },
@@ -298,10 +306,6 @@ return {
         t = { "<cmd>TodoTelescope<CR>", "todos" },
         s = { "<cmd>Telescope grep_string<CR>", "string" },
         w = { "<cmd>lua SearchWordUnderCursor()<CR>", "word" },
-        y = { function() require("telescope").extensions.yank_history.yank_history() end, "yanks" },
-        -- m = { "<cmd>Telescope man_pages<CR>", "man pages" },
-        -- c = { "<cmd>Telescope commands<CR>", "commands" },
-        -- r = { "<cmd>Telescope oldfiles<CR>", "recent" },
       },
       g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
       c = {
@@ -408,6 +412,7 @@ return {
         f = { "<cmd>TypstPreviewFollowCursorToggle<CR>", "toggle cursor follow" },
         w = { "<cmd>TypstWatch<CR>", "watch" },
       },
+      y = { function() require("telescope").extensions.yank_history.yank_history() end, "yank history" },
 
     },
   },

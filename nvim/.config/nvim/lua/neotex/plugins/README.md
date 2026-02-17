@@ -13,7 +13,7 @@ Plugin specs are organized by domain and loaded through lazy.nvim category impor
 - `text/`: writing-focused plugins
   - `vimtex.lua`, `markdown-preview.lua`, `jupyter/`
 - `ui/`: visual shell around editing
-  - `colorscheme.lua`, `lualine.lua`, `bufferline.lua`, `nvim-tree.lua`, `nvim-web-devicons.lua`, `sessions.lua`
+  - `colorscheme.lua`, `lualine.lua`, `bufferline.lua`, `nvim-web-devicons.lua`, `sessions.lua`
 - `typst/`: Typst support
   - `typst-preview.lua`, `typst-vim.lua`, `luasnip.lua`
 
@@ -27,4 +27,5 @@ Plugin specs are organized by domain and loaded through lazy.nvim category impor
 
 - `lazygit.nvim` is the active LazyGit integration.
 - Snacks' `lazygit` module is intentionally disabled to avoid overlap.
-- `nvim-tree` and `yazi` are both kept intentionally for different file-navigation workflows.
+- `yazi.nvim` handles file navigation (replaces nvim-tree).
+

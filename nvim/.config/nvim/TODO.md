@@ -16,11 +16,12 @@ Active maintenance backlog for NeoTex.
 
 ## Low Priority
 
-- [ ] Decide whether to keep both `nvim-tree` and `yazi` long term.
 - [ ] Revisit optional filetype-specific docs for Typst and Jupyter workflows.
 
 ## Recently Completed
 
+- [x] Replaced nvim-tree with yazi for file navigation.
+- [x] Centralized all leader keybinds in which-key.lua.
 - [x] Removed Avante/MCPHub references from active configuration.
 - [x] Rewired AI menu to OpenCode + Copilot.
 - [x] Disabled Copilot startup notifications by lazy-loading Copilot.
