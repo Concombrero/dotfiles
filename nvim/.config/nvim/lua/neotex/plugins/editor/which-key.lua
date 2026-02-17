@@ -338,7 +338,6 @@ return {
         h = { "<cmd>LocalHighlightToggle<CR>", "highlight" },
         k = { "<cmd>VimtexClean<CR>", "kill aux" },
         p = { "<cmd>TermExec cmd='python3 %:p:r.py'<CR>", "python" },
-        r = { "<cmd>AutolistRecalculate<CR>", "reorder list" },
         t = { "<cmd>terminal latexindent -w %:p:r.tex<CR>", "tex format" },
         u = { "<cmd>cd %:p:h | NvimTreeRefresh | NvimTreeFindFile<CR>", "update cwd" },
         v = { "<plug>(vimtex-context-menu)", "vimtex menu" },
@@ -439,11 +438,6 @@ return {
       },
       L = {
         name = "LIST",
-        c = { "<cmd>lua IncrementCheckbox()<CR>", "increment checkbox" },
-        d = { "<cmd>lua DecrementCheckbox()<CR>", "decrement checkbox" },
-        n = { "<cmd>AutolistCycleNext<CR>", "next" },
-        p = { "<cmd>AutolistCyclePrev<CR>", "previous" },
-        r = { "<cmd>AutolistRecalculate<CR>", "reorder" },
       },
       l = {
         name = "LSP & LINT",

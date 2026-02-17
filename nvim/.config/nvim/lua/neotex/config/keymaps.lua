@@ -131,68 +131,10 @@ function M.setup()
 
   -- Markdown mappings setup function triggered by an auto-command
   function _G.set_markdown_keymaps()
-    -- Load the autolist module
-    local ok, autolist = pcall(require, "neotex.plugins.tools.autolist.util")
-
     -- Tab settings for markdown
     vim.opt.tabstop = 2
     vim.opt.shiftwidth = 2
     vim.opt.softtabstop = 2
-
-    -- Only set the keymaps if the autolist module is loaded
-    if ok and autolist and autolist.operations then
-      -- Use the autolist handlers for various key mappings
-
-      -- List creation/management
-      vim.keymap.set("i", "<CR>", autolist.operations.enter_handler,
-        { expr = true, buffer = true, desc = "Smart list handling for Enter" })
-
-      -- Indentation keymaps
-      vim.keymap.set("i", "<Tab>", autolist.operations.tab_handler,
-        { expr = true, buffer = true, desc = "Smart list indent" })
-
-      vim.keymap.set("i", "<S-Tab>", autolist.operations.shift_tab_handler,
-        { expr = true, buffer = true, desc = "Smart list unindent" })
-
-      vim.keymap.set("i", "<C-D>", autolist.operations.shift_tab_handler,
-        { expr = true, buffer = true, desc = "Smart list unindent (C-D)" })
-
-      -- Normal mode keymaps
-      vim.keymap.set("n", "<C-n>", "<cmd>AutolistIncrementCheckbox<CR>",
-        { buffer = true, desc = "Increment checkbox" })
-
-      vim.keymap.set("n", "<A-n>", "<cmd>AutolistDecrementCheckbox<CR>",
-        { buffer = true, desc = "Decrement checkbox" })
-
-      vim.keymap.set("n", "o", "o<cmd>AutolistNewBullet<cr>",
-        { buffer = true, desc = "New bullet below" })
-
-      vim.keymap.set("n", "O", "O<cmd>AutolistNewBulletBefore<cr>",
-        { buffer = true, desc = "New bullet above" })
-
-      vim.keymap.set("n", ">", "><cmd>AutolistRecalculate<cr>",
-        { buffer = true, desc = "Indent bullet" })
-
-      vim.keymap.set("n", "<", "<<cmd>AutolistRecalculate<cr>",
-        { buffer = true, desc = "Unindent bullet" })
-
-      vim.keymap.set("n", "<C-c>", "<cmd>AutolistRecalculate<cr>",
-        { buffer = true, desc = "Recalculate list" })
-
-      -- Deletion with list recalculation
-      vim.keymap.set("n", "dd", "dd<cmd>AutolistRecalculate<cr>",
-        { buffer = true, desc = "Delete and recalculate" })
-
-      vim.keymap.set("v", "d", "d<cmd>AutolistRecalculate<cr>",
-        { buffer = true, desc = "Delete and recalculate" })
-    else
-      -- Fallback in case the module isn't loaded for some reason
-      buf_map(0, "i", "<CR>", "<CR><cmd>AutolistNewBullet<cr>", "New bullet point")
-      buf_map(0, "n", "o", "o<cmd>AutolistNewBullet<cr>", "New bullet below")
-      buf_map(0, "n", "O", "O<cmd>AutolistNewBulletBefore<cr>", "New bullet above")
-      buf_map(0, "n", "<C-n>", "<cmd>lua IncrementCheckbox()<CR>", "Increment checkbox")
-      buf_map(0, "n", "<A-n>", "<cmd>lua DecrementCheckbox()<CR>", "Decrement checkbox")
-    end
   end
 
   ---------------------------------

@@ -3,11 +3,9 @@
 --
 -- This module loads plugins that integrate various tools:
 -- - gitsigns.lua: Git integration
--- - firenvim.lua: Browser integration
 -- - vimtex.lua: LaTeX integration
 -- - lean.lua: Lean theorem prover integration
 -- - markdown-preview.lua: Markdown preview
--- - autolist.lua: Smart list handling for markdown
 -- - mini.lua: Mini plugins collection (pairs, comments, etc.)
 -- - surround.lua: Text surrounding functionality
 -- - todo-comments.lua: Highlight and search TODO comments
@@ -59,9 +57,7 @@ end
 
 -- Load modules
 local gitsigns_module = safe_require("neotex.plugins.tools.gitsigns")
-local firenvim_module = safe_require("neotex.plugins.tools.firenvim")
 local snacks_module = safe_require("neotex.plugins.tools.snacks")
-local autolist_module = safe_require("neotex.plugins.tools.autolist")
 local mini_module = safe_require("neotex.plugins.tools.mini")
 local surround_module = safe_require("neotex.plugins.tools.surround")
 local todo_comments_module = safe_require("neotex.plugins.tools.todo-comments")
@@ -81,9 +77,7 @@ end
 
 -- Add only valid plugin specs
 add_if_valid(gitsigns_module)
-add_if_valid(firenvim_module)
 add_if_valid(snacks_module)
-add_if_valid(autolist_module)
 add_if_valid(mini_module)
 add_if_valid(surround_module)
 add_if_valid(todo_comments_module)

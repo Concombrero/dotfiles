@@ -9,10 +9,12 @@
 -- - toggleterm.lua: Terminal integration
 -- - treesitter.lua: Syntax highlighting and code navigation
 --
+-- Note: The following have been removed:
+-- - autolist.lua: Smart list handling for markdown (removed)
+--
 -- Note: The following have been moved to the tools module:
 -- - yanky.nvim: Enhanced yank and paste functionality (moved to tools)
 -- - todo-comments.lua: Highlight and search TODO comments (moved to tools)
--- - autolist.lua: Smart list handling for markdown (moved to tools)
 -- - mini.lua: Mini plugins collection (moved to tools)
 -- - surround.lua: Text surrounding with quotes, brackets, etc. (moved to tools)
 --

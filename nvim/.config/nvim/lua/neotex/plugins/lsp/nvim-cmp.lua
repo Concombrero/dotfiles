@@ -6,13 +6,9 @@ return {
     "hrsh7th/cmp-path", -- source for file system paths
     "L3MON4D3/LuaSnip", -- snippet engine
     "saadparwaiz1/cmp_luasnip", -- for autocompletion
-    -- "rafamadriz/friendly-snippets", -- useful snippets
-    -- "onsails/lspkind.nvim", -- vs-code like pictograms
     "hrsh7th/cmp-cmdline",
-    "petertriho/cmp-git",
     "f3fora/cmp-spell",
     "micangl/cmp-vimtex",
-    -- "aspeddro/cmp-pandoc.nvim",
   },
   config = function()
 
@@ -147,24 +143,6 @@ return {
           -- elseif has_words_before() then
           --  cmp.complete()
         ["<S-Tab>"] = cmp.mapping(function(fallback)
-          -- Check if we're in a list item first
-          local line = vim.fn.getline(".")
-          local is_list = false
-          
-          -- Quick check for list items
-          for _, pattern in ipairs({"-", "*", "+", "%d%."}) do
-            if line:match("^%s*" .. pattern .. "%s") then
-              is_list = true
-              break
-            end
-          end
-          
-          if is_list then
-            -- Call our unindent function if we have it available
-            local ok = pcall(function() vim.cmd("AutolistUnindent") end)
-            if ok then return end
-          end
-          
           -- Standard cmp Shift-Tab behavior
           if cmp.visible() then
             cmp.select_prev_item()

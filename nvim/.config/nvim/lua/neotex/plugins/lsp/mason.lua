@@ -8,16 +8,38 @@ return {
   },
 
   config = function()
-    -- import mason
     local mason = require("mason")
-
-    -- import mason-lspconfig
     local mason_lspconfig = require("mason-lspconfig")
-
-    -- import mason-tool-installer
     local mason_tool_installer = require("mason-tool-installer")
+    local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
-    -- enable mason and configure icons
+    -- Get default capabilities for LSP clients
+    local capabilities = cmp_nvim_lsp.default_capabilities()
+
+    -- Ensure Mason binaries are available
+    local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+    if vim.fn.isdirectory(mason_bin) == 1 then
+      vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+    end
+
+    -- DIAGNOSTICS CONFIGURATION
+    local signs = { Error = "󰅜", Warn = "󰀦", Hint = "󰌵", Info = "󰋽" }
+    vim.diagnostic.config({
+      virtual_text = true,
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = signs.Error,
+          [vim.diagnostic.severity.WARN] = signs.Warn,
+          [vim.diagnostic.severity.HINT] = signs.Hint,
+          [vim.diagnostic.severity.INFO] = signs.Info,
+        },
+      },
+      underline = true,
+      update_in_insert = false,
+      severity_sort = true,
+    })
+
+    -- MASON SETUP
     mason.setup({
       ui = {
         icons = {
@@ -28,35 +50,83 @@ return {
       },
     })
 
+    -- LSP SERVER HANDLERS
+    local handlers = {}
+
+    -- PYRIGHT
+    handlers["pyright"] = function()
+      require("lspconfig").pyright.setup({
+        capabilities = capabilities,
+        settings = {
+          python = {
+            analysis = {
+              typeCheckingMode = "basic",
+            },
+          },
+        },
+      })
+    end
+
+    -- TEXLAB (LaTeX)
+    handlers["texlab"] = function()
+      require("lspconfig").texlab.setup({
+        capabilities = capabilities,
+        settings = {
+          texlab = {
+            build = {
+              onSave = true,
+            },
+            chktex = {
+              onEdit = false,
+              onOpenAndSave = false,
+            },
+            diagnosticsDelay = 300,
+          },
+        },
+      })
+    end
+
+    -- TINYMIST (Typst)
+    handlers["tinymist"] = function()
+      require("lspconfig").tinymist.setup({
+        capabilities = capabilities,
+        single_file_support = true,
+      })
+    end
+
+    -- LUA_LS
+    handlers["lua_ls"] = function()
+      require("lspconfig").lua_ls.setup({
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { "vim" },
+            },
+            workspace = {
+              library = {
+                [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+                [vim.fn.stdpath("config") .. "/lua"] = true,
+              },
+            },
+          },
+        },
+      })
+    end
+
+    -- MASON-LSPCONFIG SETUP
     mason_lspconfig.setup({
-      -- Keep the LSP server set explicit and predictable.
       ensure_installed = {
         "pyright",
         "texlab",
         "tinymist",
         "lua_ls",
       },
-      -- Avoid auto-enabling unexpected servers.
-      automatic_installation = false,
-      automatic_enable = { "pyright", "texlab", "tinymist", "lua_ls" },
-      handlers = {
-        -- Default handler: only enable servers we explicitly configure in lspconfig.
-        -- This prevents Mason-installed formatters/linters (stylua, black, etc.)
-        -- from being accidentally started as LSP servers.
-        function(server_name)
-          local configured_servers = { "pyright", "texlab", "tinymist", "lua_ls" }
-          for _, s in ipairs(configured_servers) do
-            if server_name == s then
-              -- Server is already configured and enabled in lspconfig.lua,
-              -- so we just need to register its config (without re-enabling).
-              return
-            end
-          end
-          -- Unknown server discovered by mason-lspconfig: skip it silently.
-        end,
-      },
+      automatic_installation = true,
+      handlers = handlers,
     })
 
+    -- MASON-TOOL-INSTALLER SETUP
     mason_tool_installer.setup({
       ensure_installed = {
         -- LSP servers
@@ -72,6 +142,7 @@ return {
         "prettier",
         "clang-format",
         "shfmt",
+        "latexindent",
 
         -- Linters / diagnostics tools
         "pylint",
@@ -82,12 +153,17 @@ return {
         "markdownlint",
         "shellcheck",
         "selene",
+        "luacheck",
         "htmlhint",
         "cpplint",
+        "tidy",
 
         -- Notebook tooling
         "jupytext",
       },
     })
+
+    -- Disable stylua from being enabled as an LSP server (it's a formatter)
+    pcall(vim.lsp.disable, "stylua")
   end,
 }
