@@ -31,7 +31,7 @@ This is all materialized through a set of tools that tries to stay minimal while
 - Editing: `neovim` (see [NeoTex README](nvim/.config/nvim/README.md) for details).
 - Web : Zen Browser
 - AI workflow : OpenCode agent, with integration in Neovim. 
-- Workspace-local document/media tabs: PDFs and images opened via `xdg-open` are grouped into dedicated i3 tabbed containers per workspace.
+- Workspace-local document/media tabs: PDFs/images are grouped into dedicated i3 tabbed containers per workspace.
 
 The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`.
 
@@ -228,14 +228,13 @@ betterlockscreen -u ~/Pictures/Wallpapers
 betterlockscreen --lock dim
 ```
 
-### 5) Workspace-local PDF/image tabs (managed by i3)
+### 5) Workspace-local PDF/image tabs.
 
-`zathura-tabbed` and `sxiv-tabbed` now use native i3 tabbed containers (no suckless `tabbed` binary).
+`zathura-tabbed` and `sxiv-tabbed` use native i3 tabbed containers. 
 
 Behavior per workspace:
 
-- First opened PDF creates a dedicated tabbed container for PDFs in that workspace.
-- First opened image creates a dedicated tabbed container for images in that workspace.
+- First opened PDF/image creates a dedicated tabbed container for PDFs/images in that workspace.
 - Any subsequent PDF/image opened via `xdg-open` in that workspace is appended as a new tab in the matching container.
 - Tab titles are normalized to basename-only (for example `paper.pdf`, `figure.png`).
 
@@ -313,7 +312,6 @@ System tools expected by the config include:
 - `python3/pip` (`ipython`, notebook flow)
 - `git`, `make`, C toolchain
 - `lazygit`, `yazi`, `zathura`, `latexmk`, `qutebrowser`
-- `pandoc` (optional, for Neovim document export keymaps)
 
 ## Day-2 Operations
 
