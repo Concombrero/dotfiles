@@ -1,2 +1,4 @@
-- cleanup nvim config (still a mess, remove mini.ai, fix the docs, etc)
-- chore : add license, update readme
+- add system-wide catpuccin flavor option using a script
+  - i3, polybar, zen, zathura, nvim, alacritty, wallpaper (have to generate other gyro wallpapers with different backgrounds), qutebrowser
+  - maybe take inspirations of omarchy  which has this option
+  - requires having dynamic config for all above mentioned programs, easier on some then others
