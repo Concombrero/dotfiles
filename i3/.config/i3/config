@@ -1,43 +1,38 @@
-# i3 config file (v4)
+# i3 config file 
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 #
-# This config file uses keycodes (bindsym) and was written for the QWERTY
+# This config file uses keycodes (bindsym) and was written for the AZERTY
 # layout.
 #
 # To get a config file with the same key positions, but for your current
 # layout, use the i3-config-wizard
-#
+
+# Super key for Mod
 set $mod Mod4
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 font pango:JetBrainsMono Nerd Font Mono 14
 
-# This font is widely installed, provides lots of unicode glyphs, right-to-left
-# text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango:DejaVu Sans Mono 8
 # Swap Caps Lock and Escape system-wide (X11 level)
 exec_always --no-startup-id setxkbmap -option caps:swapescape
 
-# Set root window cursor so empty workspaces use the Xcursor theme
-exec_always --no-startup-id xsetroot -cursor_name left_ptr
-
 exec_always --no-startup-id picom
-# Start XDG autostart .desktop files using dex. See also
-# https://wiki.archlinux.org/index.php/XDG_Autostart
+
 exec --no-startup-id dex --autostart --environment i3
 # Import full environment into systemd user session, then restart the portal
 # so it picks up DISPLAY, XAUTHORITY, etc. The portal may have started before
 # this import, so restarting it ensures a clean environment.
+
 exec --no-startup-id systemctl --user import-environment && systemctl --user restart xdg-desktop-portal-termfilechooser.service
+
+# Status bar 
 exec_always --no-startup-id killall polybar
 exec_always --no-startup-id ~/.config/polybar/launch_polybar.sh
 
-#wallpaper 
+# Wallpaper 
 exec_always --no-startup-id feh --bg-fill ~/Pictures/Wallpapers/catppuccin_gyro.jpg
 
-# The combination of xss-lock, nm-applet and pactl is a popular choice, so
-# they are included here as an example. Modify as you see fit.
 
 # xss-lock grabs a logind suspend inhibit lock and will use betterlockscreen to lock the
 # screen before suspend. Use loginctl lock-session to lock your screen.
@@ -46,7 +41,6 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- betterlockscreen --lock
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
-
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -73,7 +67,6 @@ tiling_drag modifier titlebar
 bindsym $mod+Return exec i3-sensible-terminal
 
 #start zen browser (requires symlink of your zen install to "zen")
-
 bindsym $mod+z exec zen
 
 #start neovim
@@ -82,19 +75,11 @@ bindsym $mod+n exec i3-sensible-terminal -e nvim
 #start lazygit
 bindsym $mod+g exec i3-sensible-terminal -e lazygit
 
-
 # kill focused window
 bindsym $mod+q kill
 
-
-# start dmenu (a program launcher)
-# bindsym $mod+d exec --no-startup-id dmenu_run
-# A more modern dmenu replacement is rofi:
+# Start rofi, a modern dmenu replacement
  bindsym $mod+d exec rofi -show combi
-
- # There also is i3-dmenu-desktop which only displays applications shipping a
-# .desktop file. It is a wrapper around dmenu, so you need that installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 # change focus
 bindsym $mod+$left focus left
@@ -199,9 +184,10 @@ bindsym $mod+Shift+Tab move container to workspace back_and_forth; workspace bac
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
-# exit i3 (logs you out of your X session)
-# bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+
+# power menu
 bindsym $mod+p exec --no-startup-id ~/.local/bin/rofi-power
+
 # resize window (you can also use the mouse for that)
 mode "resize" {
         # These bindings trigger as soon as you enter the resize mode
@@ -230,22 +216,16 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 #bind flameshot to printscreen
-
 bindsym Print exec --no-startup-id flameshot gui
-#######################################################################
-# automatically start i3-config-wizard to offer the user to create a
-# keysym-based config which used their favorite modifier (alt or windows)
-#
-# i3-config-wizard will not launch if there already is a config file
-# in ~/.config/i3/config (or $XDG_CONFIG_HOME/i3/config if set) or
-# ~/.i3/config.
-#
 # Monitor setup — CUSTOMIZE THIS for your hardware
 # Put machine-specific commands (xrandr, xmodmap, etc.) in ~/.config/i3/local.conf
 # That file is not tracked by git and won't be overwritten by stow.
 # Example local.conf content:
 #   exec --no-startup-id xrandr --output eDP-1 --off --output HDMI-1 --auto
 include ~/.config/i3/local.conf
+
+# Re-apply root cursor after local monitor setup (xrandr can reset it on login)
+exec_always --no-startup-id sh -c 'sleep 0.4; xsetroot -cursor_name left_ptr'
 
 
 #catpuccin theme
