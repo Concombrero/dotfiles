@@ -1,169 +1,154 @@
---[[ WHICH-KEY MAPPINGS - COMPREHENSIVE REFERENCE
+--[[ WHICH-KEY MAP REFERENCE (source-aligned)
 -----------------------------------------------------------
-This module configures the which-key.nvim plugin, which provides a popup menu
-that displays possible keybindings for the key sequence you've started typing.
+This reference mirrors mappings defined in the following files:
+- this file: `lua/neotex/plugins/editor/which-key.lua` (`opts.defaults`)
+- `lua/neotex/plugins/editor/formatting.lua` (`<leader>mp`)
+- `lua/neotex/plugins/text/markdown-preview.lua` (`<leader>mo`)
+- `lua/neotex/plugins/tools/yanky.lua` (`<leader>fy`, `<leader>yh`)
+- `lua/neotex/plugins/tools/opencode.lua` (`<leader>o` prefix; sub-keys from plugin defaults)
 
-The configuration below organizes keybindings into logical groups with descriptive
-labels for each command.
+TOP-LEVEL (<leader>)                            | LABEL
+-----------------------------------------------------------
+<leader>b                                       | build
+<leader>d                                       | delete buffer
+<leader>e                                       | EXPLORER
+<leader>g                                       | lazygit
+<leader>h                                       | create split
+<leader>i                                       | index
+<leader>q                                       | quit
+<leader>u                                       | undo
+<leader>v                                       | view
+<leader>w                                       | write
+<leader>y                                       | yank history
 
-----------------------------------------------------------------------------------
-TOP-LEVEL MAPPINGS (<leader>)                   | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>b - VimtexCompile                       | Compile LaTeX document
-<leader>d - Save and delete buffer              | Save file and close buffer
-<leader>e - Explorer                             | Open file manager (yazi)
-<leader>g - Open lazygit                        | Launch terminal git interface
-<leader>h - Create vertical split               | Split window vertically
-<leader>i - Open VimtexToc                      | Show LaTeX table of contents
-<leader>q - Save all and quit                   | Save all files and exit Neovim
-<leader>u - Open Telescope undo                 | Show undo history with preview
-<leader>v - VimtexView                          | View compiled LaTeX document
-<leader>w - Write all files                     | Save all open files
-<leader>x - Text operations                     | Align, split/join, diff operations
-<leader>y - Yank history                         | Browse yank history
+ACTIONS (<leader>a)                             | LABEL
+-----------------------------------------------------------
+<leader>ab                                      | bib export
+<leader>ac                                      | clear vimtex
+<leader>ae                                      | error report
+<leader>af                                      | format
+<leader>ak                                      | kill aux
+<leader>at                                      | tex format
+<leader>av                                      | vimtex menu
+<leader>aw                                      | word count
 
-----------------------------------------------------------------------------------
-ACTIONS (<leader>a)                             | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ab - Export bibliography                | Export BibTeX to separate file
-<leader>ac - Clear VimTex cache                 | Clear LaTeX compilation cache
-<leader>ae - Show VimTex errors                 | Display LaTeX error messages
-<leader>af - Format buffer                      | Format current buffer via LSP
-<leader>ak - Clean VimTex aux files             | Remove LaTeX auxiliary files
-<leader>at - Format tex file                    | Format LaTeX using latexindent
-<leader>av - VimTex context menu                | Show VimTeX context actions
-<leader>aw - Count words                        | Count words in LaTeX document
-<leader>aS - SSH connect                        | Connect to MIT server via SSH
+COPILOT (<leader>c)                             | LABEL
+-----------------------------------------------------------
+<leader>ce                                      | copilot enable
+<leader>cd                                      | copilot disable
+<leader>cs                                      | copilot status
+<leader>cp                                      | copilot panel
+<leader>cn                                      | copilot next
+<leader>cb                                      | copilot prev
+<leader>cl                                      | copilot line
+<leader>cw                                      | copilot word
+<leader>cx                                      | copilot dismiss
 
-----------------------------------------------------------------------------------
-COPILOT (<leader>c)                             | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ce - Copilot enable                     | Enable Copilot suggestions
-<leader>cd - Copilot disable                    | Disable Copilot suggestions
-<leader>cs - Copilot status                     | Show Copilot status
-<leader>cp - Copilot panel                      | Open Copilot panel
-<leader>cn - Copilot next                       | Next Copilot suggestion
-<leader>cb - Copilot previous                   | Previous Copilot suggestion
-<leader>cl - Copilot line                       | Accept Copilot line
-<leader>cw - Copilot word                       | Accept Copilot word
-<leader>cx - Copilot dismiss                    | Dismiss Copilot suggestion
+EXPLORER (<leader>e)                            | LABEL
+-----------------------------------------------------------
+<leader>ef                                      | yazi here
+<leader>ew                                      | yazi cwd
 
-----------------------------------------------------------------------------------
-FIND (<leader>f)                                | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>fa - Find all files                     | Search all files, including hidden
-<leader>fb - Find buffers                       | Switch between open buffers
-<leader>fc - Find citations                     | Search BibTeX citations
-<leader>ff - Find files                          | Search files in project/cwd
-<leader>fl - Resume last search                 | Continue previous search
-<leader>fp - Project grep                       | Search text in project files (ivy)
-<leader>fq - Find in quickfix                   | Search within quickfix list
-<leader>fg - Git commit history                 | Browse git commit history
-<leader>fh - Help tags                          | Search Neovim help documentation
-<leader>fk - Keymaps                            | Show all keybindings
-<leader>fr - Registers                          | Show clipboard registers
-<leader>ft - Todos                               | Search TODO/FIXME/HACK comments
-<leader>fs - Search string                      | Search for string in project
-<leader>fw - Search word under cursor           | Find current word in project
+FIND (<leader>f)                                | LABEL
+-----------------------------------------------------------
+<leader>fa                                      | all files
+<leader>fb                                      | buffers
+<leader>fc                                      | citations
+<leader>ff                                      | files
+<leader>fg                                      | git history
+<leader>fh                                      | help
+<leader>fk                                      | keymaps
+<leader>fl                                      | last search
+<leader>fp                                      | project grep
+<leader>fq                                      | quickfix
+<leader>fr                                      | registers
+<leader>fs                                      | string
+<leader>ft                                      | todos
+<leader>fw                                      | word
+<leader>fy                                      | yanks (from yanky.lua)
 
-----------------------------------------------------------------------------------
-EXPLORER (<leader>e)                            | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ef - Yazi here                        | Open file manager at current file
-<leader>ew - Yazi cwd                         | Open file manager at cwd
+JUPYTER (<leader>j)                             | LABEL
+-----------------------------------------------------------
+<leader>ja                                      | run all cells
+<leader>jb                                      | run cells below
+<leader>jc                                      | comment cell
+<leader>jd                                      | merge with cell below
+<leader>je                                      | execute cell
+<leader>jf                                      | send file to REPL
+<leader>ji                                      | start IPython REPL
+<leader>jj                                      | next cell
+<leader>jk                                      | previous cell
+<leader>jl                                      | send line to REPL
+<leader>jn                                      | execute and next
+<leader>jo                                      | insert cell below
+<leader>jO                                      | insert cell above
+<leader>jq                                      | exit REPL
+<leader>jr                                      | clear REPL
+<leader>js                                      | split cell
+<leader>jt                                      | send motion to REPL
+<leader>ju                                      | merge with cell above
+<leader>jv                                      | send visual selection to REPL
 
-----------------------------------------------------------------------------------
-JUPYTER (<leader>j)                             | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ja - Run all cells                      | Execute all notebook cells
-<leader>jb - Run cells below                    | Run notebook cells below cursor
-<leader>jc - Comment cell                       | Comment out current cell
-<leader>jd - Merge with cell below              | Join current cell with cell below
-<leader>je - Execute cell                       | Run current notebook cell
-<leader>jf - Send file to REPL                  | Send entire file to REPL
-<leader>ji - Start IPython REPL                 | Start Python interactive shell
-<leader>jj - Next cell                          | Navigate to next cell
-<leader>jk - Previous cell                      | Navigate to previous cell
-<leader>jl - Send line to REPL                  | Send current line to REPL
-<leader>jn - Execute and next                   | Run cell and move to next
-<leader>jo - Insert cell below                  | Add new cell below current
-<leader>jO - Insert cell above                  | Add new cell above current
-<leader>jq - Exit REPL                          | Close the REPL
-<leader>jr - Clear REPL                         | Clear the REPL screen
-<leader>js - Split cell                         | Split current cell at cursor
-<leader>jt - Send motion to REPL                | Send text via motion to REPL
-<leader>ju - Merge with cell above              | Join current cell with cell above
-<leader>jv - Send visual selection to REPL      | Send selected text to REPL
+LSP & LINT (<leader>l)                          | LABEL
+-----------------------------------------------------------
+<leader>lB                                      | toggle buffer linting
+<leader>lD                                      | declaration
+<leader>lL                                      | lint file
+<leader>lR                                      | rename
+<leader>lb                                      | buffer diagnostics
+<leader>lc                                      | code action
+<leader>ld                                      | definition
+<leader>lf                                      | format buffer
+<leader>lg                                      | toggle global linting
+<leader>lh                                      | help
+<leader>li                                      | implementations
+<leader>lk                                      | kill lsp
+<leader>ll                                      | line diagnostics
+<leader>ln                                      | next diagnostic
+<leader>lp                                      | previous diagnostic
+<leader>lr                                      | references
+<leader>ls                                      | restart lsp
+<leader>lt                                      | start lsp
+<leader>ly                                      | copy diagnostics to clipboard
 
-----------------------------------------------------------------------------------
-LIST (<leader>L)                                | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>Lc - Toggle checkbox                    | Check/uncheck a checkbox
-<leader>Ln - Next list item                     | Move to next item in list
-<leader>Lp - Previous list item                 | Move to previous item in list
-<leader>Lr - Reorder list                       | Fix list numbering
+MARKDOWN (<leader>m)                            | LABEL
+-----------------------------------------------------------
+<leader>ma                                      | toggle all folds
+<leader>mf                                      | toggle fold under cursor
+<leader>mo                                      | open markdown preview (from markdown-preview.lua)
+<leader>mp                                      | Format code (from formatting.lua)
+<leader>ms                                      | submit selection with message
+<leader>mt                                      | toggle folding method
+<leader>mu                                      | open URL under cursor
 
-----------------------------------------------------------------------------------
-LSP & LINT (<leader>l)                          | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>lb - Buffer diagnostics                 | Show all errors in current file
-<leader>lc - Code action                        | Show available code actions
-<leader>lf - Format buffer                      | Format current buffer via LSP/conform
-<leader>ld - Go to definition                   | Jump to symbol definition
-<leader>lD - Go to declaration                  | Jump to symbol declaration
-<leader>lh - Hover help                         | Show documentation under cursor
-<leader>li - Implementations                    | Find implementations of symbol
-<leader>lk - Kill LSP                           | Stop language server
-<leader>ll - Line diagnostics                   | Show errors for current line
-<leader>ln - Next diagnostic                    | Go to next error/warning
-<leader>lp - Previous diagnostic                | Go to previous error/warning
-<leader>lr - References                         | Find all references to symbol
-<leader>ls - Restart LSP                        | Restart language server
-<leader>lt - Start LSP                          | Start language server
-<leader>ly - Copy diagnostics                   | Copy diagnostics to clipboard
-<leader>lR - Rename                             | Rename symbol under cursor
-<leader>lL - Lint file                          | Run linters on current file
-<leader>lg - Toggle global linting              | Enable/disable linting globally
-<leader>lB - Toggle buffer linting              | Enable/disable linting for buffer
+SESSIONS (<leader>s)                            | LABEL
+-----------------------------------------------------------
+<leader>sd                                      | delete
+<leader>sl                                      | load
+<leader>ss                                      | save
 
-----------------------------------------------------------------------------------
-MARKDOWN (<leader>m)                            | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ms - Submit selection                   | Submit visual selection with user message
-<leader>mu - Open URL                           | Open URL under cursor
-<leader>ma - Toggle all folds                   | Toggle all folds open/closed
-<leader>mf - Toggle fold                        | Toggle fold under cursor
-<leader>mt - Toggle folding method              | Switch between manual/smart folding
+TYPST (<leader>t)                               | LABEL
+-----------------------------------------------------------
+<leader>tb                                      | build (update | make)
+<leader>tf                                      | toggle cursor follow
+<leader>to                                      | preview
+<leader>tp                                      | toggle preview
+<leader>ts                                      | stop preview
+<leader>tw                                      | watch
 
-----------------------------------------------------------------------------------
-SESSIONS (<leader>s)                            | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>ss - Save session                       | Save current session
-<leader>sd - Delete session                     | Delete a saved session
-<leader>sl - Load session                       | Load a saved session
+YANK (<leader>y)                                | LABEL
+-----------------------------------------------------------
+<leader>y                                       | yank history
+<leader>yh                                      | history (from yanky.lua)
 
-----------------------------------------------------------------------------------
-TYPST (<leader>t)                               | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>to - TypstPreview                       | Start Typst preview
-<leader>tp - TypstPreviewToggle                 | Toggle Typst preview
-<leader>ts - TypstPreviewStop                   | Stop Typst preview
-<leader>tf - TypstPreviewFollowCursorToggle     | Toggle cursor follow
-<leader>tw - TypstWatch                         | Watch and recompile Typst
+OPENCODE (<leader>o)
+-----------------------------------------------------------
+`<leader>o` is a prefix owned by opencode.nvim. Sub-key bindings are provided
+by the plugin defaults (configured via `keymap_prefix = "<leader>o"`).
 
-----------------------------------------------------------------------------------
-TEXT (<leader>x)                                | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>xa - Align                              | Start text alignment
-<leader>xA - Align with preview                 | Start alignment with preview
-<leader>xs - Split/join toggle                  | Toggle between single/multi-line
-<leader>xd - Toggle diff overlay                | Show diff between buffer and clipboard
-<leader>xw - Toggle word diff                   | Show word-level diffs
-
-----------------------------------------------------------------------------------
-YANK (<leader>y)                                | DESCRIPTION
-----------------------------------------------------------------------------------
-<leader>y - Yank history                        | Browse clipboard history with Telescope
+RESERVED GROUPS
+-----------------------------------------------------------
+<leader>L                                       | LIST (group name only in this file)
 ]]
 
 return {
@@ -388,6 +373,7 @@ return {
 
       t = {
         name = "TYPST",
+        b = { "<cmd>update | make<CR>", "build" },
         o = { "<cmd>TypstPreview<CR>", "preview" },
         p = { "<cmd>TypstPreviewToggle<CR>", "toggle preview" },
         s = { "<cmd>TypstPreviewStop<CR>", "stop preview" },
