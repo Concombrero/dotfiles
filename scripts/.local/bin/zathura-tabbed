@@ -1,77 +1,192 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Debug log
-LOG="$HOME/zathura-debug.log"
-echo "--- Run: $(date) ---" >> "$LOG"
+set -euo pipefail
 
-# Force X11 for Zathura
-export GDK_BACKEND=x11
+workspace_name() {
+  i3-msg -t get_workspaces | jq -r '.[] | select(.focused == true).name' | head -n1
+}
 
-TABBED_NAME="zathura-tabbed"
-TABBED_BIN="$HOME/.local/bin/tabbed"
+workspace_mark() {
+  local ws safe
+  ws="$(workspace_name)"
+  [ -z "$ws" ] && ws="default"
+  safe="$(printf '%s' "$ws" | tr -c '[:alnum:]_-' '_')"
+  printf '__i3_pdf_tabs_%s' "$safe"
+}
 
-# 1. Get Current i3 Workspace Name
-# We use jq to parse the focused workspace name safely
-WS_NAME=$(i3-msg -t get_workspaces | jq -r '.[] | select(.focused==true).name')
+container_id() {
+  local mark="$1"
+  i3-msg -t get_tree | jq -r --arg mark "$mark" '
+    ..
+    | objects
+    | select(.window == null)
+    | select(.layout == "tabbed")
+    | select((.marks // []) | index($mark))
+    | .id
+  ' | head -n1
+}
 
-if [ -z "$WS_NAME" ]; then
-    echo "Could not detect i3 workspace, falling back to 'default'" >> "$LOG"
-    WS_NAME="default"
-fi
+create_pdf_container() {
+  local mark="$1"
+  local layout_file
 
-echo "Current Workspace: $WS_NAME" >> "$LOG"
+  layout_file="$(mktemp)"
+  cat >"$layout_file" <<EOF
+{
+  "type": "con",
+  "layout": "tabbed",
+  "marks": ["$mark"],
+  "nodes": [
+    { "swallows": [ { "class": "^Zathura$" } ] }
+  ]
+}
+EOF
 
-# 2. Define Workspace-Specific Lockfile
-XID_FILE="$HOME/.zathura-tabbed-xid-${WS_NAME//\//_}" # Replace slashes in name just in case
+  i3-msg --quiet "append_layout $layout_file"
+  rm -f "$layout_file"
+}
 
-XID=""
+ensure_pdf_container() {
+  local mark="$1" id target_id
 
-# 3. Try to read XID from file
-if [ -f "$XID_FILE" ]; then
-    READ_XID=$(cat "$XID_FILE")
-    echo "Read XID from file: $READ_XID" >> "$LOG"
-    
-    # 4. Verify if this XID is valid AND is actually our tabbed window
-    # We check the window name (-name) or class to ensure we don't attach to a random window after reboot
-    if xwininfo -id "$READ_XID" > /dev/null 2>&1; then
-        # Check actual window class/name to be 100% sure
-        CHECK_NAME=$(xdotool getwindowname "$READ_XID" 2>/dev/null)
-        # Note: tabbed title changes, so checking name is tricky.
-        # Better: Check WM_CLASS. tabbed sets class to 'tabbed' and instance to what we set (-n)
-        CHECK_CLASS=$(xprop -id "$READ_XID" WM_CLASS 2>/dev/null)
-        
-        if [[ "$CHECK_CLASS" == *"$TABBED_NAME"* ]]; then
-             XID=$READ_XID
-             echo "XID is valid and verified as zathura-tabbed." >> "$LOG"
-        else
-             echo "XID exists but class mismatch (Old ID reused?): $CHECK_CLASS" >> "$LOG"
+  id="$(container_id "$mark")"
+
+  if [ -z "$id" ]; then
+    i3-msg --quiet "[con_mark=\"$mark\"] unmark \"$mark\"" || true
+    create_pdf_container "$mark"
+    id="$(container_id "$mark")"
+  fi
+
+  if [ -z "$id" ]; then
+    echo "Could not create/focus PDF tab container" >&2
+    exit 1
+  fi
+
+  target_id="$(i3-msg -t get_tree | jq -r --argjson id "$id" '
+    ..
+    | objects
+    | select(.id == $id)
+    | (.focus[0] // (.nodes[0].id) // .id)
+  ')"
+
+  i3-msg --quiet "[con_id=\"$target_id\"] focus"
+}
+
+decode_target() {
+  local raw="$1"
+  if [[ "$raw" == file://* ]]; then
+    python3 - "$raw" <<'PY'
+import sys
+from urllib.parse import unquote, urlparse
+
+uri = sys.argv[1]
+parsed = urlparse(uri)
+print(unquote(parsed.path))
+PY
+  else
+    printf '%s\n' "$raw"
+  fi
+}
+
+basename_label() {
+  local path="$1"
+  basename -- "$path"
+}
+
+list_window_con_ids() {
+  local container="$1"
+  i3-msg -t get_tree | jq -r --argjson cid "$container" '
+    (.. | objects | select(.id == $cid)) as $root
+    | $root
+    | ..
+    | objects
+    | select(.window != null)
+    | select((.window_properties.class // "") == "Zathura")
+    | .id
+  '
+}
+
+set_title_format() {
+  local con_id="$1"
+  local label="$2"
+  local escaped xid
+
+  xid="$(i3-msg -t get_tree | jq -r --argjson id "$con_id" '
+    ..
+    | objects
+    | select(.id == $id)
+    | (.window // empty)
+  ' | head -n1)"
+
+  if [ -n "$xid" ]; then
+    xprop -id "$xid" -f _NET_WM_NAME 8u -set _NET_WM_NAME "$label" >/dev/null 2>&1 || true
+    xprop -id "$xid" -f WM_NAME 8s -set WM_NAME "$label" >/dev/null 2>&1 || true
+  fi
+
+  escaped="${label//\\/\\\\}"
+  escaped="${escaped//\"/\\\"}"
+  i3-msg --quiet "[con_id=\"$con_id\"] title_format \"$escaped\"" >/dev/null || true
+}
+
+wait_and_set_basename() {
+  local container="$1"
+  local label="$2"
+  shift 2
+  local old_ids=("$@")
+  local retries=40
+  local found=""
+
+  while [ "$retries" -gt 0 ]; do
+    local current id seen
+    mapfile -t current < <(list_window_con_ids "$container")
+
+    for id in "${current[@]}"; do
+      seen=0
+      for old in "${old_ids[@]}"; do
+        if [ "$id" = "$old" ]; then
+          seen=1
+          break
         fi
-    else
-        echo "XID is invalid (window closed)." >> "$LOG"
+      done
+      if [ "$seen" -eq 0 ] && [ -n "$id" ]; then
+        found="$id"
+        break
+      fi
+    done
+
+    if [ -n "$found" ]; then
+      set_title_format "$found" "$label"
+      return 0
     fi
-fi
 
-# 5. If no valid XID found, start new instance
-if [ -z "$XID" ]; then
-    echo "Starting new instance for workspace $WS_NAME..." >> "$LOG"
-    
-    XID=$("$TABBED_BIN" -d -c -n "$TABBED_NAME" 2>>"$LOG")
-    
-    echo "New XID created: $XID" >> "$LOG"
-    
-    # Save the new XID to workspace-specific file
-    echo "$XID" > "$XID_FILE"
-fi
+    retries=$((retries - 1))
+    sleep 0.05
+  done
 
-# 6. Open Zathura
-if [ -n "$XID" ]; then
-    echo "Opening Zathura in XID: $XID" >> "$LOG"
-    zathura -e "$XID" "$@" 2>>"$LOG" &
-    
-    # Activate window
-    xdotool windowactivate "$XID" 2>/dev/null
-else
-    # Fallback
-    echo "Failed to get XID, running standalone" >> "$LOG"
-    zathura "$@" 2>>"$LOG" &
-fi
+  return 1
+}
+
+main() {
+  local mark target label cid
+  mark="$(workspace_mark)"
+
+  if [ "$#" -eq 0 ]; then
+    ensure_pdf_container "$mark"
+    zathura >/dev/null 2>&1 &
+    exit 0
+  fi
+
+  for target in "$@"; do
+    ensure_pdf_container "$mark"
+    cid="$(container_id "$mark")"
+    target="$(decode_target "$target")"
+    label="$(basename_label "$target")"
+
+    mapfile -t old_ids < <(list_window_con_ids "$cid")
+    zathura -- "$target" >/dev/null 2>&1 &
+    wait_and_set_basename "$cid" "$label" "${old_ids[@]}" >/dev/null 2>&1 || true
+    sleep 0.06
+  done
+}
+
+main "$@"

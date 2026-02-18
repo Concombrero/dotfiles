@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Sxiv (Workspace Tabs)
+Comment=Open images in i3 workspace-local tabbed containers
+Exec=/usr/bin/env sxiv-tabbed %U
+Terminal=false
+Categories=Graphics;Viewer;
+MimeType=image/jpeg;image/png;image/gif;image/bmp;image/tiff;image/webp;
+NoDisplay=false

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zathura (Workspace Tabs)
+Comment=Open PDFs in i3 workspace-local tabbed containers
+Exec=/usr/bin/env zathura-tabbed %U
+Terminal=false
+Categories=Office;Viewer;
+MimeType=application/pdf;
+NoDisplay=false

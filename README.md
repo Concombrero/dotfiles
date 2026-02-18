@@ -31,6 +31,7 @@ This is all materialized through a set of tools that tries to stay minimal while
 - Editing: `neovim` (see [NeoTex README](nvim/.config/nvim/README.md) for details).
 - Web : Zen Browser
 - AI workflow : OpenCode agent, with integration in Neovim. 
+- Workspace-local document/media tabs: PDFs and images opened via `xdg-open` are grouped into dedicated i3 tabbed containers per workspace.
 
 The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`.
 
@@ -66,7 +67,8 @@ What this does at a high level:
 2. Installs non-APT tools (`fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `zen-browser`, `betterlockscreen`).
 3. Installs Python tooling and fonts.
 4. Stows all configured packages into `$HOME`.
-5. Applies the default wallpaper with `feh` when a graphical session is available.
+5. Configures default MIME handlers for PDFs/images (`zathura-tabbed.desktop`, `sxiv-tabbed.desktop`).
+6. Applies the default wallpaper with `feh` when a graphical session is available.
 
 Installer log:
 
@@ -91,7 +93,7 @@ Installer log:
 | Flag | Meaning |
 |---|---|
 | `--skip-packages` | Skip all apt/PPA package installation |
-| `--skip-tools` | Skip non-APT tools (`fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `zen-browser`, `betterlockscreen`), Python tools, and `tabbed` build |
+| `--skip-tools` | Skip non-APT tools (`fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `zen-browser`, `betterlockscreen`) and Python tools |
 | `--skip-fonts` | Skip Nerd Fonts + Font Awesome install |
 | `--stow-only` | Only apply Stow packages |
 
@@ -112,13 +114,12 @@ Example:
 
 ### APT packages (from `packages.txt`)
 
-- Core: `git`, `stow`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `pkg-config`
+- Core: `git`, `stow`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `pkg-config`, `xdg-utils`
 - Desktop: `i3-wm`, `i3lock`, `i3status`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `xdotool`, `x11-xserver-utils`, `x11-utils`, `dex`, `xss-lock`, `network-manager-gnome`, `pulseaudio-utils`, `imagemagick`
 - CLI: `htop`, `neofetch`, `ripgrep`, `fd-find`, `bat`, `feh`, `jq`
 - Docs/academic: `zathura`, `zathura-pdf-poppler`, `texlive-full`, `latexmk`
-- Media/viewer: `sxiv`, `vlc`, `xwininfo`
+- Media/viewer: `sxiv`, `vlc`
 - Python base: `python3`, `python3-pip`, `python3-venv`
-- Build deps for `tabbed`: `libx11-dev`, `libxft-dev`
 
 Script-installed packages:
 
@@ -136,7 +137,7 @@ Script-installed packages:
 - `betterlockscreen` (official upstream installer)
 - Yazi plugin sync via `ya pack -i`
 - Python user tools: `ipython`, `jupytext`, `black`, `isort`, `pylint`
-- `tabbed` built from source to `~/.local/bin/tabbed`
+- MIME defaults via `xdg-mime`: `application/pdf` -> `zathura-tabbed.desktop`, images -> `sxiv-tabbed.desktop`
 - Fonts: `JetBrainsMono`, `RobotoMono`, `NerdFontsSymbolsOnly`, `Font Awesome`
 
 ## Stow Packages Applied by Installer
@@ -164,7 +165,7 @@ Script-installed packages:
 | `xdg-desktop-portal` | `~/.config/xdg-desktop-portal/portals.conf` |
 | `xdg-desktop-portal-termfilechooser` | `~/.config/xdg-desktop-portal-termfilechooser/` |
 | `latex` | `~/texmf/` (custom `.bst` files) |
-| `scripts` | `~/.local/bin/rofi-power`, `~/.local/bin/zathura-tabbed`, `~/.local/bin/sxiv-tabbed` |
+| `scripts` | `~/.local/bin/rofi-power`, `~/.local/bin/zathura-tabbed`, `~/.local/bin/sxiv-tabbed`, `~/.local/bin/i3-tab-title-fix`, `~/.local/share/applications/{zathura-tabbed.desktop,sxiv-tabbed.desktop}` |
 | `wallpapers` | `~/Pictures/Wallpapers/` |
 | `opencode` | `~/.config/opencode/opencode.json` |
 
@@ -227,13 +228,28 @@ betterlockscreen -u ~/Pictures/Wallpapers
 betterlockscreen --lock dim
 ```
 
-### 5) Custom `tabbed` source (optional)
+### 5) Workspace-local PDF/image tabs (managed by i3)
 
-If you keep a patched/themed `tabbed`, place it at:
+`zathura-tabbed` and `sxiv-tabbed` now use native i3 tabbed containers (no suckless `tabbed` binary).
 
-- `~/dotfiles/tabbed-src/`
+Behavior per workspace:
 
-Then `install.sh` builds this local source instead of cloning upstream.
+- First opened PDF creates a dedicated tabbed container for PDFs in that workspace.
+- First opened image creates a dedicated tabbed container for images in that workspace.
+- Any subsequent PDF/image opened via `xdg-open` in that workspace is appended as a new tab in the matching container.
+- Tab titles are normalized to basename-only (for example `paper.pdf`, `figure.png`).
+
+Quick checks:
+
+```bash
+xdg-mime query default application/pdf
+xdg-mime query default image/png
+```
+
+Expected:
+
+- `zathura-tabbed.desktop`
+- `sxiv-tabbed.desktop`
 
 ### 6) Zen Browser
 

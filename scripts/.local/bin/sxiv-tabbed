@@ -1,72 +1,192 @@
-#!/bin/bash
-# Workspace-aware sxiv-tabbed wrapper with title fix
+#!/usr/bin/env bash
 
-# 1. Setup
-TABBED_NAME="sxiv-tabbed"
-TABBED_BIN="$HOME/.local/bin/tabbed"
+set -euo pipefail
 
-# Get current workspace for isolation
-WS_NAME=$(i3-msg -t get_workspaces 2>/dev/null | jq -r '.[] | select(.focused==true).name')
-[ -z "$WS_NAME" ] && WS_NAME="default"
-XID_FILE="$HOME/.sxiv-tabbed-xid-${WS_NAME//\//_}"
-
-# 2. Get or Create Tabbed Window
-XID=""
-if [ -f "$XID_FILE" ]; then
-    READ_XID=$(cat "$XID_FILE")
-    # Verify XID exists
-    if xwininfo -id "$READ_XID" >/dev/null 2>&1; then
-        XID=$READ_XID
-    fi
-fi
-
-if [ -z "$XID" ]; then
-    # Start new tabbed instance
-    # -d: detach, -c: close on last tab, -n: name
-    XID=$("$TABBED_BIN" -d -c -n "$TABBED_NAME")
-    echo "$XID" > "$XID_FILE"
-fi
-
-# 3. Identify Filename (for title)
-# Get the last argument
-FILE="${@: -1}"
-# If it's a file, get basename. If not (e.g. dir), use string as is.
-if [ -f "$FILE" ]; then
-    FILENAME=$(basename "$FILE")
-else
-    FILENAME="$FILE"
-fi
-
-# 4. Helper to get child windows of tabbed
-get_children() {
-    # Match lines starting with whitespace + 0x
-    xwininfo -children -id "$XID" | grep -E "^\s+0x" | awk '{print $1}' | sort
+workspace_name() {
+  i3-msg -t get_workspaces | jq -r '.[] | select(.focused == true).name' | head -n1
 }
 
-# Snapshot existing children
-OLD_CHILDREN=$(get_children)
+workspace_mark() {
+  local ws safe
+  ws="$(workspace_name)"
+  [ -z "$ws" ] && ws="default"
+  safe="$(printf '%s' "$ws" | tr -c '[:alnum:]_-' '_')"
+  printf '__i3_img_tabs_%s' "$safe"
+}
 
-# 5. Launch sxiv embedded
-sxiv -e "$XID" "$@" &
+container_id() {
+  local mark="$1"
+  i3-msg -t get_tree | jq -r --arg mark "$mark" '
+    ..
+    | objects
+    | select(.window == null)
+    | select(.layout == "tabbed")
+    | select((.marks // []) | index($mark))
+    | .id
+  ' | head -n1
+}
 
-# 6. Background job to catch the new window and fix its title
-(
-    # Try for up to 1 second
-    for i in {1..20}; do
-        NEW_CHILDREN=$(get_children)
-        
-        # Find ID present in NEW but not OLD
-        TARGET_ID=$(comm -13 <(echo "$OLD_CHILDREN") <(echo "$NEW_CHILDREN") | head -n 1)
-        
-        if [ -n "$TARGET_ID" ]; then
-            # Force title update
-            xprop -id "$TARGET_ID" -f _NET_WM_NAME 8u -set _NET_WM_NAME "$FILENAME"
-            xprop -id "$TARGET_ID" -f WM_NAME 8s -set WM_NAME "$FILENAME"
-            break
+create_image_container() {
+  local mark="$1"
+  local layout_file
+
+  layout_file="$(mktemp)"
+  cat >"$layout_file" <<EOF
+{
+  "type": "con",
+  "layout": "tabbed",
+  "marks": ["$mark"],
+  "nodes": [
+    { "swallows": [ { "class": "^(Sxiv|Nsxiv)$" } ] }
+  ]
+}
+EOF
+
+  i3-msg --quiet "append_layout $layout_file"
+  rm -f "$layout_file"
+}
+
+ensure_image_container() {
+  local mark="$1" id target_id
+
+  id="$(container_id "$mark")"
+
+  if [ -z "$id" ]; then
+    i3-msg --quiet "[con_mark=\"$mark\"] unmark \"$mark\"" || true
+    create_image_container "$mark"
+    id="$(container_id "$mark")"
+  fi
+
+  if [ -z "$id" ]; then
+    echo "Could not create/focus image tab container" >&2
+    exit 1
+  fi
+
+  target_id="$(i3-msg -t get_tree | jq -r --argjson id "$id" '
+    ..
+    | objects
+    | select(.id == $id)
+    | (.focus[0] // (.nodes[0].id) // .id)
+  ')"
+
+  i3-msg --quiet "[con_id=\"$target_id\"] focus"
+}
+
+decode_target() {
+  local raw="$1"
+  if [[ "$raw" == file://* ]]; then
+    python3 - "$raw" <<'PY'
+import sys
+from urllib.parse import unquote, urlparse
+
+uri = sys.argv[1]
+parsed = urlparse(uri)
+print(unquote(parsed.path))
+PY
+  else
+    printf '%s\n' "$raw"
+  fi
+}
+
+basename_label() {
+  local path="$1"
+  basename -- "$path"
+}
+
+list_window_con_ids() {
+  local container="$1"
+  i3-msg -t get_tree | jq -r --argjson cid "$container" '
+    (.. | objects | select(.id == $cid)) as $root
+    | $root
+    | ..
+    | objects
+    | select(.window != null)
+    | select((.window_properties.class // "") | test("^(Sxiv|Nsxiv)$"))
+    | .id
+  '
+}
+
+set_title_format() {
+  local con_id="$1"
+  local label="$2"
+  local escaped xid
+
+  xid="$(i3-msg -t get_tree | jq -r --argjson id "$con_id" '
+    ..
+    | objects
+    | select(.id == $id)
+    | (.window // empty)
+  ' | head -n1)"
+
+  if [ -n "$xid" ]; then
+    xprop -id "$xid" -f _NET_WM_NAME 8u -set _NET_WM_NAME "$label" >/dev/null 2>&1 || true
+    xprop -id "$xid" -f WM_NAME 8s -set WM_NAME "$label" >/dev/null 2>&1 || true
+  fi
+
+  escaped="${label//\\/\\\\}"
+  escaped="${escaped//\"/\\\"}"
+  i3-msg --quiet "[con_id=\"$con_id\"] title_format \"$escaped\"" >/dev/null || true
+}
+
+wait_and_set_basename() {
+  local container="$1"
+  local label="$2"
+  shift 2
+  local old_ids=("$@")
+  local retries=40
+  local found=""
+
+  while [ "$retries" -gt 0 ]; do
+    local current id seen
+    mapfile -t current < <(list_window_con_ids "$container")
+
+    for id in "${current[@]}"; do
+      seen=0
+      for old in "${old_ids[@]}"; do
+        if [ "$id" = "$old" ]; then
+          seen=1
+          break
         fi
-        sleep 0.05
+      done
+      if [ "$seen" -eq 0 ] && [ -n "$id" ]; then
+        found="$id"
+        break
+      fi
     done
-) &
 
-# 7. Activate Tabbed
-xdotool windowactivate "$XID" 2>/dev/null
+    if [ -n "$found" ]; then
+      set_title_format "$found" "$label"
+      return 0
+    fi
+
+    retries=$((retries - 1))
+    sleep 0.05
+  done
+
+  return 1
+}
+
+main() {
+  local mark target label cid
+  mark="$(workspace_mark)"
+
+  if [ "$#" -eq 0 ]; then
+    ensure_image_container "$mark" >/dev/null
+    sxiv >/dev/null 2>&1 &
+    exit 0
+  fi
+
+  for target in "$@"; do
+    ensure_image_container "$mark"
+    cid="$(container_id "$mark")"
+    target="$(decode_target "$target")"
+    label="$(basename_label "$target")"
+
+    mapfile -t old_ids < <(list_window_con_ids "$cid")
+    sxiv -- "$target" >/dev/null 2>&1 &
+    wait_and_set_basename "$cid" "$label" "${old_ids[@]}" >/dev/null 2>&1 || true
+    sleep 0.06
+  done
+}
+
+main "$@"

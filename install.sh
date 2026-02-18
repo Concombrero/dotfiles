@@ -10,11 +10,11 @@
 #   3. Installs tools not in apt (starship, zoxide, yazi, lazygit, fzf, opencode, zen-browser, betterlockscreen)
 #   4. Installs Node.js via NodeSource (needed by Neovim plugins)
 #   5. Installs Python tools for Neovim (ipython, jupytext, black, isort, pylint)
-#   6. Builds suckless tabbed (for zathura-tabbed)
-#   7. Installs Nerd Fonts
-#   8. Sets fish as the default shell
-#   9. Stows all config packages
-#  10. Sets the default wallpaper (if running in a graphical session)
+#   6. Installs Nerd Fonts
+#   7. Sets fish as the default shell
+#   8. Stows all config packages
+#   9. Sets the default wallpaper (if running in a graphical session)
+#  10. Configures default MIME apps for PDF/images
 #  11. Installs Yazi plugins
 # ============================================================
 
@@ -220,37 +220,6 @@ install_python_tools() {
     log "Python tools installed."
 }
 
-# ─── Step 5: Build suckless tabbed ──────────────────────────
-build_tabbed() {
-    local TABBED_DIR="$DOTFILES_DIR/tabbed-src"
-    local TABBED_BIN="$HOME/.local/bin/tabbed"
-
-    if [ -x "$TABBED_BIN" ]; then
-        warn "tabbed already exists at $TABBED_BIN, skipping build."
-        return
-    fi
-
-    info "Building suckless tabbed (for zathura-tabbed)..."
-    mkdir -p "$HOME/.local/bin"
-
-    if [ -d "$TABBED_DIR" ]; then
-        info "Using bundled tabbed source from $TABBED_DIR..."
-        make -C "$TABBED_DIR" clean 2>&1 | tee -a "$LOG_FILE"
-        make -C "$TABBED_DIR" 2>&1 | tee -a "$LOG_FILE"
-        cp "$TABBED_DIR/tabbed" "$TABBED_BIN"
-    else
-        info "Cloning suckless tabbed..."
-        local TMP_DIR=$(mktemp -d)
-        git clone https://git.suckless.org/tabbed "$TMP_DIR/tabbed" 2>&1 | tee -a "$LOG_FILE"
-        make -C "$TMP_DIR/tabbed" 2>&1 | tee -a "$LOG_FILE"
-        cp "$TMP_DIR/tabbed/tabbed" "$TABBED_BIN"
-        rm -rf "$TMP_DIR"
-    fi
-
-    chmod +x "$TABBED_BIN"
-    log "tabbed built and installed to $TABBED_BIN."
-}
-
 # ─── Step 6: Install Nerd Fonts ─────────────────────────────
 install_fonts() {
     local FONT_DIR="$HOME/.local/share/fonts"
@@ -361,6 +330,7 @@ stow_packages() {
     # Ensure target directories exist (stow needs the parent directories)
     mkdir -p "$HOME/.config"
     mkdir -p "$HOME/.local/bin"
+    mkdir -p "$HOME/.local/share/applications"
 
     local failed=()
     for pkg in "${packages[@]}"; do
@@ -416,7 +386,40 @@ set_default_wallpaper() {
     fi
 }
 
-# ─── Step 10: Install Yazi plugins ──────────────────────────
+# ─── Step 10: Configure MIME defaults ───────────────────────
+configure_mime_defaults() {
+    if ! command -v xdg-mime &>/dev/null; then
+        warn "xdg-mime not found, skipping default app setup for PDF/images."
+        return
+    fi
+
+    info "Configuring default PDF/image handlers..."
+
+    # Desktop entries are stowed from scripts/.local/share/applications
+    xdg-mime default zathura-tabbed.desktop application/pdf 2>&1 | tee -a "$LOG_FILE" || warn "Failed setting PDF handler."
+
+    local image_mimes=(
+        image/jpeg
+        image/png
+        image/gif
+        image/bmp
+        image/tiff
+        image/webp
+    )
+
+    local mime
+    for mime in "${image_mimes[@]}"; do
+        xdg-mime default sxiv-tabbed.desktop "$mime" 2>&1 | tee -a "$LOG_FILE" || warn "Failed setting image handler for $mime."
+    done
+
+    if command -v update-desktop-database &>/dev/null; then
+        update-desktop-database "$HOME/.local/share/applications" 2>&1 | tee -a "$LOG_FILE" || true
+    fi
+
+    log "Default PDF/image handlers configured."
+}
+
+# ─── Step 11: Install Yazi plugins ──────────────────────────
 install_yazi_plugins() {
     if command -v ya &>/dev/null; then
         info "Installing Yazi plugins..."
@@ -469,7 +472,8 @@ main() {
                 echo "  APT:       i3, polybar, picom, rofi, dunst, flameshot, zathura, texlive-full, etc."
                 echo "  Binaries:  starship, zoxide, yazi, lazygit, fzf, opencode, zen-browser, betterlockscreen"
                 echo "  Python:    ipython, jupytext, black, isort, pylint"
-                echo "  Build:     suckless tabbed (for zathura-tabbed)"
+                echo "  MIME:      application/pdf -> zathura-tabbed.desktop"
+                echo "             image/* -> sxiv-tabbed.desktop"
                 echo "  Fonts:     JetBrainsMono, RobotoMono, NerdFontsSymbolsOnly, Font Awesome"
                 echo "  Wallpaper: ~/Pictures/Wallpapers/catppuccin_gyro.jpg (via feh, if DISPLAY is set)"
                 exit 0
@@ -483,6 +487,7 @@ main() {
 
     if [ "$STOW_ONLY" = true ]; then
         stow_packages
+        configure_mime_defaults
         set_default_wallpaper
         echo ""
         log "Stow-only mode complete."
@@ -506,7 +511,6 @@ main() {
         install_zen
         install_betterlockscreen
         install_python_tools
-        build_tabbed
     else
         warn "Skipping tool installation."
     fi
@@ -519,6 +523,7 @@ main() {
 
     set_fish_shell
     stow_packages
+    configure_mime_defaults
     set_default_wallpaper
     install_yazi_plugins
 
