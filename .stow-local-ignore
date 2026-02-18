@@ -12,3 +12,6 @@ LICENSE
 # opencode runtime files that should remain machine-local
 ^\.config/opencode/package\.json$
 ^\.config/opencode/bun\.lock$
+
+# nvim plugin lockfile should remain machine-local
+^\.config/nvim/lazy-lock\.json$

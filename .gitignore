@@ -13,3 +13,4 @@ Thumbs.db
 
 # Neovim local runtime/session state
 nvim/.config/nvim/sessions/
+nvim/.config/nvim/lazy-lock.json
