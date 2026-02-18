@@ -83,6 +83,53 @@ local function parse_startup_lines(lines)
   return startup_time, startup_events
 end
 
+-- Collect plugin timing data from lazy.nvim in a version-compatible way.
+local function get_plugin_profile_data()
+  local ok = pcall(require, "lazy")
+  if not ok then
+    return nil, "lazy.nvim is not available"
+  end
+
+  local config_ok, lazy_config = pcall(require, "lazy.core.config")
+  if not config_ok or type(lazy_config.plugins) ~= "table" then
+    return nil, "lazy.nvim plugin metadata is unavailable"
+  end
+
+  local plugin_times = {}
+  local total_time = 0
+
+  for name, plugin in pairs(lazy_config.plugins) do
+    local loaded = plugin._ and plugin._.loaded or nil
+    local load_time_ns = loaded and loaded.time or nil
+
+    if type(load_time_ns) == "number" and load_time_ns > 0 then
+      local load_time_ms = load_time_ns / 1e6
+      total_time = total_time + load_time_ms
+
+      table.insert(plugin_times, {
+        name = name,
+        time = load_time_ms,
+        loaded_on_startup = plugin.lazy == false,
+        event = plugin.event,
+        keys = plugin.keys,
+        cmd = plugin.cmd,
+        ft = plugin.ft,
+        config = plugin.config,
+      })
+    end
+  end
+
+  table.sort(plugin_times, function(a, b)
+    return a.time > b.time
+  end)
+
+  return {
+    total_time = total_time,
+    plugins = plugin_times,
+    timestamp = os.time(),
+  }
+end
+
 -- Analyzes Neovim startup time by running neovim with --startuptime
 function M.analyze_startup()
   local output_file = vim.fn.tempname()
@@ -178,13 +225,6 @@ end
 
 -- Profile load time for all plugins managed by lazy.nvim
 function M.profile_plugins()
-  -- Check if lazy.nvim is available
-  local ok, lazy = pcall(require, "lazy")
-  if not ok then
-    vim.notify("lazy.nvim is not available", vim.log.levels.ERROR)
-    return
-  end
-  
   -- Create floating window for results
   local buf, win, width = create_floating_window("Plugin Load Time Profiling")
   
@@ -193,48 +233,26 @@ function M.profile_plugins()
   
   -- Get plugin stats from lazy.nvim
   vim.defer_fn(function()
-    -- Get plugin states
-    local plugins = require("lazy.core.config").plugins
-    local states = require("lazy.core.cache").stats()
-    
-    -- Collect plugin load time data
-    local plugin_times = {}
-    for name, plugin in pairs(plugins) do
-      local state = states[name] or {}
-      local load_time = (state.loaded or 0) + (state.loading or 0)
-      
-      -- Only include plugins that have been loaded
-      if state.loaded and load_time > 0 then
-        table.insert(plugin_times, {
-          name = name,
-          time = load_time,
-          loaded_on_startup = plugin.lazy == false,
-          event = plugin.event,
-          keys = plugin.keys,
-          cmd = plugin.cmd,
-          ft = plugin.ft
-        })
-      end
+    local profile, err = get_plugin_profile_data()
+    if not profile then
+      vim.api.nvim_buf_set_option(buf, "modifiable", true)
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, {
+        "Failed to analyze plugin load times",
+        "",
+        tostring(err),
+        "",
+        "Press 'q' to close this window",
+      })
+      vim.api.nvim_buf_set_option(buf, "modifiable", false)
+      return
     end
-    
-    -- Sort plugins by load time (descending)
-    table.sort(plugin_times, function(a, b)
-      return a.time > b.time
-    end)
-    
-    -- Calculate total load time
-    local total_time = 0
-    for _, plugin in ipairs(plugin_times) do
-      total_time = total_time + plugin.time
-    end
-    
+
     -- Store results for later analysis
-    M.profile_data.plugins = {
-      total_time = total_time,
-      plugins = plugin_times,
-      timestamp = os.time()
-    }
+    M.profile_data.plugins = profile
     M.profile_data.last_run = "plugins"
+
+    local plugin_times = profile.plugins
+    local total_time = profile.total_time
     
     -- Format and display the results
     local result_lines = {
@@ -343,49 +361,9 @@ function M.generate_report()
     
     -- Run plugin analysis if we don't have data
     if vim.tbl_isempty(M.profile_data.plugins) then
-      local ok, lazy = pcall(require, "lazy")
-      if ok then
-        -- Get plugin states
-        local plugins = require("lazy.core.config").plugins
-        local states = require("lazy.core.cache").stats()
-        
-        -- Collect plugin load time data
-        local plugin_times = {}
-        for name, plugin in pairs(plugins) do
-          local state = states[name] or {}
-          local load_time = (state.loaded or 0) + (state.loading or 0)
-          
-          -- Only include plugins that have been loaded
-          if state.loaded and load_time > 0 then
-            table.insert(plugin_times, {
-              name = name,
-              time = load_time,
-              loaded_on_startup = plugin.lazy == false,
-              event = plugin.event,
-              keys = plugin.keys,
-              cmd = plugin.cmd,
-              ft = plugin.ft
-            })
-          end
-        end
-        
-        -- Sort plugins by load time (descending)
-        table.sort(plugin_times, function(a, b)
-          return a.time > b.time
-        end)
-        
-        -- Calculate total load time
-        local total_time = 0
-        for _, plugin in ipairs(plugin_times) do
-          total_time = total_time + plugin.time
-        end
-        
-        -- Store results
-        M.profile_data.plugins = {
-          total_time = total_time,
-          plugins = plugin_times,
-          timestamp = os.time()
-        }
+      local profile = get_plugin_profile_data()
+      if profile then
+        M.profile_data.plugins = profile
       end
     end
     
@@ -608,51 +586,20 @@ function M.suggest_lazy_loading()
     -- Check if we have plugin data
     if vim.tbl_isempty(M.profile_data.plugins) then
       -- Try to get plugin data first
-      local ok, lazy = pcall(require, "lazy")
-      if not ok then
+      local profile, err = get_plugin_profile_data()
+      if not profile then
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, {
-          "lazy.nvim is not available",
+          "Failed to collect plugin profile data",
+          "",
+          tostring(err),
           "",
           "Press 'q' to close this window"
         })
         return
       end
-      
-      -- Get plugin states
-      local plugins = require("lazy.core.config").plugins
-      local states = require("lazy.core.cache").stats()
-      
-      -- Collect plugin load time data
-      local plugin_times = {}
-      for name, plugin in pairs(plugins) do
-        local state = states[name] or {}
-        local load_time = (state.loaded or 0) + (state.loading or 0)
-        
-        -- Only include plugins that have been loaded
-        if state.loaded and load_time > 0 then
-          table.insert(plugin_times, {
-            name = name,
-            time = load_time,
-            loaded_on_startup = plugin.lazy == false,
-            event = plugin.event,
-            keys = plugin.keys,
-            cmd = plugin.cmd,
-            ft = plugin.ft,
-            config = plugin.config
-          })
-        end
-      end
-      
-      -- Sort plugins by load time (descending)
-      table.sort(plugin_times, function(a, b)
-        return a.time > b.time
-      end)
-      
+
       -- Store in profile data
-      M.profile_data.plugins = {
-        plugins = plugin_times,
-        timestamp = os.time()
-      }
+      M.profile_data.plugins = profile
     end
     
     -- Begin analysis

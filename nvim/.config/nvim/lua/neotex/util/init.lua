@@ -66,7 +66,6 @@ function M._load_submodules()
     "url",
     "diagnostics",
     "misc",
-    "optimize",
   }
   
   local loaded = {}
@@ -85,6 +84,45 @@ function M._load_submodules()
   end
   
   return loaded
+end
+
+local function register_optimization_commands()
+  local commands = {
+    AnalyzeStartup = {
+      method = "analyze_startup",
+      desc = "Analyze Neovim startup time and identify bottlenecks",
+    },
+    ProfilePlugins = {
+      method = "profile_plugins",
+      desc = "Profile load time for all plugins",
+    },
+    OptimizationReport = {
+      method = "generate_report",
+      desc = "Generate a comprehensive optimization report",
+    },
+    SuggestLazyLoading = {
+      method = "suggest_lazy_loading",
+      desc = "Suggest lazy-loading strategies for plugins",
+    },
+  }
+
+  for command, spec in pairs(commands) do
+    pcall(vim.api.nvim_create_user_command, command, function()
+      local ok, optimize = pcall(require, "neotex.util.optimize")
+      if not ok then
+        vim.notify("Failed to load optimize utilities", vim.log.levels.ERROR)
+        return
+      end
+
+      local handler = optimize[spec.method]
+      if type(handler) ~= "function" then
+        vim.notify("Missing optimize command handler: " .. spec.method, vim.log.levels.ERROR)
+        return
+      end
+
+      handler()
+    end, { desc = spec.desc })
+  end
 end
 
 -- Setup module - called during initialization
@@ -114,6 +152,8 @@ function M.setup()
   if not _G.SetupUrlMappings and submodules.url then
     _G.SetupUrlMappings = submodules.url.setup_url_mappings
   end
+
+  register_optimization_commands()
   
   return true
 end
