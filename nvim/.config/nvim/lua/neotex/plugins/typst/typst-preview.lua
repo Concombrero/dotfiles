@@ -12,7 +12,7 @@ return{
     require('typst-preview').setup({
       ependencies_bin = { tinymist = data .. '/mason/bin/tinymist' }, 
       
-      open_cmd = "qutebrowser %s",
+      open_cmd = "qutebrowser %s 2>/dev/null",
       get_root = function(path_of_main_file)
       -- Search upward for typst.toml or .git
       local root = vim.fs.find({'typst.toml', '.git'}, { path = path_of_main_file, upward = true })[1]
