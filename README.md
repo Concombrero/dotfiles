@@ -1,51 +1,106 @@
-# Dotfiles
+# Workstation Dotfiles
+GNU Stow-managed dotfiles for a full Ubuntu (Gnome) + i3 (X11) workstation.
 
-Personal dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/) for an Ubuntu + i3 (X11) workflow.
-Theme: **Catppuccin Mocha**.
+## System Overview
 
-Main stack:
+This repo is designed as one cohesive, keyboard-first environment rather than a loose set of config files.
 
-- i3 + polybar + picom + rofi + dunst
-- Alacritty + Fish + Starship
-- Neovim (NeoTex) + Yazi + Zathura + Qutebrowser
+The principles used for building this system are simple :
 
-## Fresh Install (Recommended)
+- Keyboard is King
+- Distractions are evil
+- Defaults are fine
 
-### 1) Pre-reqs
+This is all materialized through a set of tools that tries to stay minimal while providing a solid out of the box experience that can be easily extended and customized.
 
-The bootstrap script is Ubuntu-focused and uses `apt` + PPAs.
-On non-Ubuntu Debian derivatives, run with `--skip-packages` and install equivalents manually.
+
+- Desktop/Window management:
+    - Tiling WM : `i3` 
+    - Compositor : `picom`
+    - Status bar : `polybar` 
+    - App launcher / Menu : `rofi`
+    - Notifications : `dunst`
+    - Lockscreen : `betterlockscreen`
+    - File Manager : `yazi` (via CLI)
+- Command Line Interface : 
+  - Terminal emulator : `alacritty`
+  - Shell : `fish`
+  - Prompt : `starship`
+  - Enhancements : `lazygit`, `zoxide`, `fzf` and more
+- Editing: `neovim` (see [NeoTex README](nvim/.config/nvim/README.md) for details).
+- Web : Zen Browser
+- AI workflow : OpenCode agent, with integration in Neovim. 
+
+The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`.
+
+
+## Installation Guide
+
+### 1) Prerequisites
 
 ```bash
 sudo apt update
 sudo apt install -y git curl software-properties-common
 ```
 
-### 2) Clone and run installer
+> [!NOTE]
+> The bootstrap script is Ubuntu-first (uses `apt` + PPAs). On other Debian-based systems, run with `--skip-packages` and install equivalent packages manually.
+
+### 2) Clone this repo
 
 ```bash
 git clone <your-repo-url> ~/dotfiles
 cd ~/dotfiles
+```
+
+### 3) Run bootstrap installer
+
+```bash
 ./install.sh
 ```
 
-### 3) First boot steps
+What this does at a high level:
 
-1. Log out and back in (fish is set as default shell).
+1. Installs system dependencies and PPAs.
+2. Installs non-APT tools (`fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `zen-browser`, `betterlockscreen`).
+3. Installs Python tooling and fonts.
+4. Stows all configured packages into `$HOME`.
+5. Applies the default wallpaper with `feh` when a graphical session is available.
+
+Installer log:
+
+- `~/dotfiles/install.log`
+
+### 4) First login checks
+
+1. Log out and back in (fish becomes default shell).
 2. Open Neovim and run:
    - `:Lazy sync`
    - `:Mason`
    - `:checkhealth`
 
-Installer log is written to `~/dotfiles/install.log`.
+> [!IMPORTANT]
+> The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
+
+> [!NOTE]
+> If installer runs outside a GUI (`DISPLAY` not set), wallpaper application is skipped during install. i3 still sets the same wallpaper on session start.
 
 ## Installer Flags
 
+| Flag | Meaning |
+|---|---|
+| `--skip-packages` | Skip all apt/PPA package installation |
+| `--skip-tools` | Skip non-APT tools (`fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `zen-browser`, `betterlockscreen`), Python tools, and `tabbed` build |
+| `--skip-fonts` | Skip Nerd Fonts + Font Awesome install |
+| `--stow-only` | Only apply Stow packages |
+
+Example:
+
 ```bash
-./install.sh --skip-tools     # Skip fzf/starship/zoxide/yazi/lazygit/opencode/python/tabbed
+./install.sh --skip-tools
 ```
 
-## What `install.sh` Installs
+## What `install.sh` Provisions
 
 ### Repositories added
 
@@ -54,19 +109,17 @@ Installer log is written to `~/dotfiles/install.log`.
 - `ppa:aslatter/ppa`
 - NodeSource LTS repo (if `node` is missing)
 
-### APT packages
+### APT packages (from `packages.txt`)
 
-Everything in `packages.txt`, including:
-
-- Core: `git`, `stow`, `curl`, `wget`, `unzip`, `build-essential`, `cmake`, `pkg-config`
-- Desktop: `i3-wm`, `i3lock`, `i3status`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `xdotool`, `x11-xserver-utils`, `dex`, `xss-lock`, `network-manager-gnome`, `pulseaudio-utils`
+- Core: `git`, `stow`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `pkg-config`
+- Desktop: `i3-wm`, `i3lock`, `i3status`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `xdotool`, `x11-xserver-utils`, `x11-utils`, `dex`, `xss-lock`, `network-manager-gnome`, `pulseaudio-utils`, `imagemagick`
 - CLI: `htop`, `neofetch`, `ripgrep`, `fd-find`, `bat`, `feh`, `jq`
 - Docs/academic: `zathura`, `zathura-pdf-poppler`, `texlive-full`, `latexmk`
 - Media/viewer: `sxiv`, `vlc`, `xwininfo`
 - Python base: `python3`, `python3-pip`, `python3-venv`
 - Build deps for `tabbed`: `libx11-dev`, `libxft-dev`
 
-Also installed explicitly by script:
+Script-installed packages:
 
 - `neovim`, `fish`, `alacritty`, `nodejs`, `qutebrowser`
 
@@ -78,14 +131,14 @@ Also installed explicitly by script:
 - `yazi` + `ya` (GitHub release binary)
 - `lazygit` (GitHub release binary)
 - `opencode` (official installer from opencode.ai)
+- `zen-browser` (official Linux tarball installer via curl script)
+- `betterlockscreen` (official upstream installer)
 - Yazi plugin sync via `ya pack -i`
 - Python user tools: `ipython`, `jupytext`, `black`, `isort`, `pylint`
 - `tabbed` built from source to `~/.local/bin/tabbed`
 - Fonts: `JetBrainsMono`, `RobotoMono`, `NerdFontsSymbolsOnly`, `Font Awesome`
 
 ## Stow Packages Applied by Installer
-
-`install.sh` stows these packages automatically:
 
 | Package | Target |
 |---|---|
@@ -114,13 +167,13 @@ Also installed explicitly by script:
 | `wallpapers` | `~/Pictures/Wallpapers/` |
 | `opencode` | `~/.config/opencode/opencode.json` |
 
-## Manual Setup (Important)
+## Manual Setup Checklist
 
-These items are intentionally not fully automated.
+These items are either manual setup or useful post-install checks.
 
-### 1) xdg-desktop-portal-termfilechooser backend (for Yazi file picker)
+### 1) `xdg-desktop-portal-termfilechooser` backend (for Yazi file picker)
 
-The config is stowed, but the backend binary must be installed manually.
+The config is stowed, but backend binary install is manual:
 
 ```bash
 sudo apt install -y meson ninja-build xdg-desktop-portal xdg-desktop-portal-gtk
@@ -139,11 +192,13 @@ systemctl --user import-environment
 systemctl --user restart xdg-desktop-portal-termfilechooser.service
 ```
 
-Architecture/debug notes are in `xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser/agents.md`.
+Debug notes:
+
+- `xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser/agents.md`
 
 ### 2) Machine-specific monitor config
 
-Create `~/.config/i3/local.conf` for machine-local `xrandr` and similar overrides.
+Create `~/.config/i3/local.conf` for monitor/layout overrides:
 
 ```bash
 cat > ~/.config/i3/local.conf << 'EOF'
@@ -154,45 +209,60 @@ EOF
 
 ### 3) Polybar hardware names
 
-`polybar/.config/polybar/config.ini` currently uses:
+`polybar/.config/polybar/config.ini` currently assumes:
 
-- Wireless interface: `wlo1`
+- Wi-Fi interface: `wlo1`
 - Battery: `BAT0`
 - AC adapter: `ADP1`
 
-If your machine uses different names, update them.
+Adjust if your system uses different names.
 
-### 4) Tabbed wrappers extra deps
+### 4) Betterlockscreen cache (recommended)
 
-`zathura-tabbed` and `sxiv-tabbed` rely on additional tools not in `packages.txt`:
+Initialize lockscreen cache from your wallpaper directory:
 
 ```bash
-sudo apt install -y x11-utils
+betterlockscreen -u ~/Pictures/Wallpapers
+betterlockscreen --lock dim
 ```
-
-Note: `jq` and `xdotool` are already in `packages.txt` and installed automatically.
 
 ### 5) Custom `tabbed` source (optional)
 
-If you want a patched/themed `tabbed` build, place your source tree at:
+If you keep a patched/themed `tabbed`, place it at:
 
 - `~/dotfiles/tabbed-src/`
 
-`install.sh` will build that local source instead of cloning vanilla upstream.
+Then `install.sh` builds this local source instead of cloning upstream.
 
-### 6) Zen Browser (optional)
+### 6) Zen Browser
 
-`fish` and `bash` expose `zen` alias only if this binary exists:
+Zen is installed automatically by `install.sh` using the official Linux command from the [Zen docs](https://docs.zen-browser.app/guides/install-linux):
 
-- `~/.local/opt/zen/zen`
+```bash
+curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | $SHELL
+```
+
+Expected install locations:
+
+- `~/.tarball-installations/zen`
+- `~/.local/bin/zen`
+
+Quick check:
+
+```bash
+command -v zen
+```
 
 ### 7) CUDA (optional)
 
-Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH` when present.
+Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
 
 ### 8) Firecrawl API key for OpenCode MCP (optional)
 
-OpenCode is installed automatically by `install.sh` and its config is stowed from `opencode/`. If you use the Firecrawl MCP server, configure the API key:
+OpenCode is installed automatically and `opencode.json` is stowed from `opencode/`.
+Runtime files (`package.json`, `bun.lock`, `node_modules/`) are intentionally machine-local and not stowed.
+
+If you use Firecrawl MCP:
 
 ```bash
 mkdir -p ~/.config/opencode
@@ -200,9 +270,17 @@ printf '%s' 'fc-your-key-here' > ~/.config/opencode/firecrawl_api_key
 chmod 600 ~/.config/opencode/firecrawl_api_key
 ```
 
-This secret file is ignored by git and referenced by `opencode.json`.
+### 9) Vertex AI environment for OpenCode (optional)
 
-### 9) Zotero bibliography (optional)
+`fish/.config/fish/config.fish` exports:
+
+- `GOOGLE_CLOUD_PROJECT`
+- `GOOGLE_APPLICATION_CREDENTIALS`
+- `VERTEX_LOCATION`
+
+Set values for your own project, or remove/comment if unused.
+
+### 10) Zotero bibliography (optional)
 
 Neovim bibliography tooling expects:
 
@@ -210,11 +288,11 @@ Neovim bibliography tooling expects:
 
 ## Neovim External Tooling Notes
 
-On first run, Mason auto-installs configured LSP/formatter/linter tools (pyright, texlab, tinymist, lua-language-server, stylua, prettier, shellcheck, markdownlint, etc.).
+On first run, Mason auto-installs configured LSP/formatter/linter tools (for example: `pyright`, `texlab`, `tinymist`, `lua-language-server`, `stylua`, `prettier`, `shellcheck`, `markdownlint`).
 
 System tools expected by the config include:
 
-- `node/npm` (Markdown preview, JS-based tooling)
+- `node/npm` (Markdown preview and JS tooling)
 - `python3/pip` (`ipython`, notebook flow)
 - `git`, `make`, C toolchain
 - `lazygit`, `yazi`, `zathura`, `latexmk`, `qutebrowser`
@@ -228,7 +306,7 @@ stow -D <package>   # remove symlinks for one package
 stow -R <package>   # restow one package
 ```
 
-To add a new stow package:
+Add a new Stow package:
 
 ```bash
 mkdir -p ~/dotfiles/newpkg/.config/newpkg
@@ -237,4 +315,4 @@ cd ~/dotfiles
 stow newpkg
 ```
 
-The folder structure inside each package must match the path relative to `$HOME`.
+The folder structure inside each package must match paths relative to `$HOME`.

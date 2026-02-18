@@ -7,13 +7,15 @@
 # This script:
 #   1. Installs required system packages (apt)
 #   2. Adds PPAs for Neovim, Fish, Alacritty
-#   3. Installs tools not in apt (starship, zoxide, yazi, lazygit, fzf, opencode, neovim)
+#   3. Installs tools not in apt (starship, zoxide, yazi, lazygit, fzf, opencode, zen-browser, betterlockscreen)
 #   4. Installs Node.js via NodeSource (needed by Neovim plugins)
 #   5. Installs Python tools for Neovim (ipython, jupytext, black, isort, pylint)
 #   6. Builds suckless tabbed (for zathura-tabbed)
 #   7. Installs Nerd Fonts
 #   8. Sets fish as the default shell
 #   9. Stows all config packages
+#  10. Sets the default wallpaper (if running in a graphical session)
+#  11. Installs Yazi plugins
 # ============================================================
 
 set -euo pipefail
@@ -164,6 +166,26 @@ install_lazygit() {
     sudo mv "$TMP_DIR/lazygit" /usr/local/bin/lazygit
     rm -rf "$TMP_DIR"
     log "Lazygit installed."
+}
+
+install_betterlockscreen() {
+    if command -v betterlockscreen &>/dev/null; then
+        warn "betterlockscreen already installed, skipping."
+        return
+    fi
+    info "Installing betterlockscreen..."
+    curl -fsSL https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh | sudo bash -s system 2>&1 | tee -a "$LOG_FILE"
+    log "betterlockscreen installed."
+}
+
+install_zen() {
+    if [ -x "$HOME/.local/bin/zen" ] || command -v zen &>/dev/null; then
+        warn "Zen Browser already installed, skipping."
+        return
+    fi
+    info "Installing Zen Browser..."
+    curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash 2>&1 | tee -a "$LOG_FILE"
+    log "Zen Browser installed."
 }
 
 install_opencode() {
@@ -367,7 +389,34 @@ stow_packages() {
     log "All packages stowed."
 }
 
-# ─── Step 9: Install Yazi plugins ───────────────────────────
+# ─── Step 9: Set default wallpaper ──────────────────────────
+set_default_wallpaper() {
+    local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
+
+    if [ ! -f "$wallpaper" ]; then
+        warn "Default wallpaper not found at $wallpaper, skipping wallpaper setup."
+        return
+    fi
+
+    if ! command -v feh &>/dev/null; then
+        warn "feh not found, skipping wallpaper setup."
+        return
+    fi
+
+    if [ -z "${DISPLAY:-}" ]; then
+        warn "DISPLAY is not set; skipping immediate wallpaper apply. i3 will apply it on login."
+        return
+    fi
+
+    info "Applying default wallpaper with feh..."
+    if feh --bg-fill "$wallpaper" 2>&1 | tee -a "$LOG_FILE"; then
+        log "Default wallpaper applied: $wallpaper"
+    else
+        warn "Could not apply wallpaper now (non-critical)."
+    fi
+}
+
+# ─── Step 10: Install Yazi plugins ──────────────────────────
 install_yazi_plugins() {
     if command -v ya &>/dev/null; then
         info "Installing Yazi plugins..."
@@ -411,17 +460,18 @@ main() {
                 echo "Options:"
                 echo "  --skip-packages   Skip apt package installation (and PPAs)"
                 echo "  --skip-fonts      Skip Nerd Font installation"
-                echo "  --skip-tools      Skip tool installation (starship, zoxide, yazi, lazygit, fzf, opencode, python tools)"
+                echo "  --skip-tools      Skip tool installation (starship, zoxide, yazi, lazygit, fzf, opencode, zen-browser, betterlockscreen, python tools)"
                 echo "  --stow-only       Only run stow (skip all installations)"
                 echo "  --help            Show this help message"
                 echo ""
                 echo "What gets installed:"
                 echo "  PPAs:      Neovim (unstable), Fish (release-4), Alacritty, NodeSource LTS"
                 echo "  APT:       i3, polybar, picom, rofi, dunst, flameshot, zathura, texlive-full, etc."
-                echo "  Binaries:  starship, zoxide, yazi, lazygit, fzf, opencode"
+                echo "  Binaries:  starship, zoxide, yazi, lazygit, fzf, opencode, zen-browser, betterlockscreen"
                 echo "  Python:    ipython, jupytext, black, isort, pylint"
                 echo "  Build:     suckless tabbed (for zathura-tabbed)"
                 echo "  Fonts:     JetBrainsMono, RobotoMono, NerdFontsSymbolsOnly, Font Awesome"
+                echo "  Wallpaper: ~/Pictures/Wallpapers/catppuccin_gyro.jpg (via feh, if DISPLAY is set)"
                 exit 0
                 ;;
             *)
@@ -433,6 +483,7 @@ main() {
 
     if [ "$STOW_ONLY" = true ]; then
         stow_packages
+        set_default_wallpaper
         echo ""
         log "Stow-only mode complete."
         return
@@ -452,6 +503,8 @@ main() {
         install_yazi
         install_lazygit
         install_opencode
+        install_zen
+        install_betterlockscreen
         install_python_tools
         build_tabbed
     else
@@ -466,6 +519,7 @@ main() {
 
     set_fish_shell
     stow_packages
+    set_default_wallpaper
     install_yazi_plugins
 
     echo ""
@@ -476,7 +530,7 @@ main() {
     info "Next steps:"
     echo "  1. Log out and back in (for fish shell to take effect)"
     echo "  2. Open Neovim and run :Lazy sync to install plugins"
-    echo "  3. Review the README for manual setup items (Zen Browser, CUDA, etc.)"
+    echo "  3. Review the README for manual setup items (CUDA, etc.)"
     echo ""
     info "To unstow a package:  stow -D <package>"
     info "To restow a package:  stow -R <package>"

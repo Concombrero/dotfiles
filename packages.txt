@@ -11,6 +11,7 @@ stow
 curl
 wget
 unzip
+bc
 build-essential
 cmake
 pkg-config
@@ -26,10 +27,12 @@ dunst
 flameshot
 xdotool
 x11-xserver-utils
+x11-utils
 dex
 xss-lock
 network-manager-gnome
 pulseaudio-utils
+imagemagick
 
 # CLI Tools
 htop
