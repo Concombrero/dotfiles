@@ -16,7 +16,6 @@ return {
       muted = "#7f849c",
       mid = "#1e1e2e",
       light = "#313244",
-      dark = "#181825",
       accent = "#fab387",
     }
 
@@ -25,7 +24,6 @@ return {
       colors.muted = palette.overlay1 or colors.muted
       colors.mid = palette.base or colors.mid
       colors.light = palette.surface0 or colors.light
-      colors.dark = palette.mantle or colors.dark
       colors.accent = palette.peach or colors.accent
     end
 
@@ -67,7 +65,6 @@ return {
 
             indicator_visible = { fg = colors.mid, bg = colors.mid },
             indicator_selected = { fg = colors.light, bg = colors.light },
-            offset_separator = { fg = colors.dark, bg = colors.dark },
 
             diagnostic = { fg = colors.muted, bg = colors.mid },
             diagnostic_visible = { fg = colors.muted, bg = colors.mid },
@@ -84,7 +81,7 @@ return {
         custom_filter = function(buf_number)
           return vim.bo[buf_number].filetype ~= "qf"
         end,
-        color_icons = false,
+        color_icons = true,
         separator_style = { "", "" },
         indicator = { style = "none" },
         buffer_close_icon = "󰅖",
@@ -99,101 +96,13 @@ return {
         sort_by = function(buffer_a, buffer_b)
           return vim.fn.getftime(buffer_a.path) > vim.fn.getftime(buffer_b.path)
         end,
-        offsets = {
-          {
-            filetype = "NvimTree",
-            text = "",
-            highlight = "NeoTreeOffset",
-            text_align = "left",
-            separator = false,
-            padding = 1,
-          },
-        },
       },
     })
 
     local function set_tabline_hls()
-      local function set_groups(groups, spec)
-        for _, group in ipairs(groups) do
-          vim.api.nvim_set_hl(0, group, spec)
-        end
-      end
-
-      set_groups({
-        "BufferLineBackground",
-        "BufferLineBuffer",
-        "BufferLineTab",
-        "BufferLineTabClose",
-        "BufferLineCloseButton",
-        "BufferLineModified",
-        "BufferLineNumbers",
-        "BufferLineDiagnostic",
-        "BufferLineError",
-        "BufferLineErrorDiagnostic",
-        "BufferLineWarning",
-        "BufferLineWarningDiagnostic",
-        "BufferLineInfo",
-        "BufferLineInfoDiagnostic",
-        "BufferLineHint",
-        "BufferLineHintDiagnostic",
-        "BufferLineDuplicate",
-        "BufferLinePick",
-        "BufferLineTruncMarker",
-        "BufferLineGroupLabel",
-        "BufferLineGroupSeparator",
-      }, { fg = colors.muted, bg = colors.mid })
-
-      set_groups({
-        "BufferLineBufferVisible",
-        "BufferLineTabVisible",
-        "BufferLineCloseButtonVisible",
-        "BufferLineModifiedVisible",
-        "BufferLineNumbersVisible",
-        "BufferLineDiagnosticVisible",
-        "BufferLineErrorVisible",
-        "BufferLineErrorDiagnosticVisible",
-        "BufferLineWarningVisible",
-        "BufferLineWarningDiagnosticVisible",
-        "BufferLineInfoVisible",
-        "BufferLineInfoDiagnosticVisible",
-        "BufferLineHintVisible",
-        "BufferLineHintDiagnosticVisible",
-        "BufferLineDuplicateVisible",
-        "BufferLinePickVisible",
-      }, { fg = colors.muted, bg = colors.mid })
-
-      set_groups({
-        "BufferLineBufferSelected",
-        "BufferLineTabSelected",
-        "BufferLineCloseButtonSelected",
-        "BufferLineModifiedSelected",
-        "BufferLineNumbersSelected",
-        "BufferLineDiagnosticSelected",
-        "BufferLineErrorSelected",
-        "BufferLineErrorDiagnosticSelected",
-        "BufferLineWarningSelected",
-        "BufferLineWarningDiagnosticSelected",
-        "BufferLineInfoSelected",
-        "BufferLineInfoDiagnosticSelected",
-        "BufferLineHintSelected",
-        "BufferLineHintDiagnosticSelected",
-        "BufferLineDuplicateSelected",
-        "BufferLinePickSelected",
-      }, { fg = colors.text, bg = colors.light, bold = true })
-
-      vim.api.nvim_set_hl(0, "BufferLineFill", { bg = colors.mid })
       vim.api.nvim_set_hl(0, "TabLine", { fg = colors.muted, bg = colors.mid })
       vim.api.nvim_set_hl(0, "TabLineFill", { bg = colors.mid })
       vim.api.nvim_set_hl(0, "TabLineSel", { fg = colors.text, bg = colors.light, bold = true })
-      vim.api.nvim_set_hl(0, "BufferLineSeparator", { fg = colors.mid, bg = colors.mid })
-      vim.api.nvim_set_hl(0, "BufferLineSeparatorVisible", { fg = colors.mid, bg = colors.mid })
-      vim.api.nvim_set_hl(0, "BufferLineSeparatorSelected", { fg = colors.light, bg = colors.light })
-      vim.api.nvim_set_hl(0, "BufferLineTabSeparator", { fg = colors.mid, bg = colors.mid })
-      vim.api.nvim_set_hl(0, "BufferLineTabSeparatorSelected", { fg = colors.light, bg = colors.light })
-      vim.api.nvim_set_hl(0, "BufferLineIndicatorVisible", { fg = colors.mid, bg = colors.mid })
-      vim.api.nvim_set_hl(0, "BufferLineIndicatorSelected", { fg = colors.light, bg = colors.light })
-      vim.api.nvim_set_hl(0, "NeoTreeOffset", { fg = colors.muted, bg = colors.dark })
-      vim.api.nvim_set_hl(0, "BufferLineOffsetSeparator", { fg = colors.dark, bg = colors.dark })
     end
 
     set_tabline_hls()
@@ -205,14 +114,6 @@ return {
         vim.schedule(set_tabline_hls)
       end,
       desc = "Reapply bufferline and tabline highlights",
-    })
-
-    vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
-      group = aug,
-      callback = function()
-        vim.defer_fn(set_tabline_hls, 10)
-      end,
-      desc = "Keep bufferline colors stable across focus changes",
     })
 
     vim.api.nvim_create_autocmd("User", {
