@@ -9,3 +9,7 @@ packages\.txt
 README\.md
 LICENSE
 tabbed-src
+
+# opencode runtime files that should remain machine-local
+^\.config/opencode/package\.json$
+^\.config/opencode/bun\.lock$
