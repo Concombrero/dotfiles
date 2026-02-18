@@ -25,19 +25,12 @@ TOP-LEVEL MAPPINGS (<leader>)                   | DESCRIPTION
 ----------------------------------------------------------------------------------
 ACTIONS (<leader>a)                             | DESCRIPTION
 ----------------------------------------------------------------------------------
-<leader>aa - PDF annotations                    | Work with PDF annotations
 <leader>ab - Export bibliography                | Export BibTeX to separate file
 <leader>ac - Clear VimTex cache                 | Clear LaTeX compilation cache
 <leader>ae - Show VimTex errors                 | Display LaTeX error messages
 <leader>af - Format buffer                      | Format current buffer via LSP
-<leader>ag - Edit tex snippets                  | Open tex snippets file
-<leader>ah - Toggle local highlight             | Highlight current word occurrences
 <leader>ak - Clean VimTex aux files             | Remove LaTeX auxiliary files
-<leader>ap - Run Python file                    | Execute current Python file
-<leader>ar - Recalculate list numbers           | Fix numbering in lists
-<leader>as - Edit snippets                      | Open snippets directory
 <leader>at - Format tex file                    | Format LaTeX using latexindent
-<leader>au - Update CWD                         | Change to file's directory
 <leader>av - VimTex context menu                | Show VimTeX context actions
 <leader>aw - Count words                        | Count words in LaTeX document
 <leader>aS - SSH connect                        | Connect to MIT server via SSH
@@ -136,8 +129,6 @@ LSP & LINT (<leader>l)                          | DESCRIPTION
 ----------------------------------------------------------------------------------
 MARKDOWN (<leader>m)                            | DESCRIPTION
 ----------------------------------------------------------------------------------
-<leader>ml - Run Lectic                         | Run Lectic on current file
-<leader>mn - New Lectic file                    | Create new Lectic file with template
 <leader>ms - Submit selection                   | Submit visual selection with user message
 <leader>mu - Open URL                           | Open URL under cursor
 <leader>ma - Toggle all folds                   | Toggle all folds open/closed
@@ -272,20 +263,14 @@ return {
       w = { "<cmd>wa!<CR>", "write" },
       a = {
         name = "ACTIONS",
-        a = { "<cmd>lua PdfAnnots()<CR>", "annotate" },
         b = { "<cmd>terminal bibexport -o %:p:r.bib %:p:r.aux<CR>", "bib export" },
         c = { "<cmd>:VimtexClearCache All<CR>", "clear vimtex" },
         e = { "<cmd>VimtexErrors<CR>", "error report" },
         f = { "<cmd>lua vim.lsp.buf.format()<CR>", "format" },
-        g = { "<cmd>e ~/.config/nvim/snippets/tex.snippets<CR>", "edit tex snippets" },
-        h = { "<cmd>LocalHighlightToggle<CR>", "highlight" },
         k = { "<cmd>VimtexClean<CR>", "kill aux" },
-        p = { "<cmd>TermExec cmd='python3 %:p:r.py'<CR>", "python" },
         t = { "<cmd>terminal latexindent -w %:p:r.tex<CR>", "tex format" },
-        u = { "<cmd>cd %:p:h<CR>", "update cwd" },
         v = { "<plug>(vimtex-context-menu)", "vimtex menu" },
         w = { "<cmd>VimtexCountWords!<CR>", "word count" },
-        s = { "<cmd>e ~/.config/nvim/snippets/<CR>", "snippets edit" },
       },
         f = {
         name = "FIND",
@@ -381,9 +366,6 @@ return {
       -- MARKDOWN MAPPINGS
       m = {
         name = "MARKDOWN",
-        -- LECTIC COMMANDS
-        l = { "<cmd>Lectic<CR>", "run lectic on file" },
-        n = { "<cmd>LecticCreateFile<CR>", "new lectic file" },
         s = { "<cmd>LecticSubmitSelection<CR>", "submit selection with message" },
 
         -- MARKDOWN/PREVIEW

@@ -11,7 +11,6 @@ Shared helper modules used across NeoTex.
 - `diagnostics.lua`: diagnostic UI helpers and clipboard export
 - `misc.lua`: small utility functions and user commands
 - `optimize.lua`: startup/plugin profiling commands
-- `lectic_extras.lua`: helper commands for Lectic file creation/submission
 
 ## User Commands Defined by Util Modules
 
@@ -26,8 +25,6 @@ Shared helper modules used across NeoTex.
 - `:ProfilePlugins`
 - `:OptimizationReport`
 - `:SuggestLazyLoading`
-- `:LecticCreateFile`
-- `:LecticSubmitSelection`
 
 ## Backward-Compatible Globals
 

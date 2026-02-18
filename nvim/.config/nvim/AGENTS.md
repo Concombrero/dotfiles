@@ -92,7 +92,6 @@ lua/neotex/
     diagnostics.lua               LSP diagnostic helpers, Jupyter cell utilities
     misc.lua                      OS detection, safe_execute, trim_whitespace, toggle_line_numbers
     optimize.lua                  Startup/plugin profiling suite
-    lectic_extras.lua             Lectic AI chat integration helpers
 after/ftplugin/                   Filetype overrides: python.lua, tex.lua, markdown.lua
 after/ftdetect/                   ipynb.lua (Jupyter notebook detection)
 LuaSnip/                          Lua-based snippets: all.lua, lua.lua, typst.lua

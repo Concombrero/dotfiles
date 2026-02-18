@@ -87,7 +87,7 @@ function M.setup()
   
   -- Disable Ctrl+click tag jumping for markdown files
   vim.api.nvim_create_autocmd({"FileType"}, {
-    pattern = {"markdown", "lectic.markdown"},
+    pattern = {"markdown"},
     callback = function()
       vim.opt_local.tagfunc = ""
     end

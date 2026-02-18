@@ -91,7 +91,7 @@ function M.toggle_folding_method()
   -- Toggle the folding method
   if current_method == "manual" then
     -- For markdown files, we use our custom expression
-    if vim.bo.filetype == "markdown" or vim.bo.filetype == "lectic.markdown" then
+    if vim.bo.filetype == "markdown" then
       new_method = "expr"
       vim.wo.foldmethod = "expr"
       vim.wo.foldexpr = "v:lua.MarkdownFoldLevel()"
@@ -162,7 +162,7 @@ function M.load_folding_state()
       local state = result
 
       -- Apply the saved state
-      if state == "expr" and (vim.bo.filetype == "markdown" or vim.bo.filetype == "lectic.markdown") then
+      if state == "expr" and vim.bo.filetype == "markdown" then
         vim.wo.foldmethod = "expr"
         vim.wo.foldexpr = "v:lua.MarkdownFoldLevel()"
       elseif state == "indent" then
