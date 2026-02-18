@@ -1,6 +1,6 @@
 -----------------------------------------------------------
 -- NeoVim Configuration Entry Point
--- Author: Benjamin Brast-McKie
+-- Author: Malik Hacini 
 -- 
 -- This is the main entry point for NeoVim configuration.
 -- It sets the leader key and loads the configuration modules.

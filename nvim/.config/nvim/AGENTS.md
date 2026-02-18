@@ -1,6 +1,6 @@
 # AGENTS.md - NeoTex NeoVim Configuration
 
-Author: Benjamin Brast-McKie
+Author: Malik Hacini
 Config name: NeoTex
 
 ## Overview
