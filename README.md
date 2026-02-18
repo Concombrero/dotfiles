@@ -1,6 +1,7 @@
 # Workstation Dotfiles
 GNU Stow-managed dotfiles for a full Ubuntu (Gnome) + i3 (X11) workstation.
 
+![Home screen](preview.png)
 ## System Overview
 
 This repo is designed as one cohesive, keyboard-first environment rather than a loose set of config files.
