@@ -45,9 +45,6 @@ sudo apt update
 sudo apt install -y git curl software-properties-common
 ```
 
-> [!NOTE]
-> The bootstrap script is Ubuntu-first (uses `apt` + PPAs). On other Debian-based systems, run with `--skip-packages` and install equivalent packages manually.
-
 ### 2) Clone this repo
 
 ```bash
@@ -60,6 +57,9 @@ cd ~/dotfiles
 ```bash
 ./install.sh
 ```
+> [!NOTE]
+> The bootstrap script is Ubuntu-first (uses `apt` + PPAs). On other Debian-based systems, run with `--skip-packages` and install equivalent packages manually.
+
 
 What this does at a high level:
 
