@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/i3-tab-title-fix.lock"
+EVENTS='["window","workspace","binding"]'
+
+declare -A LAST_TITLES=()
+
+layout_prefix() {
+  case "$1" in
+    splith) printf 'H' ;;
+    splitv) printf 'V' ;;
+    tabbed) printf 'T' ;;
+    stacked) printf 'S' ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
+normalize_label() {
+  case "$1" in
+    zen|Navigator) printf 'Zen Browser' ;;
+    Alacritty|alacritty) printf 'Alacritty' ;;
+    qutebrowser|Qutebrowser) printf 'Qutebrowser' ;;
+    firefox|Firefox) printf 'Firefox' ;;
+    *)
+      if [ -n "$1" ]; then
+        printf '%s' "$1"
+      else
+        printf 'Window'
+      fi
+      ;;
+  esac
+}
+
+apply_tab_titles() {
+  local tree line id layout prefix title raw escaped
+  local labels=()
+
+  tree="$(i3-msg -t get_tree)"
+
+  while IFS= read -r line; do
+    id="$(jq -r '.id' <<<"$line")"
+    layout="$(jq -r '.layout' <<<"$line")"
+    prefix="$(layout_prefix "$layout")"
+
+    mapfile -t labels < <(
+      jq -r '.labels[]' <<<"$line" | while IFS= read -r raw; do
+        normalize_label "$raw"
+        printf '\n'
+      done
+    )
+
+    if [ "${#labels[@]}" -eq 0 ]; then
+      continue
+    fi
+
+    title="$prefix : "
+    for ((i = 0; i < ${#labels[@]}; i++)); do
+      title+="${labels[$i]}"
+      if [ "$i" -lt "$(( ${#labels[@]} - 1 ))" ]; then
+        title+=" | "
+      fi
+    done
+
+    if [ "${LAST_TITLES[$id]-}" = "$title" ]; then
+      continue
+    fi
+
+    escaped="${title//\\/\\\\}"
+    escaped="${escaped//\"/\\\"}"
+    i3-msg --quiet "[con_id=$id] title_format \"$escaped\"" >/dev/null || true
+    LAST_TITLES["$id"]="$title"
+  done < <(
+    jq -c '
+      ..
+      | objects
+      | select((.layout == "tabbed" or .layout == "stacked") and (.nodes | length > 0))
+      | .nodes[]
+      | select(.window == null and (.nodes | length > 0))
+      | {
+          id,
+          layout,
+          labels: [
+            ..
+            | objects
+            | select(.window != null)
+            | (.window_properties.class // .window_properties.instance // .name // "Window")
+          ]
+        }
+    ' <<<"$tree"
+  )
+}
+
+main() {
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    exit 0
+  fi
+
+  apply_tab_titles
+
+  if [ "${1:-}" = "--once" ]; then
+    return
+  fi
+
+  while true; do
+    i3-msg -t subscribe "$EVENTS" 2>/dev/null | while IFS= read -r _; do
+      apply_tab_titles
+    done
+    sleep 0.2
+  done
+}
+
+main "$@"
