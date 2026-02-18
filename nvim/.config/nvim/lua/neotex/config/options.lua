@@ -46,6 +46,8 @@ function M.setup()
     cmdheight = 1,                  -- space in the neovim command line for displaying messages
     pumheight = 7,                  -- pop up menu height
     showmode = false,               -- we don't need to see things like -- INSERT -- anymore
+    title = true,                   -- let nvim manage the terminal window title
+    titlestring = "nvim %{fnamemodify(getcwd(), ':~')}", -- show nvim + current working directory
     splitbelow = true,              -- force all horizontal splits to go below current window
     splitright = true,              -- force all vertical splits to go to the right of current window
     scrolloff = 7,                  -- minimal number of screen lines to keep above and below the cursor

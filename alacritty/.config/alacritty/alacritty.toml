@@ -115,6 +115,7 @@ program = "/usr/bin/fish"
 decorations = "none"  # No title bar
 startup_mode = "Windowed"  
 title = "Alacritty"
+dynamic_title = true
 
 
 # Position window at the right half of the screen
