@@ -1,4 +1,4 @@
 - add system-wide catpuccin flavor option using a script
-  - i3, polybar, zen, zathura, nvim, alacritty, wallpaper (have to generate other gyro wallpapers with different backgrounds), qutebrowser
+  - i3, polybar, rofi, zen, zathura, nvim, alacritty, wallpaper (have to generate other gyro wallpapers with different backgrounds), qutebrowser
   - maybe take inspirations of omarchy  which has this option
   - requires having dynamic config for all above mentioned programs, easier on some then others
