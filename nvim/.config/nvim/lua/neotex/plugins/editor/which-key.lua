@@ -46,8 +46,7 @@ COPILOT (<leader>c)                             | LABEL
 
 EXPLORER (<leader>e)                            | LABEL
 -----------------------------------------------------------
-<leader>ef                                      | yazi here
-<leader>ew                                      | yazi cwd
+<leader>e                                       | yazi here
 
 FIND (<leader>f)                                | LABEL
 -----------------------------------------------------------
@@ -235,11 +234,7 @@ return {
       b = { "<cmd>VimtexCompile<CR>", "build" },
       h = { "<cmd>vert sb<CR>", "create split" },
       d = { "<cmd>update! | lua Snacks.bufdelete()<CR>", "delete buffer" },
-      e = {
-        name = "EXPLORER",
-        f = { "<cmd>Yazi<CR>", "yazi here" },
-        w = { "<cmd>Yazi cwd<CR>", "yazi cwd" },
-      },
+      e = { "<cmd>Yazi<CR>", "yazi here" },
       g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
       i = { "<cmd>VimtexTocOpen<CR>", "index" },
       q = { "<cmd>wa! | qa!<CR>", "quit" },
