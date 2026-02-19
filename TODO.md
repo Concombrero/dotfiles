@@ -2,3 +2,11 @@
   - i3, polybar, rofi, zen, zathura, nvim, alacritty, wallpaper (have to generate other gyro wallpapers with different backgrounds), qutebrowser
   - maybe take inspirations of omarchy  which has this option
   - requires having dynamic config for all above mentioned programs, easier on some then others
+  UPDATE : i vibecoded it but it isnt that useful since catppuccin flavors are pretty much the same, maybe add a few more wallpapers and call it a day
+
+
+- fix tabbed container window titles (modes not updating, titles sometimes wrong e.g"Alacritty" and not neovim)
+-neovim : autodisable copilot and remove yazi in cwd keybind, remap e to yazi in file and that's it 
+- i3 : empty bar at bottom of screen, remove 
+- cursor size
+- yazi file picker in zen 
