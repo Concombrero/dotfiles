@@ -75,10 +75,12 @@ return {
         -- supertab (with Copilot integration)
         ["<Tab>"] = cmp.mapping(function(fallback)
           -- Copilot: accept suggestion if visible
-          local copilot_ok, copilot_suggestion = pcall(require, "copilot.suggestion")
-          if copilot_ok and copilot_suggestion.is_visible() then
-            copilot_suggestion.accept()
-            return
+          if package.loaded["copilot.suggestion"] then
+            local copilot_ok, copilot_suggestion = pcall(require, "copilot.suggestion")
+            if copilot_ok and copilot_suggestion.is_visible() then
+              copilot_suggestion.accept()
+              return
+            end
           end
 
           -- Standard cmp Tab behavior
