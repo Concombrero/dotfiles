@@ -5,4 +5,4 @@
   UPDATE : i vibecoded it but it isnt that useful since catppuccin flavors are pretty much the same, maybe add a few more wallpapers and call it a day
 
 
-- fix tabbed container window titles (modes not updating, titles sometimes wrong e.g"Alacritty" and not neovim)
+- change looks of tabbed containers tabs to resemble tmux 

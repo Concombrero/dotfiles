@@ -7,15 +7,6 @@ EVENTS='["window","workspace","binding"]'
 
 declare -A LAST_TITLES=()
 
-layout_prefix() {
-  case "$1" in
-    splith) printf 'H' ;;
-    splitv) printf 'V' ;;
-    tabbed) printf 'T' ;;
-    stacked) printf 'S' ;;
-    *) printf '%s' "$1" ;;
-  esac
-}
 
 normalize_label() {
   case "$1" in
@@ -25,7 +16,13 @@ normalize_label() {
     firefox|Firefox) printf 'Firefox' ;;
     *)
       if [ -n "$1" ]; then
-        printf '%s' "$1"
+        # Truncate to ~30 chars if it's too long to avoid huge tab titles
+        local str="$1"
+        if [ "${#str}" -gt 35 ]; then
+          printf '%s...' "${str:0:32}"
+        else
+          printf '%s' "$str"
+        fi
       else
         printf 'Window'
       fi
@@ -34,7 +31,7 @@ normalize_label() {
 }
 
 apply_tab_titles() {
-  local tree line id layout prefix title raw escaped
+  local tree line id layout title raw escaped
   local labels=()
 
   tree="$(i3-msg -t get_tree)"
@@ -42,7 +39,6 @@ apply_tab_titles() {
   while IFS= read -r line; do
     id="$(jq -r '.id' <<<"$line")"
     layout="$(jq -r '.layout' <<<"$line")"
-    prefix="$(layout_prefix "$layout")"
 
     mapfile -t labels < <(
       jq -r '.labels[]' <<<"$line" | while IFS= read -r raw; do
@@ -55,7 +51,7 @@ apply_tab_titles() {
       continue
     fi
 
-    title="$prefix : "
+    title=""
     for ((i = 0; i < ${#labels[@]}; i++)); do
       title+="${labels[$i]}"
       if [ "$i" -lt "$(( ${#labels[@]} - 1 ))" ]; then
@@ -85,7 +81,7 @@ apply_tab_titles() {
             ..
             | objects
             | select(.window != null)
-            | (.window_properties.class // .window_properties.instance // .name // "Window")
+            | (.name // .window_properties.class // .window_properties.instance // "Window")
           ]
         }
     ' <<<"$tree"
