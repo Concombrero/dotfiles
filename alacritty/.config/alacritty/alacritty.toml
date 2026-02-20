@@ -116,17 +116,7 @@ decorations = "none"  # No title bar
 startup_mode = "Windowed"  
 title = "Alacritty"
 dynamic_title = true
-
-
-# Position window at the right half of the screen
-[window.position]
-x = 2880
-y = 0
-
-# Dimensions - using columns and lines instead of pixels can be more reliable
-[window.dimensions]
-columns = 80
-lines = 54
+dynamic_padding = true
 
 # Remove padding
 [window.padding]

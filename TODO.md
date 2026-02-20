@@ -6,7 +6,5 @@
 
 
 - fix tabbed container window titles (modes not updating, titles sometimes wrong e.g"Alacritty" and not neovim)
--neovim : autodisable copilot and remove yazi in cwd keybind, remap e to yazi in file and that's it 
-- i3 : empty bar at bottom of screen, remove 
 - cursor size
 - yazi file picker in zen 
