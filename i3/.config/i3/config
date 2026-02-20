@@ -51,10 +51,10 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 
 # use these keys for focus, movement, and resize directions when reaching for
 # the arrows is not convenient
-set $up l
-set $down k
-set $left j
-set $right semicolon
+set $up k
+set $down j
+set $left h
+set $right l
 
 # use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -105,19 +105,32 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
-# split in horizontal orientation
-bindsym $mod+h split h
+# container tree creation: significant but necessary deviation from defaults 
+# enables moving with hjkl
+# default mode : horizontal split
 
-# split in vertical orientation
+# create new container from focus window + split in vertical orientation
 bindsym $mod+v split v
+
+# switch container layout (vertical and split (= horizontal))
+bindsym $mod+s layout toggle split stacking
+
+# tabbed mode for the focused container
+# default is w but t feels more natural
+bindsym $mod+t layout tabbed
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# example tree (shows you can do anything with these binds) : 
+# mod + enter , mod + enter, mod + v, mod + enter, mod + v, mod + s, mod + enter
+# first mod + v is used to create a container from the current window and split it vertical
+# second mod + v is used for the same thing but mod + s then cancels vertical orientation
+# you can bind a horizontal split if you want, it makes "deep" creation clearer at the cost of one more keybind then necessary
+# and h is already used for movement
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
-
-# change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -125,11 +138,8 @@ bindsym $mod+Shift+space floating toggle
 # change focus between tiling / floating windows
 bindsym $mod+space focus mode_toggle
 
-# focus the parent container
-bindsym $mod+a focus parent
-
 # focus the child container
-#bindsym $mod+d focus child
+# bindsym $mod+c focus child
 
 # move the currently focused window to the scratchpad
 # bindsym $mod+Shift+minus move scratchpad
@@ -273,11 +283,7 @@ client.background        $base
 
 
 
-#remove decorations
-
 # Set default border for all windows
-default_border pixel 1
+default_border none
 default_floating_border pixel 1
 
-# Exception for Alacritty
-for_window [class="Alacritty"] border none
