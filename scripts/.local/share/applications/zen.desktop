@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Zen Browser
+Comment=A fast, private, and elegant web browser
+Exec=zen %u
+Icon=zen
+Terminal=false
+Categories=Network;WebBrowser;
+StartupNotify=true
+MimeType=text/html;text/xml;application/xhtml+xml;application/x-wine-extension-plaintext;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;

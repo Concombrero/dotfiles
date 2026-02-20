@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Wrapper to force GTK apps to use xdg-desktop-portal for file dialogs
+export GTK_USE_PORTAL=1
+exec "$HOME/.local/opt/zen/zen" "$@"
