@@ -1,4 +1,15 @@
 #!/usr/bin/env sh
-# Wrapper to force GTK apps to use xdg-desktop-portal for file dialogs
-export GTK_USE_PORTAL=1
-exec "$HOME/.local/opt/zen/zen" "$@"
+set -eu
+
+for candidate in \
+    "${ZEN_BIN:-}" \
+    "$HOME/.local/opt/zen/zen" \
+    "$HOME/.tarball-installations/zen/zen"
+do
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+        exec env GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}" "$candidate" "$@"
+    fi
+done
+
+printf '%s\n' "zen: binary not found at ~/.local/opt/zen/zen or ~/.tarball-installations/zen/zen" >&2
+exit 127

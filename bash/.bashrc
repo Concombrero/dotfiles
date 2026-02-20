@@ -122,11 +122,6 @@ eval "$(starship init bash)"
 alias python=python3
 alias sail='bash vendor/bin/sail'
 
-# Zen browser alias (only if installed)
-if [ -x "$HOME/.local/opt/zen/zen" ]; then
-    alias zen='$HOME/.local/opt/zen/zen'
-fi
-
 # CUDA Configuration (only if installed)
 if [ -d /usr/local/cuda-12.8 ]; then
     export PATH=/usr/local/cuda-12.8/bin${PATH:+:${PATH}}

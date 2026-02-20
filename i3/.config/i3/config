@@ -66,8 +66,8 @@ tiling_drag modifier titlebar
 # start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
 
-#start zen browser (requires symlink of your zen install to "zen")
-bindsym $mod+z exec zen
+#start zen browser
+bindsym $mod+z exec --no-startup-id ~/.local/bin/zen
 
 #start neovim
 bindsym $mod+n exec i3-sensible-terminal -e nvim
@@ -286,4 +286,3 @@ client.background        $base
 # Set default border for all windows
 default_border none
 default_floating_border pixel 1
-

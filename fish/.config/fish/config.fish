@@ -60,11 +60,6 @@ if test -d $HOME/.opencode/bin
     fish_add_path $HOME/.opencode/bin
 end
 
-# Zen browser alias (only if installed)
-if test -x $HOME/.local/opt/zen/zen
-    alias zen $HOME/.local/opt/zen/zen
-end
-
 # Use portal for file picker
 set -gx GTK_USE_PORTAL 1
 
