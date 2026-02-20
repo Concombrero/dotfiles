@@ -6,5 +6,3 @@
 
 
 - fix tabbed container window titles (modes not updating, titles sometimes wrong e.g"Alacritty" and not neovim)
-- cursor size
-- yazi file picker in zen 
