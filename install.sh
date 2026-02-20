@@ -325,6 +325,8 @@ stow_packages() {
         scripts
         wallpapers
         opencode
+        x11
+        gtk
     )
 
     # Ensure target directories exist (stow needs the parent directories)

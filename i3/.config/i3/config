@@ -225,7 +225,9 @@ bindsym Print exec --no-startup-id flameshot gui
 include ~/.config/i3/local.conf
 
 # Re-apply root cursor after local monitor setup (xrandr can reset it on login)
-exec_always --no-startup-id sh -c 'sleep 0.4; xsetroot -cursor_name left_ptr'
+exec_always --no-startup-id sh -c 'sleep 0.4; xrdb -merge ~/.Xresources && xsetroot -cursor_name left_ptr'
+exec_always --no-startup-id gsettings set org.gnome.desktop.interface cursor-size 16
+exec_always --no-startup-id gsettings set org.gnome.desktop.interface cursor-theme 'DMZ-White'
 
 # Fix tab labels for nested split containers inside tabbed/stacked layouts
 exec_always --no-startup-id ~/.local/bin/i3-tab-title-fix
