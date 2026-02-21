@@ -1,6 +1,7 @@
 # Core Tools
 git
 stow
+tmux
 curl
 wget
 unzip

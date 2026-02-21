@@ -28,7 +28,7 @@ Visually, anything that can be is themed with [Catppuccin](https://github.com/ca
   - Terminal emulator : `alacritty`
   - Shell : `fish`
   - Prompt : `starship`
-  - Enhancements : `lazygit`, `zoxide`, `fzf` and more
+  - Enhancements : `tmux`, `lazygit`, `zoxide`, `fzf` and more
 - Editing: `neovim` (see [NeoTex README](nvim/.config/nvim/README.md) for details).
 - Web : Zen Browser
 - AI workflow : OpenCode agent, with integration in Neovim. 
@@ -88,7 +88,7 @@ What this does at a high level:
 2. **Installs Packages:** Core tools (`git`, `curl`, `stow`, `nvim`) and Desktop tools (if not headless).
 3. **Installs Binaries:** `starship`, `zoxide`, `yazi`, `lazygit`, `fzf`, `opencode`, `zen-browser`.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Sets `fish` as shell, adds fonts, sets wallpaper.
+5. **Configures System:** Sets `fish` as shell, installs Alacritty terminfo, adds fonts, sets wallpaper.
 6. **Stows Configs:** Symlinks all dotfiles into `$HOME`.
 
 Installer log: `~/dotfiles/install.log`
@@ -126,7 +126,7 @@ Example:
 ### Packages (via System Package Manager)
 Defined in `packages/common.txt` and `packages/desktop.txt`.
 
-- **Core:** `git`, `stow`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `python3`, `pipx`, `btop`
+- **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `python3`, `pipx`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `neofetch`, `zathura`, `sxiv`
 
 ### External Binaries (Architecture Independent)
@@ -171,6 +171,7 @@ Installed in isolated environments to avoid breaking system Python:
 | `neofetch` | `~/.config/neofetch/config.conf` |
 | `htop` | `~/.config/htop/htoprc` |
 | `btop` | `~/.config/btop/btop.conf` |
+| `tmux` | `~/.config/tmux/tmux.conf` |
 | `qutebrowser` | `~/.config/qutebrowser/` |
 | `xdg-desktop-portal` | `~/.config/xdg-desktop-portal/portals.conf` |
 | `xdg-desktop-portal-termfilechooser` | `~/.config/xdg-desktop-portal-termfilechooser/` |

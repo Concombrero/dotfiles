@@ -16,6 +16,7 @@ fontconfig
 neofetch
 htop
 btop
+tmux
 qutebrowser
 xdg-desktop-portal
 xdg-desktop-portal-termfilechooser

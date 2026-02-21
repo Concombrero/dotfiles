@@ -28,6 +28,40 @@ install_fonts() {
     fi
 }
 
+install_alacritty_terminfo() {
+    if infocmp alacritty >/dev/null 2>&1 && infocmp alacritty-direct >/dev/null 2>&1; then
+        info "Alacritty terminfo already installed."
+        return
+    fi
+
+    if ! command -v tic >/dev/null 2>&1; then
+        warn "'tic' not found; skipping Alacritty terminfo installation."
+        return
+    fi
+
+    info "Installing Alacritty terminfo entries..."
+
+    local tmp_dir
+    local terminfo_src
+    tmp_dir=$(mktemp -d)
+    terminfo_src="$tmp_dir/alacritty.info"
+
+    if ! curl -fsSL "https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info" -o "$terminfo_src"; then
+        warn "Failed to download alacritty.info; leaving TERM unchanged for now."
+        rm -rf "$tmp_dir"
+        return
+    fi
+
+    mkdir -p "$HOME/.terminfo"
+    if tic -x -o "$HOME/.terminfo" -e alacritty,alacritty-direct "$terminfo_src"; then
+        log "Installed Alacritty terminfo entries into ~/.terminfo"
+    else
+        warn "Failed to compile Alacritty terminfo entries."
+    fi
+
+    rm -rf "$tmp_dir"
+}
+
 set_wallpaper() {
     local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
 
@@ -68,6 +102,7 @@ configure_mime() {
 }
 
 install_desktop_extras() {
+    install_alacritty_terminfo
     install_fonts
     configure_mime
     set_wallpaper
