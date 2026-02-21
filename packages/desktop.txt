@@ -1,0 +1,34 @@
+# Window Manager
+i3-wm
+i3lock
+i3status
+polybar
+picom
+rofi
+dunst
+xdotool
+x11-xserver-utils
+x11-utils
+dex
+xss-lock
+network-manager-gnome
+pulseaudio-utils
+
+# Image/Graphics
+imagemagick
+feh
+sxiv
+flameshot
+
+# Documents
+zathura
+zathura-pdf-poppler
+# texlive-full # Warning: Huge download
+latexmk
+
+# Other
+vlc
+qutebrowser
+alacritty
+neofetch
+htop
