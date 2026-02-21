@@ -13,6 +13,7 @@ The principles used for building this system are simple :
 - Defaults are fine
 
 This is all materialized through a set of tools that tries to stay minimal while providing a solid out of the box experience that can be easily extended and customized.
+Visually, anything that can be is themed with [Catppuccin](https://github.com/catppuccin), using the Mocha flavor.
 
 
 - Desktop/Window management:
