@@ -40,9 +40,22 @@ The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`
 
 ### 1) Prerequisites
 
+You only need `git` to start.
+
+**Ubuntu/Debian:**
 ```bash
 sudo apt update
-sudo apt install -y git curl software-properties-common
+sudo apt install -y git
+```
+
+**Fedora:**
+```bash
+sudo dnf install -y git
+```
+
+**Arch:**
+```bash
+sudo pacman -S git
 ```
 
 ### 2) Clone this repo
@@ -57,22 +70,27 @@ cd ~/dotfiles
 ```bash
 ./install.sh
 ```
-> [!NOTE]
-> The bootstrap script is Ubuntu-first (uses `apt` + PPAs). On other Debian-based systems, run with `--skip-packages` and install equivalent packages manually.
 
+**For Servers or Headless Systems:**
+If you don't want the desktop environment (i3, polybar, fonts, etc.), run:
+
+```bash
+./install.sh --headless
+```
+
+> [!NOTE]
+> The bootstrap script automatically detects your OS (Ubuntu, Debian, Fedora, Arch) and uses the appropriate package manager.
 
 What this does at a high level:
 
-1. Installs system dependencies and PPAs.
-2. Installs non-APT tools (`fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `zen-browser`, `betterlockscreen`).
-3. Installs Python tooling and fonts.
-4. Stows all configured packages into `$HOME`.
-5. Configures default MIME handlers for PDFs/images (`zathura-tabbed.desktop`, `sxiv-tabbed.desktop`).
-6. Applies the default wallpaper with `feh` when a graphical session is available.
+1. **Detects OS:** Adapts to `apt`, `dnf`, or `pacman`.
+2. **Installs Packages:** Core tools (`git`, `curl`, `stow`, `nvim`) and Desktop tools (if not headless).
+3. **Installs Binaries:** `starship`, `zoxide`, `yazi`, `lazygit`, `fzf`, `opencode`, `zen-browser`.
+4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
+5. **Configures System:** Sets `fish` as shell, adds fonts, sets wallpaper.
+6. **Stows Configs:** Symlinks all dotfiles into `$HOME`.
 
-Installer log:
-
-- `~/dotfiles/install.log`
+Installer log: `~/dotfiles/install.log`
 
 ### 4) First login checks
 
@@ -85,60 +103,50 @@ Installer log:
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
 
-> [!NOTE]
-> If installer runs outside a GUI (`DISPLAY` not set), wallpaper application is skipped during install. i3 still sets the same wallpaper on session start.
-
 ## Installer Flags
 
 | Flag | Meaning |
 |---|---|
-| `--skip-packages` | Skip all apt/PPA package installation |
-| `--skip-tools` | Skip non-APT tools (`fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `zen-browser`, `betterlockscreen`) and Python tools |
-| `--skip-fonts` | Skip Nerd Fonts + Font Awesome install |
-| `--stow-only` | Only apply Stow packages |
+| `--headless`, `--no-gui` | Skip desktop/GUI packages (i3, polybar, fonts, wallpapers, Zen browser). |
+| `--skip-packages` | Skip system package installation (apt/dnf/pacman). |
+| `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, etc.). |
+| `--skip-fonts` | Skip Nerd Fonts installation. |
+| `--skip-ppas` | Skip adding Ubuntu PPAs (useful for Debian Stable or non-Ubuntu based systems). |
+| `--stow-only` | Only run stow (skip all installations). |
 
 Example:
 
 ```bash
-./install.sh --skip-tools
+./install.sh --headless
 ```
 
 ## What `install.sh` Provisions
 
-### Repositories added
+### Packages (via System Package Manager)
+Defined in `packages/common.txt` and `packages/desktop.txt`.
 
-- `ppa:neovim-ppa/unstable`
-- `ppa:fish-shell/release-4`
-- `ppa:aslatter/ppa`
-- NodeSource LTS repo (if `node` is missing)
+- **Core:** `git`, `stow`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `python3`, `pipx`, `btop`
+- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `neofetch`, `zathura`, `sxiv`
 
-### APT packages (from `packages.txt`)
-
-- Core: `git`, `stow`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `pkg-config`, `xdg-utils`
-- Desktop: `i3-wm`, `i3lock`, `i3status`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `xdotool`, `x11-xserver-utils`, `x11-utils`, `dex`, `xss-lock`, `network-manager-gnome`, `pulseaudio-utils`, `imagemagick`
-- CLI: `htop`, `neofetch`, `ripgrep`, `fd-find`, `bat`, `feh`, `jq`
-- Docs/academic: `zathura`, `zathura-pdf-poppler`, `texlive-full`, `latexmk`
-- Media/viewer: `sxiv`, `vlc`
-- Python base: `python3`, `python3-pip`, `python3-venv`
-
-Script-installed packages:
-
-- `neovim`, `fish`, `alacritty`, `nodejs`, `qutebrowser`
-
-### Non-APT installs
-
+### External Binaries (Architecture Independent)
 - `fzf` (git clone to `~/.fzf`)
 - `starship` (official installer)
 - `zoxide` (official installer)
 - `yazi` + `ya` (GitHub release binary)
 - `lazygit` (GitHub release binary)
-- `opencode` (official installer from opencode.ai)
-- `zen-browser` (official Linux tarball installer via curl script)
-- `betterlockscreen` (official upstream installer)
-- Yazi plugin sync via `ya pack -i`
-- Python user tools: `ipython`, `jupytext`, `black`, `isort`, `pylint`
-- MIME defaults via `xdg-mime`: `application/pdf` -> `zathura-tabbed.desktop`, images -> `sxiv-tabbed.desktop`
-- Fonts: `JetBrainsMono`, `RobotoMono`, `NerdFontsSymbolsOnly`, `Font Awesome`
+- `opencode` (official installer)
+- `zen-browser` (official installer)
+- `betterlockscreen` (official installer)
+
+### Python Tools (via pipx)
+Installed in isolated environments to avoid breaking system Python:
+- `ipython`, `jupytext`, `black`, `isort`, `pylint`
+
+### Fonts
+- `JetBrainsMono Nerd Font`
+- `RobotoMono Nerd Font`
+- `NerdFontsSymbolsOnly`
+- `Font Awesome`
 
 ## Stow Packages Applied by Installer
 
@@ -161,11 +169,12 @@ Script-installed packages:
 | `fontconfig` | `~/.config/fontconfig/fonts.conf` |
 | `neofetch` | `~/.config/neofetch/config.conf` |
 | `htop` | `~/.config/htop/htoprc` |
+| `btop` | `~/.config/btop/btop.conf` |
 | `qutebrowser` | `~/.config/qutebrowser/` |
 | `xdg-desktop-portal` | `~/.config/xdg-desktop-portal/portals.conf` |
 | `xdg-desktop-portal-termfilechooser` | `~/.config/xdg-desktop-portal-termfilechooser/` |
 | `latex` | `~/texmf/` (custom `.bst` files) |
-| `scripts` | `~/.local/bin/rofi-power`, `~/.local/bin/zathura-tabbed`, `~/.local/bin/sxiv-tabbed`, `~/.local/bin/i3-tab-title-fix`, `~/.local/share/applications/{zathura-tabbed.desktop,sxiv-tabbed.desktop}` |
+| `scripts` | `~/.local/bin/` and `~/.local/share/applications/` |
 | `wallpapers` | `~/Pictures/Wallpapers/` |
 | `opencode` | `~/.config/opencode/opencode.json` |
 
@@ -193,10 +202,6 @@ Then relogin, or run:
 systemctl --user import-environment
 systemctl --user restart xdg-desktop-portal-termfilechooser.service
 ```
-
-Debug notes:
-
-- `xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser/agents.md`
 
 ### 2) Machine-specific monitor config
 
@@ -238,36 +243,12 @@ Behavior per workspace:
 - Any subsequent PDF/image opened via `xdg-open` in that workspace is appended as a new tab in the matching container.
 - Tab titles are normalized to basename-only (for example `paper.pdf`, `figure.png`).
 
-Quick checks:
-
-```bash
-xdg-mime query default application/pdf
-xdg-mime query default image/png
-```
-
-Expected:
-
-- `zathura-tabbed.desktop`
-- `sxiv-tabbed.desktop`
-
 ### 6) Zen Browser
 
-Zen is installed automatically by `install.sh` using the official Linux command from the [Zen docs](https://docs.zen-browser.app/guides/install-linux):
-
-```bash
-curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | $SHELL
-```
-
+Zen is installed automatically by `install.sh` when using the desktop profile.
 Expected install locations:
-
 - `~/.tarball-installations/zen`
 - `~/.local/bin/zen`
-
-Quick check:
-
-```bash
-command -v zen
-```
 
 ### 7) CUDA (optional)
 
@@ -276,8 +257,6 @@ Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update
 ### 8) Firecrawl API key for OpenCode MCP (optional)
 
 OpenCode is installed automatically and `opencode.json` is stowed from `opencode/`.
-Runtime files (`package.json`, `bun.lock`, `node_modules/`) are intentionally machine-local and not stowed.
-
 If you use Firecrawl MCP:
 
 ```bash
@@ -299,19 +278,7 @@ Set values for your own project, or remove/comment if unused.
 ### 10) Zotero bibliography (optional)
 
 Neovim bibliography tooling expects:
-
 - `~/texmf/bibtex/bib/Zotero.bib`
-
-## Neovim External Tooling Notes
-
-On first run, Mason auto-installs configured LSP/formatter/linter tools (for example: `pyright`, `texlab`, `tinymist`, `lua-language-server`, `stylua`, `prettier`, `shellcheck`, `markdownlint`).
-
-System tools expected by the config include:
-
-- `node/npm` (Markdown preview and JS tooling)
-- `python3/pip` (`ipython`, notebook flow)
-- `git`, `make`, C toolchain
-- `lazygit`, `yazi`, `zathura`, `latexmk`, `qutebrowser`
 
 ## Day-2 Operations
 
