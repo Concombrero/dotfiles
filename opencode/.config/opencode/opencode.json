@@ -1,6 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-firecrawl"],
   "mcp": {
     "firecrawl": {
       "type": "local",
@@ -8,6 +7,13 @@
       "enabled": true,
       "environment": {
         "FIRECRAWL_API_KEY": "{file:~/.config/opencode/firecrawl_api_key}"
+      }
+    }
+  },
+  "provider":{
+    "google-vertex":{
+      "models":{
+        "gemini-3.1-pro-preview-customtools":{}
       }
     }
   },
