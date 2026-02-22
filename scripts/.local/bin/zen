@@ -1,6 +1,42 @@
 #!/usr/bin/env sh
 set -eu
 
+from_i3=0
+if [ "${1:-}" = "--from-i3" ]; then
+    from_i3=1
+    shift
+fi
+
+if [ "$from_i3" -eq 1 ] && command -v flock >/dev/null 2>&1; then
+    state_dir="${XDG_RUNTIME_DIR:-/tmp}"
+    lock_file="$state_dir/zen-i3-launch.lock"
+    stamp_file="$state_dir/zen-i3-launch.timestamp"
+    dedupe_ms="${ZEN_I3_DEDUPE_MS:-500}"
+    now_ms="$(date +%s%3N 2>/dev/null || printf '%s000' "$(date +%s)")"
+    should_launch=1
+
+    {
+        flock -n 9 || exit 0
+
+        last_ms=0
+        if [ -f "$stamp_file" ]; then
+            last_ms="$(cat "$stamp_file" 2>/dev/null || printf '0')"
+        fi
+
+        case "$last_ms" in
+            ''|*[!0-9]*) last_ms=0 ;;
+        esac
+
+        if [ "$last_ms" -gt 0 ] && [ "$now_ms" -ge "$last_ms" ] && [ $((now_ms - last_ms)) -lt "$dedupe_ms" ]; then
+            should_launch=0
+        else
+            printf '%s\n' "$now_ms" >"$stamp_file"
+        fi
+    } 9>"$lock_file"
+
+    [ "$should_launch" -eq 1 ] || exit 0
+fi
+
 for candidate in \
     "${ZEN_BIN:-}" \
     "$HOME/.local/opt/zen/zen" \

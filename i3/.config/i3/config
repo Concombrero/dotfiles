@@ -70,7 +70,7 @@ tiling_drag modifier titlebar
 bindsym $mod+Return exec i3-sensible-terminal
 
 #start zen browser
-bindsym $mod+z exec --no-startup-id ~/.local/bin/zen
+bindsym $mod+z exec --no-startup-id ~/.local/bin/zen --from-i3
 
 #start neovim
 bindsym $mod+n exec i3-sensible-terminal -e nvim
