@@ -120,11 +120,6 @@ main() {
         fi
     fi
 
-    # Desktop terminal terminfo
-    if [ "$INSTALL_DESKTOP" = true ]; then
-        install_alacritty_terminfo
-    fi
-
     # Fonts & Desktop Extras
     if [ "$INSTALL_FONTS" = true ] && [ "$INSTALL_DESKTOP" = true ]; then
         install_fonts

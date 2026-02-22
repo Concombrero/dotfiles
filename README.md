@@ -88,7 +88,7 @@ What this does at a high level:
 2. **Installs Packages:** Core tools (`git`, `curl`, `stow`, `nvim`) and Desktop tools (if not headless).
 3. **Installs Binaries:** `starship`, `zoxide`, `yazi`, `lazygit`, `fzf`, `opencode`, `zen-browser`.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Sets `fish` as shell, installs Alacritty terminfo, adds fonts, sets wallpaper.
+5. **Configures System:** Sets `fish` as shell, adds fonts, sets wallpaper.
 6. **Stows Configs:** Symlinks all dotfiles into `$HOME`.
 
 Installer log: `~/dotfiles/install.log`
