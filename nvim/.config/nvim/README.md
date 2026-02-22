@@ -20,6 +20,15 @@ This file is intentionally concise and points to focused docs in this repo.
 - Linting: nvim-lint (`<leader>l` / `<leader>lL`) with executable-aware setup
 - AI: OpenCode actions (`<leader>o`) plus Copilot control from `<leader>c`
 
+## Bibliography (Zotero)
+
+NeoTex bibliography tooling expects the Zotero export at:
+
+- `~/texmf/bibtex/bib/Zotero.bib`
+
+If your bibliography file lives elsewhere, either create a symlink to this path or
+adjust your local citation workflow settings.
+
 ## Quick Start
 
 1. Open Neovim in this config.

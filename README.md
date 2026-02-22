@@ -256,32 +256,6 @@ Expected install locations:
 
 Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
 
-### 8) Firecrawl API key for OpenCode MCP (optional)
-
-OpenCode is installed automatically and `opencode.json` is stowed from `opencode/`.
-If you use Firecrawl MCP:
-
-```bash
-mkdir -p ~/.config/opencode
-printf '%s' 'fc-your-key-here' > ~/.config/opencode/firecrawl_api_key
-chmod 600 ~/.config/opencode/firecrawl_api_key
-```
-
-### 9) Vertex AI environment for OpenCode (optional)
-
-`fish/.config/fish/config.fish` exports:
-
-- `GOOGLE_CLOUD_PROJECT`
-- `GOOGLE_APPLICATION_CREDENTIALS`
-- `VERTEX_LOCATION`
-
-Set values for your own project, or remove/comment if unused.
-
-### 10) Zotero bibliography (optional)
-
-Neovim bibliography tooling expects:
-- `~/texmf/bibtex/bib/Zotero.bib`
-
 ## Day-2 Operations
 
 ```bash
