@@ -150,7 +150,6 @@ return {
         "luacheck",
         "htmlhint",
         "cpplint",
-        "tidy",
 
         -- Notebook tooling
         "jupytext",
