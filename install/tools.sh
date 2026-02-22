@@ -11,6 +11,19 @@ install_fzf() {
     log "fzf installed to ~/.fzf."
 }
 
+install_tpm() {
+    local tpm_dir="$HOME/.tmux/plugins/tpm"
+    if [ -d "$tpm_dir" ]; then
+        warn "TPM already installed at ~/.tmux/plugins/tpm, skipping."
+        return
+    fi
+
+    info "Installing tmux plugin manager (TPM)..."
+    mkdir -p "$HOME/.tmux/plugins"
+    git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+    log "TPM installed."
+}
+
 install_starship() {
     if command -v starship &>/dev/null; then
         warn "Starship already installed, skipping."

@@ -105,6 +105,7 @@ main() {
     # External Tools
     if [ "$INSTALL_TOOLS" = true ]; then
         install_fzf
+        install_tpm
         install_starship
         install_zoxide
         install_yazi
