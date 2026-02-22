@@ -255,22 +255,3 @@ Expected install locations:
 ### 7) CUDA (optional)
 
 Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
-
-## Day-2 Operations
-
-```bash
-cd ~/dotfiles
-stow -D <package>   # remove symlinks for one package
-stow -R <package>   # restow one package
-```
-
-Add a new Stow package:
-
-```bash
-mkdir -p ~/dotfiles/newpkg/.config/newpkg
-cp ~/.config/newpkg/config.toml ~/dotfiles/newpkg/.config/newpkg/
-cd ~/dotfiles
-stow newpkg
-```
-
-The folder structure inside each package must match paths relative to `$HOME`.
