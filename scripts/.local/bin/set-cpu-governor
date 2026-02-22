@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s nullglob
+
+target_governor="${1:-performance}"
+
+if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+  printf '%s\n' "Run as root: sudo $(basename "$0") [governor]" >&2
+  exit 1
+fi
+
+governor_files=(/sys/devices/system/cpu/cpufreq/policy*/scaling_governor)
+
+if [[ ${#governor_files[@]} -eq 0 ]]; then
+  printf '%s\n' "No cpufreq policy governor files found." >&2
+  exit 1
+fi
+
+applied=0
+skipped=0
+
+for governor_file in "${governor_files[@]}"; do
+  available_file="${governor_file%/scaling_governor}/scaling_available_governors"
+
+  if [[ -r "$available_file" ]]; then
+    available="$(<"$available_file")"
+    case " $available " in
+      *" $target_governor "*) ;;
+      *)
+        printf '%s\n' "Skipping ${governor_file}: ${target_governor} not supported (available: ${available})" >&2
+        skipped=$((skipped + 1))
+        continue
+        ;;
+    esac
+  fi
+
+  printf '%s\n' "$target_governor" > "$governor_file"
+  applied=$((applied + 1))
+done
+
+if [[ $applied -eq 0 ]]; then
+  printf '%s\n' "Failed: governor '${target_governor}' was not applied to any policy." >&2
+  exit 1
+fi
+
+printf '%s\n' "Applied governor '${target_governor}' to ${applied} policy(s)."
+
+if [[ $skipped -gt 0 ]]; then
+  printf '%s\n' "Skipped ${skipped} policy(s)." >&2
+fi
