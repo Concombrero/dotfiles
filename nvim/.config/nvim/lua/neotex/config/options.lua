@@ -86,6 +86,26 @@ function M.setup()
   for k, v in pairs(options) do
     vim.opt[k] = v
   end
+
+  -- Clipboard: OSC 52 for copy (works through tmux), paste from unnamed register.
+  -- OSC 52 paste hangs (terminal doesn't respond to read requests), so paste
+  -- falls back to the unnamed register. Use Ctrl+Shift+V to paste from system clipboard.
+  if os.getenv("TMUX") then
+    local function paste()
+      return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") }
+    end
+    vim.g.clipboard = {
+      name = "OSC 52",
+      copy = {
+        ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+        ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+      },
+      paste = {
+        ["+"] = paste,
+        ["*"] = paste,
+      },
+    }
+  end
   
   -- Disable Ctrl+click tag jumping for markdown files
   vim.api.nvim_create_autocmd({"FileType"}, {
