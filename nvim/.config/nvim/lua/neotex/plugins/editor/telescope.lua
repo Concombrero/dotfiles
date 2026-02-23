@@ -16,9 +16,12 @@ return {
     local telescope = require("telescope")
     local actions = require("telescope.actions")
 
+    -- On Ubuntu, fd-find installs as "fdfind" since /usr/bin/fd is fdclone
+    local fd_cmd = vim.fn.executable("fdfind") == 1 and "fdfind" or "fd"
+
     telescope.setup({
       defaults = {
-        path_display = { "truncate " },
+        path_display = { "truncate" },
         mappings = {
           i = {
             ["<C-j>"] = actions.move_selection_next,
@@ -59,11 +62,10 @@ return {
           },
         },
       },
-      load_extension = {
-        "fzf",
-        "yank_history",
-        "bibtex",
-        "lazygit"
+      pickers = {
+        find_files = {
+          find_command = { fd_cmd, "--type", "f", "--strip-cwd-prefix", "--follow", "--hidden", "-E", ".git" },
+        },
       },
       extensions = {
         undo = {
@@ -114,5 +116,11 @@ return {
         },
       },
     })
+
+    -- Load extensions (must be called after setup)
+    pcall(telescope.load_extension, "fzf")
+    pcall(telescope.load_extension, "yank_history")
+    pcall(telescope.load_extension, "bibtex")
+    pcall(telescope.load_extension, "lazygit")
   end,
 }

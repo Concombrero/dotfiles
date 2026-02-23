@@ -1,7 +1,7 @@
 local M = {}
 
 M.preset = {
-  pick = nil,
+  pick = "telescope",
   keys = {
     { icon = "󰦛 ", key = "s", desc = "Restore Session", action = ":SessionManager load_session" },
     { icon = "󰥔 ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
