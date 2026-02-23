@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# rofi-tmux-sessions — list/create/kill tmux sessions via rofi
+set -uo pipefail
+
+# Launch terminal with tmux command
+launch_terminal() {
+  local cmd="exec i3-sensible-terminal -e tmux"
+  for arg in "$@"; do
+    cmd+=" \"$arg\""
+  done
+  i3-msg -q "$cmd"
+}
+
+sessions="$(tmux list-sessions -F '#{session_name}' 2>/dev/null || true)"
+
+if [ -z "$sessions" ]; then
+    name="$(rofi -dmenu -p " tmux" \
+        -theme-str 'listview { enabled: false; }')"
+    [ -z "$name" ] && exit 0
+    launch_terminal new-session -s "$name"
+    exit 0
+fi
+
+exit_code=0
+selected="$(printf '%s\n' "$sessions" | rofi -dmenu -i -p " tmux" \
+    -kb-custom-1 "Alt+d")" || exit_code=$?
+
+# Exit code 1 = user cancelled (Escape)
+[ "$exit_code" -eq 1 ] && exit 0
+[ -z "$selected" ] && exit 0
+
+case $exit_code in
+    0)
+        # Attach if session exists, otherwise create it
+        if tmux has-session -t "=$selected" 2>/dev/null; then
+            launch_terminal attach-session -t "=$selected"
+        else
+            launch_terminal new-session -s "$selected"
+        fi
+        ;;
+    10)
+        # Alt+d: kill session, re-launch menu with updated list
+        tmux kill-session -t "=$selected" 2>/dev/null || true
+        exec "$0"
+        ;;
+esac

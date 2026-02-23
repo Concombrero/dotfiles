@@ -82,7 +82,7 @@ bindsym $mod+g exec i3-sensible-terminal -e lazygit
 bindsym $mod+q kill
 
 # Start rofi, a modern dmenu replacement
- bindsym $mod+d exec rofi -show combi
+ bindsym $mod+d exec --no-startup-id rofi -show combi
 
 # change focus
 bindsym $mod+$left focus left
@@ -119,11 +119,13 @@ bindsym $mod+v split v
 bindsym $mod+s layout toggle split stacking
 
 # tabbed mode for the focused container
-# default is w but t feels more natural
-bindsym $mod+t layout tabbed
+bindsym $mod+w layout tabbed
 
 # focus the parent container
 bindsym $mod+a focus parent
+
+# tmux session picker (rofi)
+bindsym $mod+t exec --no-startup-id ~/.local/bin/rofi-tmux-sessions
 
 # example tree (shows you can do anything with these binds) : 
 # mod + enter , mod + enter, mod + v, mod + enter, mod + v, mod + s, mod + enter
