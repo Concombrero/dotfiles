@@ -19,6 +19,7 @@
     separator_color = frame
     
     # Behavior
+    follow = none
     progress_bar = true
     progress_bar_height = 10
     progress_bar_frame_width = 1
