@@ -203,6 +203,9 @@ bindsym $mod+Shift+r restart
 # power menu
 bindsym $mod+p exec --no-startup-id ~/.local/bin/rofi-power
 
+# keybinding cheatsheet (rofi)
+bindsym $mod+slash exec --no-startup-id ~/.local/bin/rofi-cheatsheet
+
 # resize window (you can also use the mouse for that)
 mode "resize" {
         # These bindings trigger as soon as you enter the resize mode

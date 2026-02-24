@@ -1,0 +1,51 @@
+@theme "catppuccin-mocha"
+
+window {
+    font: "JetBrainsMono Nerd Font Mono 12";
+    width: 620;
+    padding: 10px;
+    location: center;
+    anchor: center;
+}
+
+inputbar {
+    children: [entry];
+    background-color: @bg-col;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+entry {
+    padding: 6px;
+    margin: 10px 0px 0px 0px;
+    text-color: @fg-col;
+    background-color: @bg-col;
+    placeholder: "Search...";
+    placeholder-color: @grey;
+}
+
+listview {
+    lines: 20;
+    columns: 1;
+    scrollbar: false;
+    padding: 6px 0px 0px;
+    margin: 10px 0px 0px 0px;
+    background-color: @bg-col;
+    fixed-height: true;
+}
+
+element {
+    padding: 3px 8px;
+    background-color: @bg-col;
+    text-color: @fg-col;
+}
+
+element selected {
+    background-color: @selected-col;
+    text-color: @fg-col2;
+}
+
+element-text {
+    background-color: inherit;
+    text-color: inherit;
+}

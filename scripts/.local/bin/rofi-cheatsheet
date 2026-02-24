@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# rofi-cheatsheet — searchable keybinding cheatsheet via rofi
+# Triggered by Super+/ in i3
+#
+# Features:
+#   - Section headers appear whenever a matching entry exists ("sticky headers")
+#     achieved by embedding invisible entry keywords in headers via pango markup
+#   - Category name is searchable but hidden on each entry (e.g. "neovim cheatsheet")
+#   - Data lives in cheatsheet.csv with "# Section" headers and "key | desc" entries
+set -euo pipefail
+
+CHEATSHEET="${XDG_DATA_HOME:-$HOME/.local/share}/cheatsheet.csv"
+
+if [[ ! -f "$CHEATSHEET" ]]; then
+    rofi -e "Cheatsheet not found: $CHEATSHEET"
+    exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+# Escape characters that have special meaning in pango markup
+pango_escape() {
+    local s="$1"
+    s="${s//&/&amp;}"
+    s="${s//</&lt;}"
+    s="${s//>/&gt;}"
+    printf '%s' "$s"
+}
+
+# Trim leading and trailing whitespace from a variable
+trim() {
+    local s="$1"
+    s="${s#"${s%%[![:space:]]*}"}"
+    s="${s%"${s##*[![:space:]]}"}"
+    printf '%s' "$s"
+}
+
+# Extract top-level category from a section title
+#   "i3 · Navigation"       → "i3"
+#   "tmux (prefix: Alt+2)"  → "tmux"
+#   "Neovim"                → "Neovim"
+base_cat() {
+    local t="$1"
+    t="${t%% · *}"
+    t="${t%% (*}"
+    printf '%s' "$t"
+}
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+
+pad=30          # column width for keybind (before description starts)
+sep_width=50    # total width of separator lines (─── Section ───…)
+
+# ---------------------------------------------------------------------------
+# Pass 1 — collect raw entry text per section (for sticky-header keywords)
+# ---------------------------------------------------------------------------
+
+declare -A section_keywords=()   # section title → concatenated entry text
+re_section='^# (.+)'
+re_entry='^([^#].+)\|(.+)$'
+current_section=""
+
+while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    if [[ "$line" =~ $re_section ]]; then
+        current_section="${BASH_REMATCH[1]}"
+        section_keywords["$current_section"]=""
+        continue
+    fi
+    if [[ -n "$current_section" && "$line" =~ $re_entry ]]; then
+        key=$(trim "${BASH_REMATCH[1]}")
+        desc=$(trim "${BASH_REMATCH[2]}")
+        section_keywords["$current_section"]+=" ${key} ${desc}"
+    fi
+done < "$CHEATSHEET"
+
+# ---------------------------------------------------------------------------
+# Pass 2 — build formatted output
+# ---------------------------------------------------------------------------
+
+output=""
+current_section=""
+
+while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+
+    # --- Section header ---
+    if [[ "$line" =~ $re_section ]]; then
+        current_section="${BASH_REMATCH[1]}"
+
+        # Visible separator bar
+        bar="─── ${current_section} "
+        while (( ${#bar} < sep_width )); do bar+="─"; done
+
+        # Invisible entry keywords so this header matches whenever one of
+        # its entries does (the "sticky header" trick)
+        kw_escaped=$(pango_escape "${section_keywords[$current_section]}")
+        output+="${bar}<span size=\"1\">${kw_escaped}</span>"$'\n'
+        continue
+    fi
+
+    # --- Keybind entry ---
+    if [[ -n "$current_section" && "$line" =~ $re_entry ]]; then
+        key=$(trim "${BASH_REMATCH[1]}")
+        desc=$(trim "${BASH_REMATCH[2]}")
+
+        # Pad the keybind column *before* pango-escaping so printf counts
+        # visible characters, not markup entities
+        printf -v key_padded "%-${pad}s" "$key"
+
+        key_padded=$(pango_escape "$key_padded")
+        desc=$(pango_escape "$desc")
+        category=$(pango_escape "$(base_cat "$current_section")")
+
+        # Invisible category name at the end so searching e.g.
+        # "neovim cheatsheet" matches this entry
+        output+="${key_padded}${desc}<span size=\"1\"> ${category}</span>"$'\n'
+    fi
+done < "$CHEATSHEET"
+
+# ---------------------------------------------------------------------------
+# Display in rofi
+# ---------------------------------------------------------------------------
+
+printf '%s' "$output" | rofi -dmenu -i \
+    -p "" \
+    -markup-rows \
+    -theme ~/.config/rofi/cheatsheet.rasi \
+    -no-custom \
+    > /dev/null
