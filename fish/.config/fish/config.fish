@@ -63,7 +63,10 @@ end
 # Use portal for file picker
 set -gx GTK_USE_PORTAL 1
 
-# Google Cloud Project for OpenCode Vertex AI
-set -gx GOOGLE_CLOUD_PROJECT project-8c8e494c-7bf3-4272-a11
-set -gx GOOGLE_APPLICATION_CREDENTIALS $HOME/.config/gcloud/application_default_credentials.json
-set -gx VERTEX_LOCATION global
+# Machine-local overrides (optional):
+# Put personal env vars, tokens, cloud project IDs, etc. in
+# ~/.config/fish/local.fish so this public repo stays portable.
+set -l fish_local_config "$HOME/.config/fish/local.fish"
+if test -f "$fish_local_config"
+    source "$fish_local_config"
+end

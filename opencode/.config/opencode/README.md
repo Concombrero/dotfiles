@@ -28,5 +28,5 @@ If you use the `google-vertex` provider, ensure your environment exports:
 - `GOOGLE_APPLICATION_CREDENTIALS`
 - `VERTEX_LOCATION`
 
-In this repo, these are typically managed in shell config (for example
-`fish/.config/fish/config.fish`).
+In this repo, keep these in a machine-local shell override (for example
+`~/.config/fish/local.fish`) instead of committing them to dotfiles.

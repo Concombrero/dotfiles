@@ -1,5 +1,5 @@
 # Workstation Dotfiles
-GNU Stow-managed dotfiles for a full Ubuntu (Gnome) + i3 (X11) workstation.
+GNU Stow-managed dotfiles for a full Ubuntu/Debian + i3 (X11) workstation.
 
 ![Home screen](preview.png)
 ## System Overview
@@ -49,16 +49,6 @@ sudo apt update
 sudo apt install -y git
 ```
 
-**Fedora:**
-```bash
-sudo dnf install -y git
-```
-
-**Arch:**
-```bash
-sudo pacman -S git
-```
-
 ### 2) Clone this repo
 
 ```bash
@@ -80,22 +70,22 @@ If you don't want the desktop environment (i3, polybar, fonts, etc.), run:
 ```
 
 > [!NOTE]
-> The bootstrap script automatically detects your OS (Ubuntu, Debian, Fedora, Arch) and uses the appropriate package manager.
+> The bootstrap installer currently supports **Ubuntu and Debian only**.
 
 What this does at a high level:
 
-1. **Detects OS:** Adapts to `apt`, `dnf`, or `pacman`.
-2. **Installs Packages:** Core tools (`git`, `curl`, `stow`, `nvim`) and Desktop tools (if not headless).
-3. **Installs Binaries:** `starship`, `zoxide`, `yazi`, `lazygit`, `fzf`, `opencode`, `zen-browser`.
+1. **Detects OS:** Verifies Ubuntu/Debian and uses `apt`.
+2. **Installs Packages:** Core CLI packages and desktop packages (if not headless).
+3. **Installs Binaries:** `neovim` (official release archive), `starship`, `zoxide`, `yazi`, `lazygit`, `fzf`, `opencode`, `zen-browser`.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Sets `fish` as shell, adds fonts, sets wallpaper.
+5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
 6. **Stows Configs:** Symlinks all dotfiles into `$HOME`.
 
 Installer log: `~/dotfiles/install.log`
 
 ### 4) First login checks
 
-1. Log out and back in (fish becomes default shell).
+1. Log out and back in.
 2. Open Neovim and run:
    - `:Lazy sync`
    - `:Mason`
@@ -109,10 +99,10 @@ Installer log: `~/dotfiles/install.log`
 | Flag | Meaning |
 |---|---|
 | `--headless`, `--no-gui` | Skip desktop/GUI packages (i3, polybar, fonts, wallpapers, Zen browser). |
-| `--skip-packages` | Skip system package installation (apt/dnf/pacman). |
+| `--skip-packages` | Skip system package installation (`apt`). |
 | `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, etc.). |
 | `--skip-fonts` | Skip Nerd Fonts installation. |
-| `--skip-ppas` | Skip adding Ubuntu PPAs (useful for Debian Stable or non-Ubuntu based systems). |
+| `--skip-ppas` | Skip adding Ubuntu PPAs (Debian skips PPAs automatically). |
 | `--stow-only` | Only run stow (skip all installations). |
 
 Example:
@@ -126,10 +116,11 @@ Example:
 ### Packages (via System Package Manager)
 Defined in `packages/common.txt` and `packages/desktop.txt`.
 
-- **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `python3`, `pipx`, `btop`
-- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `neofetch`, `zathura`, `sxiv`
+- **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `python3`, `nodejs`, `npm`, `btop`
+- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `neofetch`, `zathura`, `sxiv`, `qutebrowser`
 
-### External Binaries (Architecture Independent)
+### External Tools/Binaries
+- `neovim` (official prebuilt archive from GitHub releases)
 - `fzf` (git clone to `~/.fzf`)
 - `starship` (official installer)
 - `zoxide` (official installer)
@@ -169,7 +160,6 @@ Installed in isolated environments to avoid breaking system Python:
 | `lazygit` | `~/.config/lazygit/config.yml` |
 | `fontconfig` | `~/.config/fontconfig/fonts.conf` |
 | `neofetch` | `~/.config/neofetch/config.conf` |
-| `htop` | `~/.config/htop/htoprc` |
 | `btop` | `~/.config/btop/btop.conf` |
 | `tmux` | `~/.config/tmux/tmux.conf` |
 | `qutebrowser` | `~/.config/qutebrowser/` |
@@ -201,7 +191,8 @@ sudo ninja -C build install
 Then relogin, or run:
 
 ```bash
-systemctl --user import-environment
+systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS PATH
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS PATH
 systemctl --user restart xdg-desktop-portal-termfilechooser.service
 ```
 
@@ -218,13 +209,12 @@ EOF
 
 ### 3) Polybar hardware names
 
-`polybar/.config/polybar/config.ini` currently assumes:
+`polybar/.config/polybar/config.ini` uses auto-detection by default:
 
-- Wi-Fi interface: `wlo1`
-- Battery: `BAT0`
-- AC adapter: `ADP1`
+- Wireless interface is auto-detected via `interface-type = wireless`.
+- Battery/AC names are auto-detected in `polybar/.config/polybar/launch_polybar.sh` and exported as `POLYBAR_BATTERY`/`POLYBAR_ADAPTER`.
 
-Adjust if your system uses different names.
+If needed, you can still override manually via environment variables before launching polybar.
 
 ### 4) Betterlockscreen cache (recommended)
 
@@ -255,3 +245,18 @@ Expected install locations:
 ### 7) CUDA (optional)
 
 Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
+
+## Machine-Local Overrides (Recommended)
+
+Keep personal and machine-specific values in local files, not in this public repo:
+
+- Git identity/settings: `~/.gitconfig.local` (included by `~/.gitconfig`)
+- Fish local env vars/secrets: `~/.config/fish/local.fish` (sourced from `config.fish` if present)
+
+Example for `~/.config/fish/local.fish`:
+
+```fish
+set -gx GOOGLE_CLOUD_PROJECT your-project-id
+set -gx GOOGLE_APPLICATION_CREDENTIALS $HOME/.config/gcloud/application_default_credentials.json
+set -gx VERTEX_LOCATION global
+```
