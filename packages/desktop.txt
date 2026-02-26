@@ -31,4 +31,3 @@ vlc
 qutebrowser
 alacritty
 neofetch
-htop

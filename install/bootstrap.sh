@@ -22,17 +22,28 @@ detect_os() {
         DISTRO=$ID
     elif type lsb_release >/dev/null 2>&1; then
         OS=$(lsb_release -si)
-        DISTRO=$(lsb_release -sc)
+        DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
     elif [ -f /etc/lsb-release ]; then
         . /etc/lsb-release
         OS=$DISTRIB_ID
-        DISTRO=$DISTRIB_CODENAME
+        DISTRO=$(printf '%s' "$DISTRIB_ID" | tr '[:upper:]' '[:lower:]')
     elif [ -f /etc/debian_version ]; then
         OS="Debian"
         DISTRO="debian"
     else
         OS=$(uname -s)
     fi
+}
+
+ensure_supported_distro() {
+    case "$DISTRO" in
+        ubuntu|debian)
+            return
+            ;;
+        *)
+            die "Unsupported distribution: $DISTRO. This installer currently supports Ubuntu and Debian only."
+            ;;
+    esac
 }
 
 detect_os
@@ -47,29 +58,9 @@ install_pkg() {
 
     info "Installing packages: ${packages[*]}"
 
-    case "$DISTRO" in
-        ubuntu|debian|pop|mint|kali)
-            sudo apt-get update -y
-            sudo apt-get install -y "${packages[@]}"
-            ;;
-        fedora)
-            sudo dnf install -y "${packages[@]}"
-            ;;
-        centos|rhel)
-            sudo yum install -y "${packages[@]}"
-            ;;
-        arch|manjaro)
-            sudo pacman -S --noconfirm "${packages[@]}"
-            ;;
-        *)
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                 brew install "${packages[@]}"
-            else
-                warn "Unsupported distribution for automatic package installation: $DISTRO"
-                warn "Please install these packages manually: ${packages[*]}"
-            fi
-            ;;
-    esac
+    ensure_supported_distro
+    sudo apt-get update -y
+    sudo apt-get install -y "${packages[@]}"
 }
 
 # Check if a command exists

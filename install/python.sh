@@ -5,16 +5,7 @@ install_python_tools() {
 
     if ! command -v pipx &>/dev/null; then
         info "Installing pipx..."
-        if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
-            sudo apt install -y pipx
-        elif [[ "$DISTRO" == "arch" ]]; then
-            sudo pacman -S --noconfirm python-pipx
-        elif [[ "$DISTRO" == "fedora" ]]; then
-            sudo dnf install -y pipx
-        else
-            python3 -m pip install --user pipx
-            python3 -m pipx ensurepath
-        fi
+        install_pkg pipx
     fi
     
     # Ensure pipx path is available

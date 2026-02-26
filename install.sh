@@ -94,6 +94,8 @@ main() {
         return
     fi
 
+    ensure_supported_distro
+
     # System Packages
     if [ "$INSTALL_PACKAGES" = true ]; then
         if [ "$SKIP_PPAS" = false ]; then
@@ -104,6 +106,7 @@ main() {
 
     # External Tools
     if [ "$INSTALL_TOOLS" = true ]; then
+        install_neovim
         install_fzf
         install_tpm
         install_starship
@@ -111,24 +114,27 @@ main() {
         install_yazi
         install_lazygit
         install_opencode
-        install_betterlockscreen
         install_python_tools
-        
-        # Zen browser only if desktop
+
+        # Desktop-only tools
         if [ "$INSTALL_DESKTOP" = true ]; then
+            install_betterlockscreen
             install_zen
         fi
     fi
 
+    # Stow Packages
+    stow_packages
+
     # Fonts & Desktop Extras
-    if [ "$INSTALL_FONTS" = true ] && [ "$INSTALL_DESKTOP" = true ]; then
-        install_fonts
+    if [ "$INSTALL_DESKTOP" = true ]; then
+        if [ "$INSTALL_FONTS" = true ]; then
+            install_fonts
+        fi
+
         set_wallpaper
         configure_mime
     fi
-
-    # Stow Packages
-    stow_packages
 
     echo ""
     log "Installation Complete!"

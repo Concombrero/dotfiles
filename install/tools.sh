@@ -1,5 +1,47 @@
 #!/usr/bin/env bash
 
+install_neovim() {
+    if command -v nvim &>/dev/null; then
+        warn "Neovim already installed, skipping."
+        return
+    fi
+
+    info "Installing Neovim from official release archive..."
+
+    local arch asset
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset="nvim-linux-x86_64.tar.gz"
+            ;;
+        aarch64|arm64)
+            asset="nvim-linux-arm64.tar.gz"
+            ;;
+        *)
+            error "Unsupported architecture for Neovim prebuilt archive: $arch"
+            return
+            ;;
+    esac
+
+    local tmp_dir archive extracted_dir install_dir
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/$asset"
+    extracted_dir="$tmp_dir/${asset%.tar.gz}"
+    install_dir="$HOME/.local/opt/nvim"
+
+    curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/${asset}" -o "$archive"
+    tar -xzf "$archive" -C "$tmp_dir"
+
+    mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+    rm -rf "$install_dir"
+    mv "$extracted_dir" "$install_dir"
+    ln -sfn "$install_dir/bin/nvim" "$HOME/.local/bin/nvim"
+
+    rm -rf "$tmp_dir"
+    log "Neovim installed to ~/.local/opt/nvim."
+}
+
 install_fzf() {
     if [ -d "$HOME/.fzf" ]; then
         warn "fzf already installed at ~/.fzf, skipping."
