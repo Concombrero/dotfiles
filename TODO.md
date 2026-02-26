@@ -4,3 +4,7 @@
  - nvim, alacritty (already in omarchy)
  - yazi, qutebrowser, zathura , zen: add compatibility (not in default omarchy)
 
+
+- qutebrowser : 
+   - fix opening in tmux
+   - remove tabbar

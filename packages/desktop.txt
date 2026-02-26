@@ -30,4 +30,4 @@ latexmk
 vlc
 qutebrowser
 alacritty
-neofetch
+fastfetch

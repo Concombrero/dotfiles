@@ -117,7 +117,7 @@ Example:
 Defined in `packages/common.txt` and `packages/desktop.txt`.
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `python3`, `nodejs`, `npm`, `btop`
-- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `neofetch`, `zathura`, `sxiv`, `qutebrowser`
+- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
 
 ### External Tools/Binaries
 - `neovim` (official prebuilt archive from GitHub releases)
@@ -159,7 +159,7 @@ Installed in isolated environments to avoid breaking system Python:
 | `zathura` | `~/.config/zathura/` |
 | `lazygit` | `~/.config/lazygit/config.yml` |
 | `fontconfig` | `~/.config/fontconfig/fonts.conf` |
-| `neofetch` | `~/.config/neofetch/config.conf` |
+| `fastfetch` | `~/.config/fastfetch/config.jsonc` |
 | `btop` | `~/.config/btop/btop.conf` |
 | `tmux` | `~/.config/tmux/tmux.conf` |
 | `qutebrowser` | `~/.config/qutebrowser/` |

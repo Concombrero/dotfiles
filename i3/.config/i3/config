@@ -65,16 +65,17 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 # start a terminal
-bindsym $mod+Return exec i3-sensible-terminal
+set $terminal alacritty
+bindsym $mod+Return exec --no-startup-id $terminal
 
 #start zen browser
 bindsym $mod+z exec --no-startup-id ~/.local/bin/zen --from-i3
 
 #start neovim
-bindsym $mod+n exec i3-sensible-terminal -e nvim
+bindsym $mod+n exec --no-startup-id $terminal -e nvim
 
 #start lazygit
-bindsym $mod+g exec i3-sensible-terminal -e lazygit
+bindsym $mod+g exec --no-startup-id $terminal -e lazygit
 
 # kill focused window
 bindsym $mod+q kill

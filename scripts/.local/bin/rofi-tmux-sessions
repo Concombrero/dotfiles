@@ -4,7 +4,8 @@ set -uo pipefail
 
 # Launch terminal with tmux command
 launch_terminal() {
-  local cmd="exec i3-sensible-terminal -e tmux"
+  local terminal="${TERMINAL:-alacritty}"
+  local cmd="exec ${terminal} -e tmux"
   for arg in "$@"; do
     cmd+=" \"$arg\""
   done
