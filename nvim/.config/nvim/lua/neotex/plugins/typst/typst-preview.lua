@@ -20,7 +20,7 @@ return {
       -- `env -u TMUX` prevents qutebrowser from inheriting tmux-specific env.
       -- `setsid -f` (or nohup fallback) detaches browser launch cleanly.
       local open_cmd = string.format(
-        "sh -c 'if command -v setsid >/dev/null 2>&1; then setsid -f env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1; else nohup env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1 & fi' typst-preview %s %%s",
+        "sh -c 'if command -v setsid >/dev/null 2>&1; then setsid -f env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1; else nohup env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1 & fi' typst-preview %s \"%%s\"",
         escaped_config
       )
 
