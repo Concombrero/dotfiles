@@ -21,11 +21,9 @@ exec_always --no-startup-id setxkbmap -option caps:swapescape
 exec_always --no-startup-id picom
 
 exec --no-startup-id dex --autostart --environment i3
-# Import full environment into systemd user session, then restart the portal
-# so it picks up DISPLAY, XAUTHORITY, etc. The portal may have started before
-# this import, so restarting it ensures a clean environment.
-
-exec --no-startup-id systemctl --user import-environment && systemctl --user restart xdg-desktop-portal.service xdg-desktop-portal-termfilechooser.service
+# Import GUI variables into systemd/dbus activation environments, then restart
+# portal services so file choosers and screen-sharing helpers inherit them.
+exec --no-startup-id sh -c 'systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS PATH; if command -v dbus-update-activation-environment >/dev/null 2>&1; then dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS PATH; fi; systemctl --user restart xdg-desktop-portal.service xdg-desktop-portal-termfilechooser.service'
 
 # Status bar 
 exec_always --no-startup-id killall polybar

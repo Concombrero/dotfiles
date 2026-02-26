@@ -1,4 +1,29 @@
-DIR="$HOME/.config/polybar"
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+DIR="${XDG_CONFIG_HOME:-$HOME/.config}/polybar"
+
+detect_power_supply_names() {
+  local supply type name
+
+  for supply in /sys/class/power_supply/*; do
+    [ -e "$supply/type" ] || continue
+    type="$(tr '[:upper:]' '[:lower:]' < "$supply/type")"
+    name="$(basename "$supply")"
+
+    case "$type" in
+      battery)
+        : "${POLYBAR_BATTERY:=$name}"
+        ;;
+      mains|ac)
+        : "${POLYBAR_ADAPTER:=$name}"
+        ;;
+    esac
+  done
+
+  export POLYBAR_BATTERY POLYBAR_ADAPTER
+}
 
 # Wait until PulseAudio-compatible socket is ready (PipeWire-Pulse on modern setups)
 if command -v pactl >/dev/null 2>&1; then
@@ -12,10 +37,12 @@ if command -v pactl >/dev/null 2>&1; then
   done
 fi
 
-if type "xrandr"; then
-  for m in $(xrandr --query | grep " connected" | cut -d" " -f1); do
-    MONITOR=$m polybar --reload --config="$DIR/config.ini" toph &
-  done
+detect_power_supply_names
+
+if command -v xrandr >/dev/null 2>&1; then
+  while IFS= read -r monitor; do
+    MONITOR="$monitor" polybar --reload --config="$DIR/config.ini" toph &
+  done < <(xrandr --query | awk '/ connected/{print $1}')
 else
-  polybar --reload toph &
-fi 
+  polybar --reload --config="$DIR/config.ini" toph &
+fi
