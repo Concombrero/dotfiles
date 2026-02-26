@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+set -eu
+
+if [ "$#" -lt 1 ]; then
+  printf '%s\n' "usage: qutebrowser-typst-preview <url>" >&2
+  exit 2
+fi
+
+url="$1"
+config_py="${QUTEBROWSER_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/qutebrowser/config.py}"
+
+if command -v systemctl >/dev/null 2>&1; then
+  systemd_env="$(systemctl --user show-environment 2>/dev/null || true)"
+  display="$(printf '%s\n' "$systemd_env" | awk -F= '$1=="DISPLAY"{print $2; exit}')"
+  xauthority="$(printf '%s\n' "$systemd_env" | awk -F= '$1=="XAUTHORITY"{print $2; exit}')"
+
+  if [ -n "$display" ]; then
+    export DISPLAY="$display"
+  fi
+
+  if [ -n "$xauthority" ] && [ -f "$xauthority" ]; then
+    export XAUTHORITY="$xauthority"
+  fi
+fi
+
+if [ -f "$config_py" ]; then
+  exec qutebrowser --temp-basedir -C "$config_py" "$url"
+fi
+
+exec qutebrowser --temp-basedir "$url"

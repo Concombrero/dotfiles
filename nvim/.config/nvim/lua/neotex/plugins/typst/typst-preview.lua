@@ -10,19 +10,33 @@ return {
     version = '1.*',
     config = function()
       local mason_tinymist = vim.fn.executable('tinymist') == 1 and 'tinymist' or nil
-      local config_py = vim.fn.expand('~/.config/qutebrowser/config.py')
-      local escaped_config = vim.fn.shellescape(config_py)
+      local config_dir = vim.fn.resolve(vim.fn.stdpath('config'))
+      local repo_root = vim.fn.fnamemodify(config_dir, ':h:h:h')
+      local wrapper_candidates = {
+        vim.fn.expand('~/.local/bin/qutebrowser-typst-preview'),
+        repo_root .. '/scripts/.local/bin/qutebrowser-typst-preview',
+        'qutebrowser-typst-preview',
+      }
 
-      -- --temp-basedir: spawns a separate qutebrowser instance with a
-      --   temporary data directory (auto-cleaned on exit).
-      -- -C: loads the user's config.py so themes and settings are preserved.
-      -- Use `sh -c ...` with positional args so paths and URLs remain safely quoted.
-      -- `env -u TMUX` prevents qutebrowser from inheriting tmux-specific env.
-      -- `setsid -f` (or nohup fallback) detaches browser launch cleanly.
-      local open_cmd = string.format(
-        "sh -c 'if command -v setsid >/dev/null 2>&1; then setsid -f env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1; else nohup env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1 & fi' typst-preview %s \"%%s\"",
-        escaped_config
-      )
+      local wrapper
+      for _, candidate in ipairs(wrapper_candidates) do
+        if vim.fn.executable(candidate) == 1 then
+          wrapper = candidate
+          break
+        end
+      end
+
+      local open_cmd
+
+      if wrapper then
+        open_cmd = string.format('%s "%%s" >/dev/null 2>&1', vim.fn.shellescape(wrapper))
+      else
+        local config_py = vim.fn.expand('~/.config/qutebrowser/config.py')
+        open_cmd = string.format(
+          'qutebrowser --temp-basedir -C %s "%%s" >/dev/null 2>&1',
+          vim.fn.shellescape(config_py)
+        )
+      end
 
       require('typst-preview').setup({
         open_cmd = open_cmd,
