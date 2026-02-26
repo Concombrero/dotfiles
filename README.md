@@ -211,7 +211,7 @@ EOF
 
 `polybar/.config/polybar/config.ini` uses auto-detection by default:
 
-- Wireless interface is auto-detected via `interface-type = wireless`.
+- Wireless interface is auto-detected in `polybar/.config/polybar/launch_polybar.sh` and exported as `POLYBAR_WLAN_INTERFACE`.
 - Battery/AC names are auto-detected in `polybar/.config/polybar/launch_polybar.sh` and exported as `POLYBAR_BATTERY`/`POLYBAR_ADAPTER`.
 
 If needed, you can still override manually via environment variables before launching polybar.

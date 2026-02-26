@@ -25,6 +25,71 @@ detect_power_supply_names() {
   export POLYBAR_BATTERY POLYBAR_ADAPTER
 }
 
+detect_network_interfaces() {
+  local iface state default_iface
+
+  default_iface=""
+  if command -v ip >/dev/null 2>&1; then
+    default_iface="$(ip route show default 2>/dev/null | awk '{print $5; exit}')"
+  fi
+
+  if [ -n "${default_iface:-}" ] && [ -d "/sys/class/net/$default_iface/wireless" ]; then
+    POLYBAR_WLAN_INTERFACE="$default_iface"
+  fi
+
+  if [ -z "${POLYBAR_WLAN_INTERFACE:-}" ]; then
+    for iface in /sys/class/net/*; do
+      iface="$(basename "$iface")"
+      [ "$iface" = "lo" ] && continue
+      [ -d "/sys/class/net/$iface/wireless" ] || continue
+      state="$(cat "/sys/class/net/$iface/operstate" 2>/dev/null || true)"
+      if [ "$state" = "up" ]; then
+        POLYBAR_WLAN_INTERFACE="$iface"
+        break
+      fi
+    done
+  fi
+
+  if [ -z "${POLYBAR_WLAN_INTERFACE:-}" ]; then
+    for iface in /sys/class/net/*; do
+      iface="$(basename "$iface")"
+      [ "$iface" = "lo" ] && continue
+      [ -d "/sys/class/net/$iface/wireless" ] || continue
+      POLYBAR_WLAN_INTERFACE="$iface"
+      break
+    done
+  fi
+
+  if [ -n "${default_iface:-}" ] && [ ! -d "/sys/class/net/$default_iface/wireless" ]; then
+    POLYBAR_ETH_INTERFACE="$default_iface"
+  fi
+
+  if [ -z "${POLYBAR_ETH_INTERFACE:-}" ]; then
+    for iface in /sys/class/net/*; do
+      iface="$(basename "$iface")"
+      [ "$iface" = "lo" ] && continue
+      [ -d "/sys/class/net/$iface/wireless" ] && continue
+      state="$(cat "/sys/class/net/$iface/operstate" 2>/dev/null || true)"
+      if [ "$state" = "up" ]; then
+        POLYBAR_ETH_INTERFACE="$iface"
+        break
+      fi
+    done
+  fi
+
+  if [ -z "${POLYBAR_ETH_INTERFACE:-}" ]; then
+    for iface in /sys/class/net/*; do
+      iface="$(basename "$iface")"
+      [ "$iface" = "lo" ] && continue
+      [ -d "/sys/class/net/$iface/wireless" ] && continue
+      POLYBAR_ETH_INTERFACE="$iface"
+      break
+    done
+  fi
+
+  export POLYBAR_WLAN_INTERFACE POLYBAR_ETH_INTERFACE
+}
+
 # Wait until PulseAudio-compatible socket is ready (PipeWire-Pulse on modern setups)
 if command -v pactl >/dev/null 2>&1; then
   attempts=30
@@ -38,6 +103,7 @@ if command -v pactl >/dev/null 2>&1; then
 fi
 
 detect_power_supply_names
+detect_network_interfaces
 
 if command -v xrandr >/dev/null 2>&1; then
   while IFS= read -r monitor; do
