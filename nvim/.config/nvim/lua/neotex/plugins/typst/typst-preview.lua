@@ -11,14 +11,17 @@ return {
     config = function()
       local mason_tinymist = vim.fn.executable('tinymist') == 1 and 'tinymist' or nil
       local config_py = vim.fn.expand('~/.config/qutebrowser/config.py')
+      local escaped_config = vim.fn.shellescape(config_py)
 
       -- --temp-basedir: spawns a separate qutebrowser instance with a
       --   temporary data directory (auto-cleaned on exit).
       -- -C: loads the user's config.py so themes and settings are preserved.
-      -- 2>/dev/null: suppresses harmless startup warnings on stderr.
+      -- Use `sh -c ...` with positional args so paths and URLs remain safely quoted.
+      -- `env -u TMUX` prevents qutebrowser from inheriting tmux-specific env.
+      -- `setsid -f` (or nohup fallback) detaches browser launch cleanly.
       local open_cmd = string.format(
-        'qutebrowser --temp-basedir -C %s %%s 2>/dev/null',
-        vim.fn.shellescape(config_py)
+        "sh -c 'if command -v setsid >/dev/null 2>&1; then setsid -f env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1; else nohup env -u TMUX qutebrowser --temp-basedir -C \"$1\" \"$2\" >/dev/null 2>&1 & fi' typst-preview %s %%s",
+        escaped_config
       )
 
       require('typst-preview').setup({

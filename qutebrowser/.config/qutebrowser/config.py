@@ -13,3 +13,6 @@ if not os.path.exists(config.configdir / "theme.py"):
 if os.path.exists(config.configdir / "theme.py"):
     import theme
     theme.setup(c, 'mocha', False)
+
+# Always hide the tab bar.
+c.tabs.show = "never"
