@@ -150,43 +150,6 @@ local function setup_lazy()
   end, "setup of lazy.nvim plugins")
 end
 
--- Setup Jupyter notebook styling with proper error handling
-local function setup_jupyter_styling()
-  -- Create a VimEnter autocmd for deferred Jupyter styling setup
-  vim.api.nvim_create_autocmd("VimEnter", {
-    callback = function()
-      vim.defer_fn(function()
-        -- Safely attempt to load the styling module
-        with_error_handling(function()
-          local ok, styling
-          
-          -- First, check if any ipynb files are open before loading the styling
-          local any_ipynb = false
-          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-            local bufname = vim.api.nvim_buf_get_name(buf)
-            if bufname:match("%.ipynb$") then
-              any_ipynb = true
-              break
-            end
-          end
-          
-          -- Only load styling if needed
-          if any_ipynb then
-            ok, styling = pcall(require, "neotex.plugins.text.jupyter.styling")
-            if ok and type(styling) == "table" and styling.setup then
-              styling.setup()
-            end
-          end
-        end, "setup of Jupyter notebook styling")
-      end, 1500) -- Increased delay to ensure all plugins are loaded
-    end,
-    once = true
-  })
-  
-  -- Always return true since the actual setup is deferred
-  return true
-end
-
 -- Initialize utilities with error handling
 local function setup_utils()
   return with_error_handling(function()
@@ -205,7 +168,6 @@ function M.init()
     { func = validate_lockfile, name = "Validate lazy-lock.json" },
     { func = setup_lazy, name = "Set up plugins with lazy.nvim" },
     { func = setup_utils, name = "Initialize utility functions" },
-    { func = setup_jupyter_styling, name = "Configure Jupyter styling" },
   }
   
   local success = true
