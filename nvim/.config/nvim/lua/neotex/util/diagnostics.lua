@@ -4,7 +4,6 @@
 -- This module provides functions for working with diagnostics:
 -- - Viewing and navigating errors (show_all_errors, jump_to_error)
 -- - Diagnostic management (copy_diagnostics_to_clipboard)
--- - Jupyter notebook integration (add_jupyter_cell_with_closing)
 --
 -- The utilities enhance the built-in LSP diagnostic capabilities
 -- with more user-friendly interfaces and additional functionality.
@@ -86,36 +85,6 @@ function M.jump_to_error()
     vim.api.nvim_win_set_cursor(0, { line_num, 0 }) -- Move to line
     vim.cmd("normal! zz")       -- Center the view
     vim.diagnostic.open_float() -- Show the diagnostic at current position
-  end
-end
-
--- Enhanced function to add a Jupyter cell with both opening and closing markers
-function M.add_jupyter_cell_with_closing()
-  local ok, nn = pcall(require, "notebook-navigator")
-  if not ok then
-    vim.notify("NotebookNavigator plugin not found", vim.log.levels.ERROR)
-    return
-  end
-  
-  -- Get the current buffer
-  local bufnr = vim.api.nvim_get_current_buf()
-  local bufname = vim.api.nvim_buf_get_name(bufnr)
-  
-  -- Only for ipynb files
-  if bufname:match("%.ipynb$") then
-    -- Get cursor position
-    local pos = vim.api.nvim_win_get_cursor(0)
-    local row = pos[1]
-    
-    -- Insert Python markdown cell
-    vim.api.nvim_buf_set_lines(bufnr, row, row, false, 
-      { "```python", "", "```" })
-    
-    -- Move cursor to the empty line between markers
-    vim.api.nvim_win_set_cursor(0, { row + 2, 0 })
-  else
-    -- For other files, use the default behavior
-    nn.add_cell_below()
   end
 end
 

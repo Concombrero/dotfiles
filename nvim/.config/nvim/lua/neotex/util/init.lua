@@ -66,6 +66,7 @@ function M._load_submodules()
     "url",
     "diagnostics",
     "misc",
+    "jupyter",
   }
   
   local loaded = {}

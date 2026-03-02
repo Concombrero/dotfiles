@@ -69,24 +69,18 @@ FIND (<leader>f)                                | LABEL
 JUPYTER (<leader>j)                             | LABEL
 -----------------------------------------------------------
 <leader>ja                                      | run all cells
-<leader>jb                                      | run cells below
-<leader>jc                                      | comment cell
-<leader>jd                                      | merge with cell below
-<leader>je                                      | execute cell
-<leader>jf                                      | send file to REPL
-<leader>ji                                      | start IPython REPL
-<leader>jj                                      | next cell
-<leader>jk                                      | previous cell
-<leader>jl                                      | send line to REPL
-<leader>jn                                      | execute and next
-<leader>jo                                      | insert cell below
-<leader>jO                                      | insert cell above
-<leader>jq                                      | exit REPL
-<leader>jr                                      | clear REPL
-<leader>js                                      | split cell
-<leader>jt                                      | send motion to REPL
-<leader>ju                                      | merge with cell above
-<leader>jv                                      | send visual selection to REPL
+<leader>jb                                      | run selected and below
+<leader>jc                                      | connect Neopyter
+<leader>je                                      | run current cell
+<leader>ji                                      | Neopyter status
+<leader>jI                                      | convert ipynb to ju.py
+<leader>jn                                      | run and select next
+<leader>jo                                      | open notebook in browser
+<leader>jr                                      | restart kernel
+<leader>jR                                      | restart and run all
+<leader>js                                      | sync current notebook tab
+<leader>jS                                      | save ipynb with outputs
+<leader>jv                                      | bootstrap .venv (py3.12)
 
 LSP & LINT (<leader>l)                          | LABEL
 -----------------------------------------------------------
@@ -289,30 +283,19 @@ return {
       -- LIST MAPPINGS
       j = {
         name = "JUPYTER",
-        -- NotebookNavigator commands
-        e = { "<cmd>lua require('notebook-navigator').run_cell()<CR>", "execute cell" },
-        j = { "<cmd>lua require('notebook-navigator').move_cell('d')<CR>", "next cell" },
-        k = { "<cmd>lua require('notebook-navigator').move_cell('u')<CR>", "previous cell" },
-        n = { "<cmd>lua require('notebook-navigator').run_and_move()<CR>", "execute and next" },
-        o = { "<cmd>lua require('neotex.util.diagnostics').add_jupyter_cell_with_closing()<CR>", "insert cell below" },
-        O = { "<cmd>lua require('notebook-navigator').add_cell_above()<CR>", "insert cell above" },
-        s = { "<cmd>lua require('notebook-navigator').split_cell()<CR>", "split cell" },
-        c = { "<cmd>lua require('notebook-navigator').comment_cell()<CR>", "comment cell" },
-
-        -- Additional NotebookNavigator features
-        a = { "<cmd>lua require('notebook-navigator').run_all_cells()<CR>", "run all cells" },
-        b = { "<cmd>lua require('notebook-navigator').run_cells_below()<CR>", "run cells below" },
-        u = { "<cmd>lua require('notebook-navigator').merge_cell('u')<CR>", "merge with cell above" },
-        d = { "<cmd>lua require('notebook-navigator').merge_cell('d')<CR>", "merge with cell below" },
-
-        -- Iron.nvim REPL integration
-        i = { "<cmd>lua require('iron.core').repl_for('python')<CR>", "start IPython REPL" },
-        t = { "<cmd>lua require('iron.core').run_motion('send_motion')<CR>", "send motion to REPL" },
-        l = { "<cmd>lua require('iron.core').send_line()<CR>", "send line to REPL" },
-        f = { "<cmd>lua require('iron.core').send(nil, vim.fn.readfile(vim.fn.expand('%')))<CR>", "send file to REPL" },
-        q = { "<cmd>lua require('iron.core').close_repl()<CR>", "exit REPL" },
-        r = { "<cmd>lua require('iron.core').send(nil, string.char(12))<CR>", "clear REPL" },
-        v = { "<cmd>lua require('iron.core').visual_send()<CR>", "send visual selection to REPL" },
+        c = { "<cmd>Neopyter connect<CR>", "connect Neopyter" },
+        i = { "<cmd>Neopyter status<CR>", "Neopyter status" },
+        I = { "<cmd>lua require('neotex.util.jupyter').convert_current_ipynb_to_ju()<CR>", "convert ipynb to ju.py" },
+        s = { "<cmd>Neopyter sync current<CR>", "sync current notebook tab" },
+        e = { "<cmd>Neopyter run current<CR>", "run current cell" },
+        n = { "<cmd>Neopyter execute notebook:run-cell-and-select-next<CR>", "run and select next" },
+        o = { "<cmd>lua require('neotex.util.jupyter').open_current_notebook()<CR>", "open notebook in browser" },
+        a = { "<cmd>Neopyter run all<CR>", "run all cells" },
+        b = { "<cmd>Neopyter run allBelow<CR>", "run selected and below" },
+        r = { "<cmd>Neopyter kernel restart<CR>", "restart kernel" },
+        R = { "<cmd>Neopyter kernel restartRunAll<CR>", "restart and run all" },
+        v = { "<cmd>lua require('neotex.util.jupyter').setup_project_venv()<CR>", "bootstrap .venv (py3.12)" },
+        S = { "<cmd>lua require('neotex.util.jupyter').save_current_as_ipynb()<CR>", "save ipynb with outputs" },
       },
       L = {
         name = "LIST",
