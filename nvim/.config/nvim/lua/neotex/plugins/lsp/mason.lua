@@ -121,39 +121,45 @@ return {
     })
 
     -- MASON-TOOL-INSTALLER SETUP
+    local ensure_installed_tools = {
+      -- LSP servers
+      "pyright",
+      "texlab",
+      "tinymist",
+      "lua-language-server",
+
+      -- Formatters
+      "stylua",
+      "isort",
+      "black",
+      "prettier",
+      "clang-format",
+      "shfmt",
+      "latexindent",
+
+      -- Linters / diagnostics tools
+      "pylint",
+      "eslint_d",
+      "stylelint",
+      "jsonlint",
+      "yamllint",
+      "markdownlint",
+      "shellcheck",
+      "selene",
+      "htmlhint",
+      "cpplint",
+
+      -- Notebook tooling
+      "jupytext",
+    }
+
+    -- luacheck is installed via luarocks in Mason.
+    if vim.fn.executable("luarocks") == 1 then
+      table.insert(ensure_installed_tools, "luacheck")
+    end
+
     mason_tool_installer.setup({
-      ensure_installed = {
-        -- LSP servers
-        "pyright",
-        "texlab",
-        "tinymist",
-        "lua-language-server",
-
-        -- Formatters
-        "stylua",
-        "isort",
-        "black",
-        "prettier",
-        "clang-format",
-        "shfmt",
-        "latexindent",
-
-        -- Linters / diagnostics tools
-        "pylint",
-        "eslint_d",
-        "stylelint",
-        "jsonlint",
-        "yamllint",
-        "markdownlint",
-        "shellcheck",
-        "selene",
-        "luacheck",
-        "htmlhint",
-        "cpplint",
-
-        -- Notebook tooling
-        "jupytext",
-      },
+      ensure_installed = ensure_installed_tools,
     })
 
     -- Disable stylua from being enabled as an LSP server (it's a formatter)
