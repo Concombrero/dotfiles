@@ -292,7 +292,6 @@ client.background        $base
 
 # Prevent dunst notifications from stealing focus
 no_focus [class="Dunst"]
-no_focus [class="flameshot"]
 
 # Set default border for all windows
 default_border none
