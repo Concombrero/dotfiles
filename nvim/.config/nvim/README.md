@@ -14,7 +14,7 @@ This file is intentionally concise and points to focused docs in this repo.
 - LaTeX: VimTeX workflow (build/view/toc/context/citations)
 - Markdown: checkbox helpers, preview support
 - Typst: tinymist LSP + typst preview tooling
-- Jupyter: jupytext + notebook-navigator + iron.nvim integration
+- Jupyter: jupytext + Neopyter (JupyterLab bridge) workflow
 - LSP: pyright, texlab, tinymist, lua-language-server
 - Formatting: conform.nvim (`<leader>mp`) with per-filetype formatters
 - Linting: nvim-lint (`<leader>l` / `<leader>lL`) with executable-aware setup
@@ -53,20 +53,18 @@ adjust your local citation workflow settings.
 
 ## AI Workflow
 
-AI mappings live under `<leader>h`.
+AI mappings are split by tool:
 
 - OpenCode:
-  - `<leader>ha` ask about current context
-  - `<leader>hc` action picker
-  - `<leader>ht` toggle OpenCode terminal
+  - `<leader>o` prefix (provided by opencode.nvim defaults)
 - Copilot:
-  - `<leader>he` enable
-  - `<leader>hd` disable
-  - `<leader>hs` status
-  - `<leader>hp` panel
-  - `<leader>hn` / `<leader>hb` next/prev suggestion
-  - `<leader>hl` / `<leader>hw` accept line/word
-  - `<leader>hx` dismiss suggestion
+  - `<leader>ce` enable
+  - `<leader>cd` disable
+  - `<leader>cs` status
+  - `<leader>cp` panel
+  - `<leader>cn` / `<leader>cb` next/prev suggestion
+  - `<leader>cl` / `<leader>cw` accept line/word
+  - `<leader>cx` dismiss suggestion
 
 Notes:
 
@@ -75,18 +73,54 @@ Notes:
 
 ## Jupyter Workflow
 
-Notebook operations are grouped under `<leader>j`.
+NeoTex uses a two-file notebook model:
 
-- Core:
-  - `<leader>je` run cell
-  - `<leader>jn` run and move next
+- `.ju.py` (or `.ju.*`) is the editable source in Neovim.
+- `.ipynb` is the browser/shareable notebook representation.
+
+### Required Tools
+
+- `python3.12`
+- `jupyter lab`
+- `jupytext` CLI
+- `neopyter` Python package (JupyterLab extension)
+
+### Recommended Daily Flow
+
+1. Start from `.ipynb` and convert once with `<leader>jI` (opens `.ju.py`).
+2. In `.ju.py`, use `<leader>jo` to open notebook in qutebrowser and sync Neovim to that browser tab.
+3. Execute cells from Neovim (Ctrl/Shift/Alt Enter mappings below).
+4. Save rich-output notebook with `<leader>jS`.
+
+### `<leader>j` Mappings
+
+- Session and sync:
+  - `<leader>jo` open notebook in browser and connect/sync
+  - `<leader>jc` connect Neopyter
+  - `<leader>js` sync current notebook tab
+  - `<leader>ji` Neopyter status
+- Execution:
+  - `<leader>je` run current cell
+  - `<leader>jn` run cell and select next
   - `<leader>ja` run all cells
-  - `<leader>jj` / `<leader>jk` next/previous cell
-- REPL:
-  - `<leader>ji` start IPython REPL
-  - `<leader>jl` send line
-  - `<leader>jv` send visual selection
-  - `<leader>jf` send file
+  - `<leader>jb` run selected and below
+  - `<leader>jr` restart kernel
+  - `<leader>jR` restart kernel and run all
+- File operations:
+  - `<leader>jI` convert current `.ipynb` to `.ju.py` and open it
+  - `<leader>jS` save `.ipynb` with outputs
+  - `<leader>jv` bootstrap project `.venv` + register kernel (Python 3.12)
+
+### Cell Execution Shortcuts (`*.ju.*` buffers)
+
+- `<C-Enter>` / `<C-CR>` run current cell
+- `<S-Enter>` / `<S-CR>` run current cell and select next
+- `<A-Enter>` / `<A-CR>` run current cell and insert below
+
+### Notes
+
+- `.ipynb` opened directly in Neovim is handled by `jupytext.nvim` and shown as language text (usually Python), not raw JSON.
+- Neopyter direct mode uses a single local address (`127.0.0.1:9001`): multiple Neovim sessions can be open, but only one can own the active Neopyter bridge at a time.
 
 ## Tooling Model
 

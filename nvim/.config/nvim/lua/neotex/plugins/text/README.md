@@ -8,11 +8,10 @@ This directory contains writing-domain plugins and notebook text workflows.
 - `markdown-preview.lua`: markdown live preview command integration
 - `jupyter/`: notebook editing stack
   - `jupytext.nvim`
-  - `NotebookNavigator.nvim`
-  - `iron.nvim`
-  - notebook styling/autocommands modules
+  - `neopyter`
+  - Neopyter parser/disconnect patches for reliability
 
 ## Focus
 
 - academic writing workflows (LaTeX/Markdown)
-- notebook-style authoring and execution inside Neovim
+- notebook authoring and JupyterLab-synced execution from Neovim

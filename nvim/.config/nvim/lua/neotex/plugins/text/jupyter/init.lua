@@ -192,11 +192,6 @@ return {
           apply_neopyter_cell_keymaps(ev.buf)
         end,
       })
-
-      local ok_utils, jupyter_utils = pcall(require, "neotex.util.jupyter")
-      if ok_utils and type(jupyter_utils.setup) == "function" then
-        jupyter_utils.setup()
-      end
     end,
   },
 }

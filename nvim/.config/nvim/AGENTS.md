@@ -57,7 +57,11 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
 ### Testing
 - No test framework is configured for this NeoVim config itself.
 - For Python files edited in this NeoVim: run via `<leader>ap` (TermExec python3)
-- For Jupyter: `<leader>je` execute cell, `<leader>jn` execute and next, `<leader>ja` run all
+- For Jupyter/Neopyter:
+  - `<leader>jo` open notebook in browser and connect/sync
+  - `<leader>je` run cell, `<leader>jn` run and select next, `<leader>ja` run all
+  - `<leader>jI` convert `.ipynb` -> `.ju.py`, `<leader>jS` save `.ipynb` with outputs
+  - Buffer-local: `<C-Enter>` run cell, `<S-Enter>` run+next, `<A-Enter>` run+insert
 
 ### Performance Profiling
 - `:AnalyzeStartup` - Profile startup time (runs headless Neovim subprocess)
@@ -81,7 +85,7 @@ lua/neotex/
     lsp/                          lspconfig, mason, nvim-cmp, vimtex-cmp
     tools/                        gitsigns, lazygit, mini, surround, todo-comments,
                                   yanky, yazi, snacks, opencode, copilot
-    text/                         vimtex, markdown-preview, jupyter (jupytext, iron, notebook-navigator)
+    text/                         vimtex, markdown-preview, jupyter (jupytext + neopyter)
     ui/                           catppuccin theme, bufferline, lualine, nvim-web-devicons, sessions
     typst/                        typst-preview, typst.vim, typst-specific LuaSnip config
   util/
@@ -89,11 +93,12 @@ lua/neotex/
     buffer.lua                    Buffer navigation (sorted by modified time)
     fold.lua                      Fold management with persistence and markdown fold expr
     url.lua                       URL detection and opening (gx, Ctrl+Click)
-    diagnostics.lua               LSP diagnostic helpers, Jupyter cell utilities
+    diagnostics.lua               LSP diagnostic helper utilities
+    jupyter.lua                   Neopyter workflow helpers and notebook commands
     misc.lua                      OS detection, safe_execute, trim_whitespace, toggle_line_numbers
     optimize.lua                  Startup/plugin profiling suite
 after/ftplugin/                   Filetype overrides: python.lua, tex.lua, markdown.lua
-after/ftdetect/                   ipynb.lua (Jupyter notebook detection)
+after/ftdetect/                   ipynb.lua + ju.lua notebook filetype detection
 LuaSnip/                          Lua-based snippets: all.lua, lua.lua, typst.lua
 snippets/                         Snipmate-format: tex.snippets, markdown.snippets, python.snippets
 templates/                        LaTeX document templates (not mapped in which-key)
@@ -105,7 +110,7 @@ templates/                        LaTeX document templates (not mapped in which-
 1. `init.lua` sets `vim.g.mapleader = " "`, then `pcall(require, "neotex.config")` and `pcall(require, "neotex.bootstrap")`
 2. `neotex.config.init` calls `setup()` on options, keymaps, autocmds in order
 3. `neotex.bootstrap.init()` runs a sequential step pipeline:
-   cleanup_tmp_dirs -> ensure_lazy -> validate_lockfile -> setup_lazy -> setup_utils -> setup_jupyter_styling
+   cleanup_tmp_dirs -> ensure_lazy -> validate_lockfile -> setup_lazy -> setup_utils
 4. `setup_lazy()` calls `require("lazy").setup(...)` with imports for each plugin category
 5. `setup_utils()` loads all `neotex.util.*` submodules and calls their `setup()` functions
 
@@ -181,6 +186,6 @@ Setup functions return `true` on success for pipeline checking.
 - `vim.notify_level` set to `INFO` in init.lua
 
 ### Deferred Execution
-- Use `vim.defer_fn(fn, ms)` for non-critical initialization (URL mappings: 200ms, Jupyter: 1500ms)
+- Use `vim.defer_fn(fn, ms)` for non-critical initialization when needed
 - Use `vim.schedule()` for operations that must run in the main loop
 - Guard against duplicate setup with idempotency flags (e.g., `M._url_mappings_setup`)
