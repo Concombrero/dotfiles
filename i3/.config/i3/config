@@ -233,7 +233,7 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 #bind flameshot to printscreen
-bindsym Print exec --no-startup-id flameshot gui
+bindsym Print exec --no-startup-id ~/.local/bin/flameshot-gui-focus-fix
 # Monitor setup — CUSTOMIZE THIS for your hardware
 # Put machine-specific commands (xrandr, xmodmap, etc.) in ~/.config/i3/local.conf
 # That file is not tracked by git and won't be overwritten by stow.
@@ -292,6 +292,7 @@ client.background        $base
 
 # Prevent dunst notifications from stealing focus
 no_focus [class="Dunst"]
+no_focus [class="flameshot"]
 
 # Set default border for all windows
 default_border none

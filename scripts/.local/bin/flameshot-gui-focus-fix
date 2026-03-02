@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+previous_window=""
+if command -v xdotool >/dev/null 2>&1; then
+    previous_window="$(xdotool getactivewindow 2>/dev/null || true)"
+fi
+
+flameshot gui "$@"
+status=$?
+
+if [ -n "$previous_window" ] && command -v xdotool >/dev/null 2>&1; then
+    xdotool windowfocus "$previous_window" >/dev/null 2>&1 || true
+fi
+
+exit "$status"
