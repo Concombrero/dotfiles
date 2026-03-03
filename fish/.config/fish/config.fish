@@ -63,6 +63,40 @@ end
 # Use portal for file picker
 set -gx GTK_USE_PORTAL 1
 
+# Sync GUI/session environment from systemd user manager.
+# This keeps long-lived shells (tmux/resurrect) aligned with the active X11 session.
+if status is-interactive
+    if type -q systemctl
+        for entry in (systemctl --user show-environment 2>/dev/null)
+            switch $entry
+                case 'DISPLAY=*'
+                    set -gx DISPLAY (string sub -s 9 -- $entry)
+                case 'XAUTHORITY=*'
+                    set -gx XAUTHORITY (string sub -s 12 -- $entry)
+                case 'DBUS_SESSION_BUS_ADDRESS=*'
+                    set -gx DBUS_SESSION_BUS_ADDRESS (string sub -s 26 -- $entry)
+                case 'XDG_RUNTIME_DIR=*'
+                    set -gx XDG_RUNTIME_DIR (string sub -s 17 -- $entry)
+                case 'XDG_SESSION_TYPE=*'
+                    set -gx XDG_SESSION_TYPE (string sub -s 18 -- $entry)
+                case 'XDG_CURRENT_DESKTOP=*'
+                    set -gx XDG_CURRENT_DESKTOP (string sub -s 21 -- $entry)
+                case 'I3SOCK=*'
+                    set -gx I3SOCK (string sub -s 8 -- $entry)
+            end
+        end
+    end
+
+    # Also refresh tmux server env for new panes/windows.
+    if set -q TMUX
+        for key in DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_SESSION_TYPE XDG_CURRENT_DESKTOP I3SOCK
+            if set -q $key
+                tmux set-environment -g $key $$key >/dev/null 2>&1
+            end
+        end
+    end
+end
+
 # Machine-local overrides (optional):
 # Put personal env vars, tokens, cloud project IDs, etc. in
 # ~/.config/fish/local.fish so this public repo stays portable.

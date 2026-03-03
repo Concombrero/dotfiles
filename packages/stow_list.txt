@@ -16,6 +16,7 @@ fontconfig
 fastfetch
 btop
 tmux
+systemd
 qutebrowser
 xdg-desktop-portal
 xdg-desktop-portal-termfilechooser

@@ -162,6 +162,7 @@ Installed in isolated environments to avoid breaking system Python:
 | `fastfetch` | `~/.config/fastfetch/config.jsonc` |
 | `btop` | `~/.config/btop/btop.conf` |
 | `tmux` | `~/.config/tmux/tmux.conf` |
+| `systemd` | `~/.config/systemd/user/tmux.service` |
 | `qutebrowser` | `~/.config/qutebrowser/` |
 | `xdg-desktop-portal` | `~/.config/xdg-desktop-portal/portals.conf` |
 | `xdg-desktop-portal-termfilechooser` | `~/.config/xdg-desktop-portal-termfilechooser/` |
@@ -169,6 +170,10 @@ Installed in isolated environments to avoid breaking system Python:
 | `scripts` | `~/.local/bin/` and `~/.local/share/applications/` |
 | `wallpapers` | `~/Pictures/Wallpapers/` |
 | `opencode` | `~/.config/opencode/opencode.json` |
+
+> [!NOTE]
+> tmux-continuum may have already generated `~/.config/systemd/user/tmux.service`.
+> If stowing `systemd` reports a conflict, move that file aside once and restow.
 
 ## Manual Setup Checklist
 
@@ -191,8 +196,8 @@ sudo ninja -C build install
 Then relogin, or run:
 
 ```bash
-systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS PATH
-dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS PATH
+systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH
 systemctl --user restart xdg-desktop-portal-termfilechooser.service
 ```
 
