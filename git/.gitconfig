@@ -1,6 +1,5 @@
 [user]
-	name = Malik Hacini
-	email = juioiplm@gmail.com
+	useConfigOnly = true
 [include]
 	path = ~/.gitconfig.local
 [credential]
