@@ -5,8 +5,8 @@
 # The portal service inherits this script's stdio. Yazi and ueberzugpp emit
 # terminal graphics escape sequences (Kitty protocol, DEC private modes) that
 # the portal's VTE parser cannot handle, causing parse errors and slowdowns.
-# We must fully redirect stdio away from the portal and ensure the alacritty
-# process runs with the correct graphical environment.
+# We fully redirect stdio away from the portal and ensure alacritty runs with
+# a valid graphical/session environment.
 
 set -e
 
@@ -21,88 +21,160 @@ if [ "$verbosity" -ge 4 ] 2>/dev/null; then
     set -x
 fi
 
-# ---------- Environment hardening ----------
-# The portal service runs under systemd --user and may be missing critical
-# variables that a normal interactive login shell would have. We explicitly
-# source / set the ones required for yazi, ueberzugpp, and alacritty to
-# function correctly with GPU-accelerated image previews.
+# Keep HOME available even in sparse systemd user environments.
+export HOME="${HOME:-$(eval echo ~"$(id -un)")}"
 
-# X11 / display -- required for alacritty and ueberzugpp
-export DISPLAY="${DISPLAY:-:1}"
-export XAUTHORITY="${XAUTHORITY:-/run/user/$(id -u)/gdm/Xauthority}"
+# Read values from the systemd --user activation environment when available.
+systemd_env=""
+if command -v systemctl >/dev/null 2>&1; then
+    systemd_env="$(systemctl --user show-environment 2>/dev/null || true)"
+fi
 
-# XDG runtime (D-Bus, etc.)
-export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$(id -u)/bus}"
+systemd_env_get() {
+    key="$1"
+    printf '%s\n' "$systemd_env" | awk -F= -v key="$key" '$1 == key { print substr($0, length(key) + 2); exit }'
+}
 
-# Session type -- ueberzugpp needs to know we're on X11
-export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
+# Import GUI/session variables from systemd if missing in current process.
+if [ -z "${DISPLAY:-}" ]; then
+    display="$(systemd_env_get DISPLAY)"
+    if [ -n "$display" ]; then
+        export DISPLAY="$display"
+    else
+        socket_count=0
+        detected_display=""
+        for socket in /tmp/.X11-unix/X*; do
+            [ -S "$socket" ] || continue
+            socket_count=$((socket_count + 1))
+            detected_display=":${socket##*/X}"
+            [ "$socket_count" -gt 1 ] && break
+        done
+        if [ "$socket_count" -eq 1 ] && [ -n "$detected_display" ]; then
+            export DISPLAY="$detected_display"
+        fi
+    fi
+fi
 
-# Terminal capabilities -- ensure yazi detects a capable terminal
+if [ -z "${WAYLAND_DISPLAY:-}" ]; then
+    wayland_display="$(systemd_env_get WAYLAND_DISPLAY)"
+    if [ -n "$wayland_display" ]; then
+        export WAYLAND_DISPLAY="$wayland_display"
+    fi
+fi
+
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+    runtime_dir="$(systemd_env_get XDG_RUNTIME_DIR)"
+    if [ -z "$runtime_dir" ]; then
+        runtime_dir="/run/user/$(id -u)"
+    fi
+    export XDG_RUNTIME_DIR="$runtime_dir"
+fi
+
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+    dbus_address="$(systemd_env_get DBUS_SESSION_BUS_ADDRESS)"
+    if [ -z "$dbus_address" ] && [ -n "${XDG_RUNTIME_DIR:-}" ]; then
+        dbus_address="unix:path=${XDG_RUNTIME_DIR}/bus"
+    fi
+    if [ -n "$dbus_address" ]; then
+        export DBUS_SESSION_BUS_ADDRESS="$dbus_address"
+    fi
+fi
+
+if [ -z "${XDG_SESSION_TYPE:-}" ]; then
+    session_type="$(systemd_env_get XDG_SESSION_TYPE)"
+    if [ -z "$session_type" ]; then
+        if [ -n "${WAYLAND_DISPLAY:-}" ]; then
+            session_type="wayland"
+        elif [ -n "${DISPLAY:-}" ]; then
+            session_type="x11"
+        fi
+    fi
+    if [ -n "$session_type" ]; then
+        export XDG_SESSION_TYPE="$session_type"
+    fi
+fi
+
+if [ -z "${XDG_CURRENT_DESKTOP:-}" ]; then
+    current_desktop="$(systemd_env_get XDG_CURRENT_DESKTOP)"
+    if [ -n "$current_desktop" ]; then
+        export XDG_CURRENT_DESKTOP="$current_desktop"
+    fi
+fi
+
+if [ -z "${XAUTHORITY:-}" ]; then
+    xauthority="$(systemd_env_get XAUTHORITY)"
+    if [ -z "$xauthority" ] && [ -f "$HOME/.Xauthority" ]; then
+        xauthority="$HOME/.Xauthority"
+    fi
+    if [ -z "$xauthority" ] && [ -n "${XDG_RUNTIME_DIR:-}" ]; then
+        for candidate in "$XDG_RUNTIME_DIR/Xauthority" "$XDG_RUNTIME_DIR"/*/Xauthority; do
+            if [ -f "$candidate" ]; then
+                xauthority="$candidate"
+                break
+            fi
+        done
+    fi
+    if [ -n "$xauthority" ] && [ -f "$xauthority" ]; then
+        export XAUTHORITY="$xauthority"
+    fi
+fi
+
+# Terminal capabilities - ensure yazi detects a capable terminal.
 export TERM="${TERM:-xterm-256color}"
 export COLORTERM="${COLORTERM:-truecolor}"
 
-# CUDA / GPU libraries (user has CUDA installed; needed for GPU-accelerated rendering)
-if [ -d /usr/local/cuda-12.8 ]; then
-    export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda-12.8}"
-    export CUDA_PATH="${CUDA_PATH:-/usr/local/cuda-12.8}"
-    export LD_LIBRARY_PATH="/usr/local/cuda-12.8/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-fi
-
-# PATH -- ensure yazi, ueberzugpp, fzf, fish, and other tools are findable
-# Merge the user's typical PATH entries with whatever the portal inherited.
+# PATH - merge common user/system locations without hardcoding a specific machine.
 for p in \
     "$HOME/.local/bin" \
+    "$HOME/.cargo/bin" \
     "$HOME/.fzf/bin" \
     "/usr/local/bin" \
     "/usr/local/sbin" \
     "/usr/bin" \
     "/usr/sbin"
 do
-    case ":$PATH:" in
-        *":$p:"*) ;; # already present
-        *) PATH="$p:$PATH" ;;
+    case ":${PATH:-}:" in
+        *":$p:"*) ;;
+        *) PATH="$p${PATH:+:$PATH}" ;;
     esac
 done
 export PATH
 
-# HOME fallback (should always be set, but be defensive)
-export HOME="${HOME:-$(eval echo ~"$(id -un)")}"
-
-# ---------- Build yazi arguments ----------
-chooser_args=""
+# Build yazi arguments.
 cwd_out=""
+set -- --chooser-file="$out"
 
-if [ "$save" = "1" ]; then
-    chooser_args="--chooser-file='$out' '$path'"
-elif [ "$directory" = "1" ]; then
+if [ "$directory" = "1" ]; then
     cwd_out="${out}.1"
-    chooser_args="--chooser-file='$out' --cwd-file='$cwd_out' '$path'"
-elif [ "$multiple" = "1" ]; then
-    chooser_args="--chooser-file='$out' '$path'"
-else
-    chooser_args="--chooser-file='$out' '$path'"
+    set -- "$@" --cwd-file="$cwd_out"
 fi
 
-# ---------- Launch alacritty ----------
-# Key design decisions:
-#   1. Redirect stdin/stdout/stderr to /dev/null so the portal process never
-#      receives yazi's terminal escape sequences (fixes parse errors & slowdown).
-#   2. Use alacritty's --title flag so the window is identifiable in i3.
-#   3. Use fish -l (login) to ensure fish loads config.fish and all user
-#      environment (zoxide, aliases, etc.), then exec yazi within it.
-#   4. The script *blocks* until alacritty exits (no backgrounding) because
-#      the portal must wait for the chooser file to be written.
+if [ -n "$path" ]; then
+    set -- "$@" "$path"
+fi
 
-alacritty \
-    --title "File Chooser" \
-    -e fish -l -c "yazi $chooser_args" \
-    </dev/null >/dev/null 2>&1
+# Launch alacritty. Redirect all stdio so the portal process does not parse
+# terminal control sequences coming from yazi/ueberzugpp.
+termcmd="${TERMCMD:-alacritty}"
 
-# ---------- Directory mode: fallback to cwd-file ----------
+if command -v yazi >/dev/null 2>&1; then
+    "$termcmd" \
+        --title "File Chooser" \
+        -e yazi "$@" \
+        </dev/null >/dev/null 2>&1
+elif command -v fish >/dev/null 2>&1; then
+    "$termcmd" \
+        --title "File Chooser" \
+        -e fish -l -c 'command -q yazi; and yazi $argv' "$@" \
+        </dev/null >/dev/null 2>&1
+else
+    exit 127
+fi
+
+# Directory mode: fallback to cwd-file when chooser file is empty.
 if [ "$directory" = "1" ]; then
     if [ ! -s "$out" ] && [ -s "$cwd_out" ]; then
-        cat "$cwd_out" > "$out"
+        cp "$cwd_out" "$out"
     fi
     rm -f "$cwd_out"
 fi

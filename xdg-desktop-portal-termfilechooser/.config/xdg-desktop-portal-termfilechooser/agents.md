@@ -102,6 +102,6 @@ systemctl --user restart xdg-desktop-portal-termfilechooser.service xdg-desktop-
 
 # Test file chooser from CLI (simulates what the portal does)
 # This should open alacritty with yazi:
-/home/tag/.config/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh 0 0 0 "$HOME" /tmp/test-chooser-out
+$HOME/.config/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh 0 0 0 "$HOME" /tmp/test-chooser-out
 cat /tmp/test-chooser-out  # should contain the selected file path
 ```
