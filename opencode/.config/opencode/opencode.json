@@ -12,7 +12,7 @@
   },
   "provider":{
     "google-vertex":{
-      "models":{
+     "models":{
         "gemini-3.1-pro-preview-customtools":{}
       }
     }

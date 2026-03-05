@@ -261,7 +261,9 @@ Keep personal and machine-specific values in local files, not in this public rep
 Example for `~/.config/fish/local.fish`:
 
 ```fish
-set -gx GOOGLE_CLOUD_PROJECT your-project-id
+set -gx GOOGLE_VERTEX_PROJECT your-project-id
+set -gx GOOGLE_VERTEX_LOCATION global
 set -gx GOOGLE_APPLICATION_CREDENTIALS $HOME/.config/gcloud/application_default_credentials.json
-set -gx VERTEX_LOCATION global
 ```
+
+`~/.config/fish/local.fish` is machine-local and intentionally not tracked in git.
