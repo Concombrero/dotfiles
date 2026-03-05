@@ -55,6 +55,10 @@ return {
             modified_visible = { fg = colors.accent, bg = colors.mid },
             modified_selected = { fg = colors.accent, bg = colors.light },
 
+            duplicate = { fg = colors.muted, bg = colors.mid },
+            duplicate_visible = { fg = colors.muted, bg = colors.mid },
+            duplicate_selected = { fg = colors.text, bg = colors.light },
+
             numbers = { fg = colors.muted, bg = colors.mid },
             numbers_visible = { fg = colors.muted, bg = colors.mid },
             numbers_selected = { fg = colors.text, bg = colors.light, bold = true },
