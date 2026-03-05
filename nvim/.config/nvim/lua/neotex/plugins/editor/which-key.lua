@@ -5,7 +5,7 @@ This reference mirrors mappings defined in the following files:
 - `lua/neotex/plugins/editor/formatting.lua` (`<leader>mp`)
 - `lua/neotex/plugins/text/markdown-preview.lua` (`<leader>mo`)
 - `lua/neotex/plugins/tools/yanky.lua` (`<leader>fy`, `<leader>yh`)
-- `lua/neotex/plugins/tools/opencode.lua` (`<leader>o` prefix; sub-keys from plugin defaults)
+- `lua/neotex/plugins/tools/opencode.lua` (`<leader>o` plugin config; actions mapped here)
 
 TOP-LEVEL (<leader>)                            | LABEL
 -----------------------------------------------------------
@@ -136,13 +136,49 @@ YANK (<leader>y)                                | LABEL
 
 OPENCODE (<leader>o)
 -----------------------------------------------------------
-`<leader>o` is a prefix owned by opencode.nvim. Sub-key bindings are provided
-by the plugin defaults (configured via `keymap_prefix = "<leader>o"`).
+<leader>oa                                      | ask
+<leader>o[                                      | previous diff
+<leader>o]                                      | next diff
+<leader>oI                                      | open input (new session)
+<leader>oR                                      | rename session
+<leader>oT                                      | session timeline
+<leader>oV                                      | configure model variant
+<leader>oc                                      | close diff view
+<leader>od                                      | open diff view
+<leader>og                                      | toggle opencode window
+<leader>oh                                      | select from history
+<leader>oi                                      | open input window
+<leader>oo                                      | open output window
+<leader>op                                      | configure provider
+<leader>oq                                      | close opencode window
+<leader>orA                                     | revert all changes
+<leader>orR                                     | restore all snapshots
+<leader>ora                                     | revert all (last prompt)
+<leader>orr                                     | restore file snapshot
+<leader>orT                                     | revert this change
+<leader>ort                                     | revert this (last prompt)
+<leader>os                                      | select session
+<leader>ot                                      | toggle focus
+<leader>otr                                     | toggle reasoning output
+<leader>ott                                     | toggle tool output
+<leader>ov                                      | paste image from clipboard
+<leader>ox                                      | swap window position
+<leader>oy                                      | add visual selection to context
+<leader>oz                                      | toggle zoom
 
 RESERVED GROUPS
 -----------------------------------------------------------
 <leader>L                                       | LIST (group name only in this file)
 ]]
+
+local function opencode_call(method, ...)
+  local args = { ... }
+
+  return function()
+    require("lazy").load({ plugins = { "opencode.nvim" } })
+    require("opencode.api")[method](table.unpack(args))
+  end
+end
 
 return {
   "folke/which-key.nvim",
@@ -279,7 +315,41 @@ return {
         w = { function() require("copilot.suggestion").accept_word() end, "copilot word" },
         x = { function() require("copilot.suggestion").dismiss() end, "copilot dismiss" },
       },
-      o = { name = "OPENCODE" },
+      o = {
+        name = "OPENCODE",
+        a = { opencode_call("quick_chat"), "ask" },
+        ["["] = { opencode_call("diff_prev"), "previous diff" },
+        ["]"] = { opencode_call("diff_next"), "next diff" },
+        I = { opencode_call("open_input_new_session"), "open input (new session)" },
+        R = { opencode_call("rename_session"), "rename session" },
+        T = { opencode_call("timeline"), "session timeline" },
+        V = { opencode_call("configure_variant"), "configure model variant" },
+        c = { opencode_call("diff_close"), "close diff view" },
+        d = { opencode_call("diff_open"), "open diff view" },
+        g = { opencode_call("toggle"), "toggle opencode window" },
+        h = { opencode_call("select_history"), "select from history" },
+        i = { opencode_call("open_input"), "open input window" },
+        o = { opencode_call("open_output"), "open output window" },
+        p = { opencode_call("configure_provider"), "configure provider" },
+        q = { opencode_call("close"), "close opencode window" },
+        r = {
+          name = "RESTORE/REVERT",
+          a = { opencode_call("diff_revert_all_last_prompt"), "revert all (last prompt)" },
+          A = { opencode_call("diff_revert_all"), "revert all changes" },
+          r = { opencode_call("diff_restore_snapshot_file"), "restore file snapshot" },
+          R = { opencode_call("diff_restore_snapshot_all"), "restore all snapshots" },
+          t = { opencode_call("diff_revert_this_last_prompt"), "revert this (last prompt)" },
+          T = { opencode_call("diff_revert_this"), "revert this change" },
+        },
+        s = { opencode_call("select_session"), "select session" },
+        t = { opencode_call("toggle_focus"), "toggle focus" },
+        v = { opencode_call("paste_image"), "paste image from clipboard" },
+        x = { opencode_call("swap_position"), "swap window position" },
+        y = { opencode_call("add_visual_selection"), "add visual selection to context", mode = "v" },
+        z = { opencode_call("toggle_zoom"), "toggle zoom" },
+        tr = { opencode_call("toggle_reasoning_output"), "toggle reasoning output" },
+        tt = { opencode_call("toggle_tool_output"), "toggle tool output" },
+      },
       -- LIST MAPPINGS
       j = {
         name = "JUPYTER",
