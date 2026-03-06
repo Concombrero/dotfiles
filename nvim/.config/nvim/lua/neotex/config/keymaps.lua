@@ -17,7 +17,7 @@ which are called by autocmds when specific filetypes are detected.
 ----------------------------------------------------------------------------------
 TERMINAL MODE KEYBINDINGS                      | DESCRIPTION
 ----------------------------------------------------------------------------------
-<Esc>                                          | Exit terminal mode to normal mode
+<Esc>                                          | Exit terminal mode (except lazygit/yazi)
 <C-t>                                          | Toggle terminal window
 <C-h>, <C-j>, <C-k>, <C-l>                     | Navigate between windows
 <C-a>                                          | Ask OpenCode in terminal (non-lazygit only)
@@ -99,6 +99,11 @@ function M.setup()
     )
   end
 
+  local native_escape_terminal_filetypes = {
+    lazygit = true,
+    yazi = true,
+  }
+
   ----------------------------------------
   -- BUFFER-SPECIFIC KEYMAP FUNCTIONS  --
   ----------------------------------------
@@ -109,7 +114,11 @@ function M.setup()
     vim.wo.winfixbuf = true
 
     -- Terminal navigation
-    buf_map(0, "t", "<esc>", "<C-\\><C-n>", "Exit terminal mode")
+    if native_escape_terminal_filetypes[vim.bo.filetype] then
+      buf_map(0, "t", "<esc>", "<esc>", "Send escape to terminal app")
+    else
+      buf_map(0, "t", "<esc>", "<C-\\><C-n>", "Exit terminal mode")
+    end
     buf_map(0, "t", "<C-h>", "<Cmd>wincmd h<CR>", "Navigate left")
     buf_map(0, "t", "<C-j>", "<Cmd>wincmd j<CR>", "Navigate down")
     buf_map(0, "t", "<C-k>", "<Cmd>wincmd k<CR>", "Navigate up")
