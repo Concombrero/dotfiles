@@ -7,79 +7,115 @@ return {
   config = function()
     local bufferline = require("bufferline")
 
-    local palette_ok, palette = pcall(function()
-      return require("catppuccin.palettes").get_palette("mocha")
-    end)
+    local function get_colors()
+      local colors = {
+        text = "#cdd6f4",
+        muted = "#7f849c",
+        mid = "#1e1e2e",
+        light = "#313244",
+        accent = "#fab387",
+      }
 
-    local colors = {
-      text = "#cdd6f4",
-      muted = "#7f849c",
-      mid = "#1e1e2e",
-      light = "#313244",
-      accent = "#fab387",
-    }
+      local palette_ok, palette = pcall(function()
+        return require("catppuccin.palettes").get_palette("mocha")
+      end)
 
-    if palette_ok and palette then
-      colors.text = palette.text or colors.text
-      colors.muted = palette.overlay1 or colors.muted
-      colors.mid = palette.base or colors.mid
-      colors.light = palette.surface0 or colors.light
-      colors.accent = palette.peach or colors.accent
+      if palette_ok and palette then
+        colors.text = palette.text or colors.text
+        colors.muted = palette.overlay1 or colors.muted
+        colors.mid = palette.base or colors.mid
+        colors.light = palette.surface0 or colors.light
+        colors.accent = palette.peach or colors.accent
+      end
+
+      return colors
     end
 
-    local ctp_ok, ctp_bufferline = pcall(require, "catppuccin.special.bufferline")
-    local highlights = nil
+    local function make_hl(fg, bg, extra)
+      local hl = { fg = fg, bg = bg }
+      if extra then
+        hl = vim.tbl_extend("force", hl, extra)
+      end
+      return hl
+    end
 
-    if ctp_ok then
-      highlights = ctp_bufferline.get_theme({
+    local function build_custom_highlights(colors)
+      local groups = {
+        fill = { bg = colors.mid },
+      }
+
+      local function assign(names, fg, bg, extra)
+        for _, name in ipairs(names) do
+          groups[name] = make_hl(fg, bg, extra)
+        end
+      end
+
+      assign({
+        "background",
+        "buffer_visible",
+        "tab",
+        "tab_close",
+        "close_button",
+        "close_button_visible",
+        "duplicate",
+        "duplicate_visible",
+        "numbers",
+        "numbers_visible",
+        "trunc_marker",
+        "diagnostic",
+        "diagnostic_visible",
+      }, colors.muted, colors.mid)
+
+      assign({
+        "close_button_selected",
+        "duplicate_selected",
+        "diagnostic_selected",
+      }, colors.text, colors.light)
+
+      assign({
+        "buffer_selected",
+        "tab_selected",
+        "numbers_selected",
+      }, colors.text, colors.light, { bold = true })
+
+      assign({
+        "tab_separator",
+        "separator",
+        "separator_visible",
+        "offset_separator",
+        "indicator_visible",
+      }, colors.mid, colors.mid)
+
+      assign({
+        "tab_separator_selected",
+        "separator_selected",
+        "indicator_selected",
+      }, colors.light, colors.light)
+
+      assign({ "modified", "modified_visible" }, colors.accent, colors.mid)
+      groups.modified_selected = make_hl(colors.accent, colors.light)
+
+      return groups
+    end
+
+    local function get_bufferline_highlights(colors)
+      local ctp_ok, ctp_bufferline = pcall(require, "catppuccin.special.bufferline")
+      if not ctp_ok then
+        return nil
+      end
+
+      return ctp_bufferline.get_theme({
         styles = {},
         custom = {
-          all = {
-            fill = { bg = colors.mid },
-
-            background = { fg = colors.muted, bg = colors.mid },
-            buffer_visible = { fg = colors.muted, bg = colors.mid },
-            buffer_selected = { fg = colors.text, bg = colors.light, bold = true },
-
-            tab = { fg = colors.muted, bg = colors.mid },
-            tab_selected = { fg = colors.text, bg = colors.light, bold = true },
-            tab_separator = { fg = colors.mid, bg = colors.mid },
-            tab_separator_selected = { fg = colors.light, bg = colors.light },
-            tab_close = { fg = colors.muted, bg = colors.mid },
-
-            close_button = { fg = colors.muted, bg = colors.mid },
-            close_button_visible = { fg = colors.muted, bg = colors.mid },
-            close_button_selected = { fg = colors.text, bg = colors.light },
-
-            modified = { fg = colors.accent, bg = colors.mid },
-            modified_visible = { fg = colors.accent, bg = colors.mid },
-            modified_selected = { fg = colors.accent, bg = colors.light },
-
-            duplicate = { fg = colors.muted, bg = colors.mid },
-            duplicate_visible = { fg = colors.muted, bg = colors.mid },
-            duplicate_selected = { fg = colors.text, bg = colors.light },
-
-            numbers = { fg = colors.muted, bg = colors.mid },
-            numbers_visible = { fg = colors.muted, bg = colors.mid },
-            numbers_selected = { fg = colors.text, bg = colors.light, bold = true },
-
-            separator = { fg = colors.mid, bg = colors.mid },
-            separator_visible = { fg = colors.mid, bg = colors.mid },
-            separator_selected = { fg = colors.light, bg = colors.light },
-
-            indicator_visible = { fg = colors.mid, bg = colors.mid },
-            indicator_selected = { fg = colors.light, bg = colors.light },
-
-            diagnostic = { fg = colors.muted, bg = colors.mid },
-            diagnostic_visible = { fg = colors.muted, bg = colors.mid },
-            diagnostic_selected = { fg = colors.text, bg = colors.light },
-          },
+          all = build_custom_highlights(colors),
         },
       })
     end
 
+    local colors = get_colors()
+
     bufferline.setup({
-      highlights = highlights,
+      highlights = get_bufferline_highlights(colors),
       options = {
         mode = "buffers",
         custom_filter = function(buf_number)
@@ -122,6 +158,7 @@ return {
 
     vim.api.nvim_create_autocmd("User", {
       pattern = "AlphaReady",
+      group = aug,
       desc = "Disable tabline for alpha",
       callback = function()
         vim.opt.showtabline = 0
@@ -129,14 +166,18 @@ return {
     })
 
     vim.api.nvim_create_autocmd("BufUnload", {
-      buffer = 0,
+      group = aug,
       desc = "Enable tabline after alpha",
-      callback = function()
-        vim.opt.showtabline = 2
+      callback = function(args)
+        if vim.api.nvim_buf_is_valid(args.buf)
+            and vim.bo[args.buf].filetype == "alpha" then
+          vim.opt.showtabline = 2
+        end
       end,
     })
 
     vim.api.nvim_create_autocmd("FileType", {
+      group = aug,
       pattern = "qf",
       callback = function()
         vim.opt_local.buflisted = false
