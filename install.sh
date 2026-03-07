@@ -68,6 +68,7 @@ done
 # 2. Setup Environment
 export DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export LOG_FILE="$DOTFILES_DIR/install.log"
+export STOW_HAD_FAILURES=false
 
 # Initialize Log
 echo "" > "$LOG_FILE"
@@ -90,7 +91,12 @@ main() {
     # Stow Only Mode
     if [ "$STOW_ONLY" = true ]; then
         stow_packages
-        log "Stow-only mode complete."
+        echo ""
+        if [ "$STOW_HAD_FAILURES" = true ]; then
+            warn "Stow-only mode completed with partial success. Failed packages: ${STOW_FAILED_PACKAGES[*]}"
+        else
+            log "Stow-only mode completed successfully."
+        fi
         return
     fi
 
@@ -137,7 +143,11 @@ main() {
     fi
 
     echo ""
-    log "Installation Complete!"
+    if [ "$STOW_HAD_FAILURES" = true ]; then
+        warn "Installation completed with partial success. Stow failed for: ${STOW_FAILED_PACKAGES[*]}"
+    else
+        log "Installation completed successfully."
+    fi
     info "Please log out and log back in for all changes to take effect."
 }
 
