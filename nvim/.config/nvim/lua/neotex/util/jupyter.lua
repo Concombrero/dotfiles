@@ -189,42 +189,8 @@ local function notebook_url(server, relative_path)
   return url
 end
 
-local function gui_env_from_systemd()
-  local env = {}
-  if vim.fn.executable("systemctl") ~= 1 then
-    return env
-  end
-
-  local ok, output = run_system({ "systemctl", "--user", "show-environment" })
-  if not ok then
-    return env
-  end
-
-  for line in output:gmatch("[^\r\n]+") do
-    local key, value = line:match("^([^=]+)=(.*)$")
-    if key and value and value ~= "" then
-      if key == "DISPLAY"
-        or key == "XAUTHORITY"
-        or key == "WAYLAND_DISPLAY"
-        or key == "XDG_RUNTIME_DIR"
-        or key == "DBUS_SESSION_BUS_ADDRESS"
-      then
-        env[key] = value
-      end
-    end
-  end
-
-  return env
-end
-
 local function resolve_qutebrowser_launcher()
-  local config_dir = vim.fn.resolve(vim.fn.stdpath("config"))
-  local repo_root = vim.fn.fnamemodify(config_dir, ":h:h:h")
-
   local candidates = {
-    vim.fn.expand("~/.local/bin/qutebrowser-typst-preview"),
-    repo_root .. "/scripts/.local/bin/qutebrowser-typst-preview",
-    "qutebrowser-typst-preview",
     "qutebrowser",
   }
 
@@ -246,7 +212,6 @@ local function open_in_qutebrowser(url)
 
   local stderr_lines = {}
   local job_id = vim.fn.jobstart({ launcher, url }, {
-    env = gui_env_from_systemd(),
     stderr_buffered = true,
     on_stderr = function(_, data)
       if type(data) ~= "table" then
