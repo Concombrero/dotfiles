@@ -16,7 +16,7 @@ This file is intentionally concise and points to focused docs in this repo.
 - Typst: tinymist LSP + typst preview tooling
 - Jupyter: jupytext + Neopyter (JupyterLab bridge) workflow
 - LSP: pyright, texlab, tinymist, lua-language-server
-- Formatting: conform.nvim (`<leader>mp`) with per-filetype formatters
+- Formatting: conform.nvim (`<leader>lf`) with per-filetype formatters
 - Linting: nvim-lint (`<leader>l` / `<leader>lL`) with executable-aware setup
 - AI: OpenCode actions (`<leader>o`) plus Copilot control from `<leader>c`
 
@@ -42,8 +42,7 @@ adjust your local citation workflow settings.
   - `:Lazy`
   - `:ReloadConfig` to reload config
 - Formatting and linting:
-  - `<leader>mp` format buffer/selection
-  - `:FormatToggle` / `:FormatToggle buffer`
+  - `<leader>lf` format buffer/selection
   - `<leader>l` or `<leader>lL` lint now
   - `:LintToggle` / `:LintToggle buffer`
 - LSP lifecycle:

@@ -2,7 +2,7 @@
 -----------------------------------------------------------
 This reference mirrors mappings defined in the following files:
 - this file: `lua/neotex/plugins/editor/which-key.lua` (`opts.defaults`)
-- `lua/neotex/plugins/editor/formatting.lua` (`<leader>mp`)
+- `lua/neotex/plugins/editor/formatting.lua` (`<leader>lf` via conform.nvim, plus `<leader>mp` helper)
 - `lua/neotex/plugins/text/markdown-preview.lua` (`<leader>mo`)
 - `lua/neotex/plugins/tools/yanky.lua` (`<leader>fy`, `<leader>yh`)
 - `lua/neotex/plugins/tools/opencode.lua` (`<leader>o` plugin config; actions mapped here)
@@ -109,7 +109,7 @@ MARKDOWN (<leader>m)                            | LABEL
 <leader>ma                                      | toggle all folds
 <leader>mf                                      | toggle fold under cursor
 <leader>mo                                      | open markdown preview (from markdown-preview.lua)
-<leader>mp                                      | Format code (from formatting.lua)
+<leader>mp                                      | Format code helper (from formatting.lua)
 <leader>ms                                      | submit selection with message
 <leader>mt                                      | toggle folding method
 <leader>mu                                      | open URL under cursor

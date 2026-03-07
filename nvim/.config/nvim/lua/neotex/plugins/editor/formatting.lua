@@ -80,7 +80,7 @@ return {
         },
       },
       
-      -- Format on save behavior (disabled by default, use <leader>mp to format manually)
+      -- Format on save behavior (disabled by default, use <leader>lf to format manually)
       format_on_save = function(bufnr)
         -- Customize which filetypes to format on save
         local auto_format_filetypes = {
@@ -119,45 +119,5 @@ return {
         },
       }, { prefix = "<leader>" })
     end
-    
-    -- Add commands for showing/toggling format-on-save
-    vim.api.nvim_create_user_command("FormatToggle", function(args)
-      local is_enabled = false
-      if args.args == "buffer" then
-        -- Toggle for current buffer
-        if vim.b.disable_autoformat == true then
-          vim.b.disable_autoformat = false
-          is_enabled = true
-        else
-          vim.b.disable_autoformat = true
-          is_enabled = false
-        end
-        
-        vim.notify(
-          string.format("Format on save %s for this buffer", is_enabled and "enabled" or "disabled"),
-          vim.log.levels.INFO
-        )
-      else
-        -- Toggle globally
-        if vim.g.disable_autoformat == true then
-          vim.g.disable_autoformat = false
-          is_enabled = true
-        else
-          vim.g.disable_autoformat = true
-          is_enabled = false
-        end
-        
-        vim.notify(
-          string.format("Format on save %s globally", is_enabled and "enabled" or "disabled"),
-          vim.log.levels.INFO
-        )
-      end
-    end, {
-      nargs = "?",
-      complete = function()
-        return { "buffer" }
-      end,
-      desc = "Toggle format on save",
-    })
   end,
 }

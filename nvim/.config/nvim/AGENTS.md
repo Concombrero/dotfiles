@@ -32,7 +32,6 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
 
 ### Formatting
 - `<leader>lf` - Format buffer or selection (conform.nvim, async with LSP fallback)
-- `:FormatToggle` / `:FormatToggle buffer` - Toggle format-on-save
 - Format-on-save is disabled by default; use `<leader>lf` manually
 - Formatters by filetype:
   - Lua: `stylua` (2-space indent, double quotes)
