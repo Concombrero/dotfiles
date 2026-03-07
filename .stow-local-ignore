@@ -5,7 +5,6 @@
 \.stow-local-ignore
 install\.sh
 install\.log
-packages\.txt
 README\.md
 LICENSE
 
