@@ -181,16 +181,22 @@ These items are either manual setup or useful post-install checks.
 
 ### 1) `xdg-desktop-portal-termfilechooser` backend (for Yazi file picker)
 
-The config is stowed, but backend binary install is manual:
+The config is stowed, and `install.sh` now installs the Ubuntu/Debian runtime + build dependencies for this backend as part of the normal desktop package set.
+
+The backend binary itself still needs a one-time manual source install because there is no standard Ubuntu/Debian package for `xdg-desktop-portal-termfilechooser`:
 
 ```bash
-sudo apt install -y meson ninja-build xdg-desktop-portal xdg-desktop-portal-gtk
-
 git clone https://github.com/boydaihungst/xdg-desktop-portal-termfilechooser.git /tmp/xdptf
 cd /tmp/xdptf
 meson setup build
 ninja -C build
 sudo ninja -C build install
+```
+
+If `meson setup` complains about manpage tooling, retry with:
+
+```bash
+meson setup build -Dman-pages=disabled
 ```
 
 Then relogin, or run:

@@ -13,6 +13,8 @@ dex
 xss-lock
 network-manager-gnome
 pulseaudio-utils
+xdg-desktop-portal
+xdg-desktop-portal-gtk
 
 # Image/Graphics
 imagemagick
@@ -31,3 +33,10 @@ vlc
 qutebrowser
 alacritty
 fastfetch
+
+# Portal file chooser backend build deps
+meson
+ninja-build
+libinih-dev
+libsystemd-dev
+scdoc
