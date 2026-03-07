@@ -76,7 +76,7 @@ What this does at a high level:
 
 1. **Detects OS:** Verifies Ubuntu/Debian and uses `apt`.
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless).
-3. **Installs Binaries:** `neovim` (official release archive), `starship`, `zoxide`, `yazi`, `lazygit`, `fzf`, `opencode`, `zen-browser`.
+3. **Installs Binaries:** `neovim` (official release archive), `starship`, `zoxide`, `yazi`, `lazygit`, `fzf` (via git clone to `~/.fzf`), `opencode`, `zen-browser`.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
 6. **Stows Configs:** Symlinks all dotfiles into `$HOME`.

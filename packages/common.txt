@@ -8,7 +8,6 @@ unzip
 bc
 xdg-utils
 btop
-fzf
 ripgrep
 fd-find
 bat
