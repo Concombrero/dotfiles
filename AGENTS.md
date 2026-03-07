@@ -5,7 +5,7 @@
 This repository is a GNU Stow-managed dotfiles setup for a keyboard-first Ubuntu/Debian workstation.
 It is organized as package directories that mirror the final paths under `$HOME`.
 
-- Primary platform: Ubuntu on X11
+- Primary platform: Ubuntu/Debian on X11
 - Window manager: `i3`
 - Compositor: `picom`
 - Status bar: `polybar`

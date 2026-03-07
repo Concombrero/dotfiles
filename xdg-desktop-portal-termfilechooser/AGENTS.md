@@ -12,8 +12,8 @@ Tracked files here:
 
 ## Purpose
 
-This package makes the terminal file chooser backend usable as the default GTK/XDG portal file picker on this workstation.
-In practice, GTK apps such as Zen Browser request `org.freedesktop.impl.portal.FileChooser`, `xdg-desktop-portal` routes that request to `termfilechooser`, and the backend launches `yazi` inside `alacritty` through `yazi-wrapper.sh`.
+This package makes the terminal file chooser backend usable as the `FileChooser` portal implementation for this repo's desktop session.
+In practice, GTK apps that use XDG portals request `org.freedesktop.impl.portal.FileChooser`, `xdg-desktop-portal` routes that request to `termfilechooser`, and the backend launches `yazi` inside `alacritty` through `yazi-wrapper.sh`.
 
 The wrapper is not a cosmetic launcher. It is compatibility glue for:
 
@@ -86,7 +86,7 @@ After edits, test the real chooser path when possible:
 - inspect logs with `journalctl --user -u xdg-desktop-portal-termfilechooser.service -f`
 - verify `systemctl --user show-environment` contains the expected GUI/session vars
 - test the wrapper directly with `~/.config/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh 0 0 0 "$HOME" /tmp/test-chooser-out`
-- verify a GTK app such as Zen Browser opens `yazi` in `alacritty` and returns the selected path correctly
+- verify a GTK app that uses portals opens `yazi` in `alacritty` and returns the selected path correctly
 
 ## Additional Reference
 

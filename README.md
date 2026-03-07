@@ -1,5 +1,5 @@
 # Workstation Dotfiles
-GNU Stow-managed dotfiles for a full Ubuntu/Debian + i3 (X11) workstation.
+GNU Stow-managed dotfiles for a full Ubuntu/Debian + i3 workstation, with X11 as the primary session model.
 
 ![Home screen](preview.png)
 ## System Overview
@@ -181,9 +181,13 @@ These items are either manual setup or useful post-install checks.
 
 ### 1) `xdg-desktop-portal-termfilechooser` backend (for Yazi file picker)
 
-The config is stowed, and `install.sh` now installs the Ubuntu/Debian runtime + build dependencies for this backend as part of the normal desktop package set.
+The config is stowed, and the normal desktop install now pulls in this backend's runtime + build dependencies (`meson`, `ninja-build`, `libinih-dev`, `libsystemd-dev`, `scdoc`).
 
-The backend binary itself still needs a one-time manual source install because there is no standard Ubuntu/Debian package for `xdg-desktop-portal-termfilechooser`:
+The backend binary itself still needs a one-time manual source install because there is no standard Ubuntu/Debian package for `xdg-desktop-portal-termfilechooser`.
+
+If you installed with `--headless`/`--no-gui`, install those dependencies first before building the backend manually.
+
+Then build and install it once from source:
 
 ```bash
 git clone https://github.com/boydaihungst/xdg-desktop-portal-termfilechooser.git /tmp/xdptf

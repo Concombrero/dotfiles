@@ -6,9 +6,10 @@ Config name: NeoTex
 ## Overview
 
 This is a NeoVim configuration focused on academic writing (LaTeX, Typst, Markdown),
-Python development, Jupyter notebooks, and Lua plugin development. It runs on NixOS and
-uses lazy.nvim for plugin management. AI workflows are built around OpenCode + Copilot
-plus Lectic utilities for writing workflows.
+Python development, Jupyter notebooks, and Lua plugin development. It uses lazy.nvim for
+plugin management and is maintained in this Ubuntu/Debian workstation repo. AI workflows
+are built around OpenCode + Copilot, with a few writing helpers still exposed through
+existing Lectic-related commands.
 
 ## Build / Lint / Test Commands
 
@@ -21,9 +22,9 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
 - `:ReloadConfig` - Reload Neovim configuration
 
 ### Linting
-- `<leader>l` - Lint current file (nvim-lint `try_lint()`)
-- `<leader>lL` - Lint current file (same, under LSP group)
+- `<leader>lL` - Lint current file (nvim-lint `try_lint()`)
 - Auto-lints on `BufWritePost`/`BufEnter` for: python, lua, javascript, typescript
+- `<leader>lg` / `<leader>lB` - Toggle auto-linting globally or per-buffer
 - `:LintToggle` / `:LintToggle buffer` - Toggle auto-linting globally or per-buffer
 - Linters: eslint/eslint_d (JS/TS), pylint (Python), luacheck/selene (Lua),
   shellcheck (sh), markdownlint, cppcheck/cpplint (C/C++), stylelint (CSS),
@@ -37,7 +38,7 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
   - Lua: `stylua` (2-space indent, double quotes)
   - Python: `isort` (profile=black) then `black` (88 char line limit)
   - JS/TS/CSS/HTML/JSON/YAML/Markdown: `prettier`
-  - C/C++: `clang_format`
+  - C/C++: `clang-format` (via conform's `clang_format` formatter)
   - Shell: `shfmt` (2-space indent)
   - LaTeX: `latexindent`
   - All files: `trim_whitespace`, `trim_newlines`
@@ -101,7 +102,7 @@ after/ftdetect/                   ipynb.lua + ju.lua notebook filetype detection
 LuaSnip/                          Lua-based snippets: all.lua, lua.lua, typst.lua
 snippets/                         Snipmate-format: tex.snippets, markdown.snippets, python.snippets
 templates/                        LaTeX document templates (not mapped in which-key)
-  scripts/                          Shell/Lua maintenance scripts (plugin/tool checks)
+scripts/                          Shell/Lua maintenance scripts (plugin/tool checks)
 ```
 
 ## Bootstrap Chain
