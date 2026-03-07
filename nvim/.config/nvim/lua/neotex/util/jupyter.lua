@@ -14,6 +14,20 @@ local function trim_or_default(text)
   return trimmed
 end
 
+local function sanitize_kernel_name(name)
+  local sanitized = vim.trim(name or ""):lower()
+  sanitized = sanitized:gsub("[^%w%._%-]+", "-")
+  sanitized = sanitized:gsub("%-+", "-")
+  sanitized = sanitized:gsub("^%-+", "")
+  sanitized = sanitized:gsub("%-+$", "")
+
+  if sanitized == "" then
+    return "python-312"
+  end
+
+  return sanitized
+end
+
 local function run_system(command)
   local output = vim.fn.system(command)
   return vim.v.shell_error == 0, output
@@ -478,7 +492,10 @@ function M.open_current_notebook()
   end
 
   if paths.is_ju_source then
-    refresh_ipynb_from_ju(python, paths.source_path, paths.ipynb_path)
+    local refreshed = refresh_ipynb_from_ju(python, paths.source_path, paths.ipynb_path)
+    if not refreshed then
+      return
+    end
   end
 
   local server = ensure_server_for_notebook(python, paths.ipynb_path)
