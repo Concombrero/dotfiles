@@ -1,0 +1,63 @@
+@theme "catppuccin-mocha"
+
+window {
+    location: center;
+    anchor: center;
+    width: 200px;
+    padding: 10px 16px;
+}
+
+mainbox {
+    spacing: 0px;
+}
+
+inputbar {
+    enabled: false;
+    children: [ entry ];
+    background-color: @bg-col;
+    border: 0px;
+    margin: 0px 0px 10px 0px;
+    padding: 0px;
+}
+
+prompt,
+textbox-prompt-colon,
+case-indicator,
+mode-switcher,
+element-icon {
+    enabled: false;
+}
+
+entry {
+    margin: 0px;
+    padding: 2px 0px 8px 0px;
+    text-color: @fg-col;
+    background-color: @bg-col;
+    placeholder: "new session";
+    placeholder-color: @grey;
+}
+
+listview {
+    lines: 8;
+    columns: 1;
+    fixed-height: false;
+    dynamic: false;
+    scrollbar: false;
+    spacing: 6px;
+    margin: 0px;
+    padding: 0px;
+}
+
+element {
+    orientation: horizontal;
+    children: [ element-text ];
+    padding: 4px 0px;
+    margin: 0px;
+    border-radius: 0px;
+}
+
+element-text {
+    margin: 0px;
+    horizontal-align: 0.0;
+    vertical-align: 0.5;
+}
