@@ -6,8 +6,8 @@ Documentation=man:tmux(1)
 Type=forking
 ExecStart=/usr/bin/env tmux new-session -d
 
-ExecStop=%h/.tmux/plugins/tmux-resurrect/scripts/save.sh
-ExecStop=/usr/bin/env tmux kill-server
+ExecStop=/usr/bin/env bash -lc 'tmux ls >/dev/null 2>&1 && "$HOME/.tmux/plugins/tmux-resurrect/scripts/save.sh" || true'
+ExecStop=/usr/bin/env bash -lc 'tmux ls >/dev/null 2>&1 && tmux kill-server || true'
 KillMode=control-group
 
 RestartSec=2
