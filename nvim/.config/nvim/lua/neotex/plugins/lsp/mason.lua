@@ -127,6 +127,8 @@ return {
     vim.lsp.config("julials", {
       capabilities = capabilities,
       single_file_support = true,
+      on_new_config = function(_, _)
+      end,
       cmd = {
         resolve_julia_bin() or "julia",
         "--startup-file=no",
