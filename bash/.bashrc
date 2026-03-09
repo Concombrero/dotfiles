@@ -132,3 +132,18 @@ elif [ -d /usr/local/cuda ]; then
 fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# >>> juliaup initialize >>>
+
+# !! Contents within this block are managed by juliaup !!
+
+case ":$PATH:" in
+    *:/home/tag/.juliaup/bin:*)
+        ;;
+
+    *)
+        export PATH=/home/tag/.juliaup/bin${PATH:+:${PATH}}
+        ;;
+esac
+
+# <<< juliaup initialize <<<

@@ -3,6 +3,8 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   cmd = { "Mason", "MasonInstall", "MasonUpdate", "MasonUninstall" },
   dependencies = {
+    "neovim/nvim-lspconfig",
+    "hrsh7th/cmp-nvim-lsp",
     "williamboman/mason-lspconfig.nvim",
     "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
@@ -13,7 +15,22 @@ return {
     local mason_tool_installer = require("mason-tool-installer")
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
-    -- Get default capabilities for LSP clients
+    local julia_root_markers = { "Project.toml", "JuliaProject.toml" }
+
+    local function resolve_julia_bin()
+      local julia_bin = vim.fn.exepath("julia")
+      if julia_bin ~= "" then
+        return julia_bin
+      end
+
+      local juliaup_bin = vim.fn.expand("~/.juliaup/bin/julia")
+      if vim.fn.executable(juliaup_bin) == 1 then
+        return juliaup_bin
+      end
+
+      return nil
+    end
+
     local capabilities = cmp_nvim_lsp.default_capabilities()
 
     -- DIAGNOSTICS CONFIGURATION
@@ -44,70 +61,6 @@ return {
       },
     })
 
-    -- LSP SERVER HANDLERS
-    local handlers = {}
-
-    -- PYRIGHT
-    handlers["pyright"] = function()
-      require("lspconfig").pyright.setup({
-        capabilities = capabilities,
-        settings = {
-          python = {
-            analysis = {
-              typeCheckingMode = "basic",
-            },
-          },
-        },
-      })
-    end
-
-    -- TEXLAB (LaTeX)
-    handlers["texlab"] = function()
-      require("lspconfig").texlab.setup({
-        capabilities = capabilities,
-        settings = {
-          texlab = {
-            build = {
-              onSave = true,
-            },
-            chktex = {
-              onEdit = false,
-              onOpenAndSave = false,
-            },
-            diagnosticsDelay = 300,
-          },
-        },
-      })
-    end
-
-    -- TINYMIST (Typst)
-    handlers["tinymist"] = function()
-      require("lspconfig").tinymist.setup({
-        capabilities = capabilities,
-        single_file_support = true,
-      })
-    end
-
-    -- LUA_LS
-    handlers["lua_ls"] = function()
-      require("lspconfig").lua_ls.setup({
-        capabilities = capabilities,
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = { "vim" },
-            },
-            workspace = {
-              library = {
-                [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                [vim.fn.stdpath("config") .. "/lua"] = true,
-              },
-            },
-          },
-        },
-      })
-    end
-
     -- MASON-LSPCONFIG SETUP
     mason_lspconfig.setup({
       ensure_installed = {
@@ -117,8 +70,101 @@ return {
         "lua_ls",
       },
       automatic_installation = true,
-      handlers = handlers,
+      automatic_enable = {
+        exclude = { "julials" },
+      },
     })
+
+    vim.lsp.config("pyright", {
+      capabilities = capabilities,
+      settings = {
+        python = {
+          analysis = {
+            typeCheckingMode = "basic",
+          },
+        },
+      },
+    })
+
+    vim.lsp.config("texlab", {
+      capabilities = capabilities,
+      settings = {
+        texlab = {
+          build = {
+            onSave = true,
+          },
+          chktex = {
+            onEdit = false,
+            onOpenAndSave = false,
+          },
+          diagnosticsDelay = 300,
+        },
+      },
+    })
+
+    vim.lsp.config("tinymist", {
+      capabilities = capabilities,
+      single_file_support = true,
+    })
+
+    vim.lsp.config("lua_ls", {
+      capabilities = capabilities,
+      settings = {
+        Lua = {
+          diagnostics = {
+            globals = { "vim" },
+          },
+          workspace = {
+            library = {
+              [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+              [vim.fn.stdpath("config") .. "/lua"] = true,
+            },
+          },
+        },
+      },
+    })
+
+    vim.lsp.config("julials", {
+      capabilities = capabilities,
+      single_file_support = true,
+      cmd = {
+        resolve_julia_bin() or "julia",
+        "--startup-file=no",
+        "--history-file=no",
+        "-e",
+        [[
+          ls_install_path = joinpath(
+            get(DEPOT_PATH, 1, joinpath(homedir(), ".julia")),
+            "environments",
+            "nvim-lspconfig"
+          )
+          pushfirst!(LOAD_PATH, ls_install_path)
+          using LanguageServer, SymbolServer, StaticLint
+          popfirst!(LOAD_PATH)
+          depot_path = get(ENV, "JULIA_DEPOT_PATH", "")
+          project_path = let
+            dirname(something(
+            Base.load_path_expand((
+              p = get(ENV, "JULIA_PROJECT", nothing);
+              p === nothing ? nothing : isempty(p) ? nothing : p
+            )),
+            Base.current_project(),
+            get(Base.load_path(), 1, nothing),
+            Base.load_path_expand("@v#.#")
+            ))
+          end
+
+          @info "Running language server" VERSION pwd() project_path depot_path
+          server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, depot_path)
+          server.runlinter = true
+          run(server)
+        ]],
+      },
+      filetypes = { "julia" },
+      root_markers = julia_root_markers,
+    })
+
+    vim.lsp.enable("julials")
 
     -- MASON-TOOL-INSTALLER SETUP
     local ensure_installed_tools = {

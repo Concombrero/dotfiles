@@ -15,7 +15,7 @@ This file is intentionally concise and points to focused docs in this repo.
 - Markdown: checkbox helpers, preview support
 - Typst: tinymist LSP + typst preview tooling
 - Jupyter: jupytext + Neopyter (JupyterLab bridge) workflow
-- LSP: pyright, texlab, tinymist, lua-language-server
+- LSP: pyright, texlab, tinymist, lua-language-server, julials
 - Formatting: conform.nvim (`<leader>lf`) with per-filetype formatters; format-on-save stays off by default
 - Linting: nvim-lint (`<leader>lL`) with executable-aware setup and auto-lint toggles on `<leader>lg` / `<leader>lB`
 - AI: OpenCode actions (`<leader>o`) plus Copilot control from `<leader>c`
@@ -132,6 +132,41 @@ The config prepends Mason binaries to Neovim PATH at startup, so editor tools ar
 - `texlab` (LaTeX)
 - `tinymist` (Typst)
 - `lua_ls` (Lua)
+- `julials` (Julia)
+
+### Julia LSP Notes
+
+Julia support uses `vim.lsp.config(...)` for `julials`, while Mason still manages the other
+servers normally. `julials` is excluded from Mason auto-enable because the packaged
+`julia-lsp` wrapper can break on newer Julia releases.
+
+Requirements:
+
+- `julia` must be on PATH inside Neovim (this config prepends `~/.juliaup/bin` when present)
+- Treesitter parser `julia` is auto-installed by `nvim-treesitter`
+- a local Julia LSP environment must exist at `~/.julia/environments/nvim-lspconfig`
+
+Bootstrap that environment once on any machine with Julia installed:
+
+```sh
+julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/nvim-lspconfig" -e 'using Pkg; Pkg.add("LanguageServer"); Pkg.add("SymbolServer"); Pkg.add("StaticLint"); Pkg.instantiate()'
+```
+
+If Julia 1.12+ shows SymbolServer/world-age failures with released packages, update to the
+newer upstream branches:
+
+```sh
+julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/nvim-lspconfig" -e 'using Pkg; Pkg.add(PackageSpec(name="LanguageServer", rev="main")); Pkg.add(PackageSpec(name="SymbolServer", rev="master")); Pkg.add(PackageSpec(name="StaticLint", rev="master")); Pkg.instantiate(); Pkg.precompile()'
+```
+
+Project usage:
+
+- open Neovim from a Julia project directory when possible
+- ensure project dependencies are installed with:
+
+```sh
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+```
 
 ### Formatters
 

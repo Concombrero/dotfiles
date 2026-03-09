@@ -55,6 +55,11 @@ if test -d $HOME/.local/bin
     fish_add_path $HOME/.local/bin
 end
 
+# juliaup (only if installed)
+if test -d $HOME/.juliaup/bin
+    fish_add_path $HOME/.juliaup/bin
+end
+
 # opencode (only if installed)
 if test -d $HOME/.opencode/bin
     fish_add_path $HOME/.opencode/bin

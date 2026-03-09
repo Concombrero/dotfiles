@@ -58,6 +58,7 @@ end
 
 prepend_to_path(vim.fn.stdpath("data") .. "/mason/bin") -- Mason-installed LSP/tools
 prepend_to_path("~/.local/bin")                         -- pipx, zoxide, user scripts
+prepend_to_path("~/.juliaup/bin")                      -- Julia and juliaup-managed tools
 prepend_to_path("~/.fzf/bin")                           -- fzf (used by yazi, telescope, etc.)
 prepend_to_path("~/.opencode/bin")                      -- opencode CLI
 prepend_to_path("~/typst-x86_64-unknown-linux-musl")    -- typst binary

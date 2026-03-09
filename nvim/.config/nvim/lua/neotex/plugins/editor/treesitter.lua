@@ -34,6 +34,7 @@ return {
           "query",         -- For treesitter queries
           "markdown",      -- For documentation and Lectic support
           "markdown_inline", -- For inline markdown syntax
+          "julia",         -- For Julia source files
           "python",        -- For Python scripts
           "bash",          -- For shell scripts
           -- "latex" removed as requested - will be handled separately
