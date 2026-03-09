@@ -44,7 +44,7 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
   - All files: `trim_whitespace`, `trim_newlines`
 
 ### LSP
-- Servers: `pyright` (Python), `texlab` (LaTeX), `tinymist` (Typst), `lua_ls` (Lua)
+- Servers: `clangd` (C/C++), `cmake` (CMake), `pyright` (Python), `texlab` (LaTeX), `tinymist` (Typst), `lua_ls` (Lua), `julials` (Julia)
 - Uses mason-lspconfig handlers with `require("lspconfig").server.setup()` for server configuration
 - Mason manages LSP server installation
 - `<leader>ls` - Restart LSP, `<leader>lk` - Stop LSP, `<leader>lt` - Start LSP

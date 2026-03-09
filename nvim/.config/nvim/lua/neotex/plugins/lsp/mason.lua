@@ -32,6 +32,14 @@ return {
     end
 
     local capabilities = cmp_nvim_lsp.default_capabilities()
+    local clangd_capabilities = vim.tbl_deep_extend("force", {}, capabilities, {
+      offsetEncoding = { "utf-8", "utf-16" },
+      textDocument = {
+        completion = {
+          editsNearCursor = true,
+        },
+      },
+    })
 
     -- DIAGNOSTICS CONFIGURATION
     local signs = { Error = "󰅜", Warn = "󰀦", Hint = "󰌵", Info = "󰋽" }
@@ -64,6 +72,8 @@ return {
     -- MASON-LSPCONFIG SETUP
     mason_lspconfig.setup({
       ensure_installed = {
+        "clangd",
+        "cmake",
         "pyright",
         "texlab",
         "tinymist",
@@ -84,6 +94,21 @@ return {
           },
         },
       },
+    })
+
+    vim.lsp.config("clangd", {
+      capabilities = clangd_capabilities,
+      cmd = {
+        "clangd",
+        "--background-index",
+        "--clang-tidy",
+        "--header-insertion=iwyu",
+        "--completion-style=detailed",
+      },
+    })
+
+    vim.lsp.config("cmake", {
+      capabilities = capabilities,
     })
 
     vim.lsp.config("texlab", {
@@ -171,6 +196,8 @@ return {
     -- MASON-TOOL-INSTALLER SETUP
     local ensure_installed_tools = {
       -- LSP servers
+      "clangd",
+      "cmake-language-server",
       "pyright",
       "texlab",
       "tinymist",

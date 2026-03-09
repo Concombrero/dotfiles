@@ -49,6 +49,8 @@ return {
           
           -- Additional languages
           "c",
+          "cpp",
+          "cmake",
           "haskell",
           "norg",
         },

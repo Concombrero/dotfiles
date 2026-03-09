@@ -128,11 +128,16 @@ The config prepends Mason binaries to Neovim PATH at startup, so editor tools ar
 
 ### LSP Servers
 
+- `clangd` (C/C++)
+- `cmake` (CMake)
 - `pyright` (Python)
 - `texlab` (LaTeX)
 - `tinymist` (Typst)
 - `lua_ls` (Lua)
 - `julials` (Julia)
+
+For C/C++ projects, `clangd` works best when the project exposes `compile_commands.json`
+or `compile_flags.txt` near the source root or build directory.
 
 ### Julia LSP Notes
 

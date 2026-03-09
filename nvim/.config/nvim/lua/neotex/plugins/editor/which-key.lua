@@ -86,8 +86,10 @@ LSP & LINT (<leader>l)                          | LABEL
 -----------------------------------------------------------
 <leader>lB                                      | toggle buffer linting
 <leader>lD                                      | declaration
+<leader>lH                                      | switch source/header (clangd)
 <leader>lL                                      | lint file
 <leader>lR                                      | rename
+<leader>lS                                      | clangd symbol info
 <leader>lb                                      | buffer diagnostics
 <leader>lc                                      | code action
 <leader>ld                                      | definition
@@ -177,6 +179,20 @@ local function opencode_call(method, ...)
   return function()
     require("lazy").load({ plugins = { "opencode.nvim" } })
     require("opencode.api")[method](table.unpack(args))
+  end
+end
+
+local function run_buffer_command(command_name, missing_message)
+  return function()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local commands = vim.api.nvim_buf_get_commands(bufnr, { builtin = false })
+
+    if commands[command_name] then
+      vim.cmd(command_name)
+      return
+    end
+
+    vim.notify(missing_message, vim.log.levels.WARN)
   end
 end
 
@@ -377,6 +393,13 @@ return {
         c = { "<cmd>lua vim.lsp.buf.code_action()<CR>", "code action" },
         d = { "<cmd>lua vim.lsp.buf.definition()<CR>", "definition" },
         D = { "<cmd>lua vim.lsp.buf.declaration()<CR>", "declaration" },
+        H = {
+          run_buffer_command(
+            "LspClangdSwitchSourceHeader",
+            "Clangd source/header switching is only available in a C/C++ buffer"
+          ),
+          "switch source/header",
+        },
         f = { function() require("conform").format({ async = true, lsp_fallback = true }) end, "format buffer" },
         h = { "<cmd>lua vim.lsp.buf.hover()<CR>", "help" },
         i = { "<cmd>Telescope lsp_implementations<CR>", "implementations" },
@@ -386,6 +409,13 @@ return {
         p = { "<cmd>lua vim.diagnostic.goto_prev()<CR>", "previous diagnostic" },
         r = { "<cmd>Telescope lsp_references<CR>", "references" },
         s = { "<cmd>LspRestart<CR>", "restart lsp" },
+        S = {
+          run_buffer_command(
+            "LspClangdShowSymbolInfo",
+            "Clangd symbol info is only available in a C/C++ buffer"
+          ),
+          "clangd symbol info",
+        },
         t = { "<cmd>LspStart<CR>", "start lsp" },
         y = { "<cmd>lua CopyDiagnosticsToClipboard()<CR>", "copy diagnostics to clipboard" },
         R = { "<cmd>lua vim.lsp.buf.rename()<CR>", "rename" },

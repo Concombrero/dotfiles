@@ -170,6 +170,8 @@ return {
       callback = function()
         -- Get a list of filetypes that should be automatically linted
         local auto_lint_filetypes = {
+          "c",
+          "cpp",
           "python",
           "lua",
           "javascript",
