@@ -35,9 +35,14 @@ Rules for changes:
 
 - Always edit the file inside this repo, not the live symlink under `$HOME`.
 - Preserve the package-to-target path mapping when adding files.
+- After adding, removing, renaming, or moving files inside a stow package, rerun Stow for that package so `$HOME` matches the repo source-of-truth (for example: `stow -R -t "$HOME" opencode` from the repo root).
+- New files created in the repo do not appear under `$HOME` until the affected package is re-stowed.
+- If the target path in `$HOME` already exists as a real file or directory instead of a symlink, inspect it first, merge or back it up if needed, and then re-stow rather than editing the live copy and leaving the repo out of sync.
 - If you add a new stowable package, update `packages/stow_list.txt`.
 - Keep root-only repo files out of Stow unless they are meant to land in `$HOME`.
 - Respect `.stow-local-ignore`; it intentionally excludes root repo metadata and some machine-local runtime files.
+
+GNU Stow reference: https://www.gnu.org/software/stow/manual/stow.html
 
 Current Stow exclusions in `.stow-local-ignore` include:
 
