@@ -649,13 +649,6 @@ function M.suggest_lazy_loading()
       "lua", "python", "javascript", "typescript", "markdown", "tex", "vim"
     }
     
-    -- Common commands to consider for command-specific plugins
-    local common_commands = {
-      git = {"Git", "Gstatus", "Gdiff", "Gblame", "Gcommit"},
-      finder = {"Telescope", "Find", "Grep"},
-      lsp = {"LspInfo", "LspStart", "LspStop"}
-    }
-    
     -- Generate suggestions
     local suggestions = {}
     

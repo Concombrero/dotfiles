@@ -47,7 +47,7 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
 - Servers: `clangd` (C/C++), `cmake` (CMake), `pyright` (Python), `texlab` (LaTeX), `tinymist` (Typst), `lua_ls` (Lua), `julials` (Julia)
 - Uses mason-lspconfig handlers with `require("lspconfig").server.setup()` for server configuration
 - Mason manages LSP server installation
-- `<leader>ls` - Restart LSP, `<leader>lk` - Stop LSP, `<leader>lt` - Start LSP
+- `<leader>ls` - Restart LSP (`:lsp restart`), `<leader>lk` - Stop LSP (`:lsp stop`), `<leader>lt` - Start LSP (`:lsp enable`)
 
 ### Diagnostics
 - `<leader>ll` - Line diagnostics (float), `<leader>lb` - Buffer diagnostics (Telescope)

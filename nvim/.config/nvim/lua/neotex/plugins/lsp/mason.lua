@@ -31,6 +31,55 @@ return {
       return nil
     end
 
+    local function get_venv_python(venv_path)
+      if not venv_path or venv_path == "" then
+        return nil
+      end
+
+      local candidates = {
+        vim.fs.joinpath(venv_path, "bin", "python"),
+        vim.fs.joinpath(venv_path, "bin", "python3"),
+        vim.fs.joinpath(venv_path, "Scripts", "python.exe"),
+      }
+
+      for _, candidate in ipairs(candidates) do
+        if vim.fn.executable(candidate) == 1 then
+          return candidate
+        end
+      end
+
+      return nil
+    end
+
+    local function resolve_python_path(root_dir)
+      if root_dir and root_dir ~= "" then
+        for _, venv_name in ipairs({ ".venv", "venv", "env" }) do
+          local python_path = get_venv_python(vim.fs.joinpath(root_dir, venv_name))
+          if python_path then
+            return python_path
+          end
+        end
+      end
+
+      local active_python = get_venv_python(vim.env.VIRTUAL_ENV)
+        or get_venv_python(vim.env.CONDA_PREFIX)
+      if active_python then
+        return active_python
+      end
+
+      local python3 = vim.fn.exepath("python3")
+      if python3 ~= "" then
+        return python3
+      end
+
+      local python = vim.fn.exepath("python")
+      if python ~= "" then
+        return python
+      end
+
+      return "python"
+    end
+
     local capabilities = cmp_nvim_lsp.default_capabilities()
     local clangd_capabilities = vim.tbl_deep_extend("force", {}, capabilities, {
       offsetEncoding = { "utf-8", "utf-16" },
@@ -87,6 +136,11 @@ return {
 
     vim.lsp.config("pyright", {
       capabilities = capabilities,
+      before_init = function(_, config)
+        config.settings = config.settings or {}
+        config.settings.python = config.settings.python or {}
+        config.settings.python.pythonPath = resolve_python_path(config.root_dir)
+      end,
       settings = {
         python = {
           analysis = {

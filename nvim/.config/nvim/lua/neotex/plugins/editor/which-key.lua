@@ -97,7 +97,7 @@ LSP & LINT (<leader>l)                          | LABEL
 <leader>lg                                      | toggle global linting
 <leader>lh                                      | help
 <leader>li                                      | implementations
-<leader>lk                                      | kill lsp
+<leader>lk                                      | stop lsp
 <leader>ll                                      | line diagnostics
 <leader>ln                                      | next diagnostic
 <leader>lp                                      | previous diagnostic
@@ -403,12 +403,12 @@ return {
         f = { function() require("conform").format({ async = true, lsp_fallback = true }) end, "format buffer" },
         h = { "<cmd>lua vim.lsp.buf.hover()<CR>", "help" },
         i = { "<cmd>Telescope lsp_implementations<CR>", "implementations" },
-        k = { "<cmd>LspStop<CR>", "kill lsp" },
+        k = { "<cmd>lsp stop<CR>", "stop lsp" },
         l = { "<cmd>lua vim.diagnostic.open_float()<CR>", "line diagnostics" },
         n = { "<cmd>lua vim.diagnostic.goto_next()<CR>", "next diagnostic" },
         p = { "<cmd>lua vim.diagnostic.goto_prev()<CR>", "previous diagnostic" },
         r = { "<cmd>Telescope lsp_references<CR>", "references" },
-        s = { "<cmd>LspRestart<CR>", "restart lsp" },
+        s = { "<cmd>lsp restart<CR>", "restart lsp" },
         S = {
           run_buffer_command(
             "LspClangdShowSymbolInfo",
@@ -416,13 +416,23 @@ return {
           ),
           "clangd symbol info",
         },
-        t = { "<cmd>LspStart<CR>", "start lsp" },
+        t = { "<cmd>lsp enable<CR>", "start lsp" },
         y = { "<cmd>lua CopyDiagnosticsToClipboard()<CR>", "copy diagnostics to clipboard" },
         R = { "<cmd>lua vim.lsp.buf.rename()<CR>", "rename" },
         -- T = { "<cmd>Telescope lsp_type_definitions<CR>", "type definition" },
 
         -- Linting operations
-        L = { function() require("lint").try_lint() end, "lint file" },
+        L = {
+          function()
+            if _G.lint_try_lint then
+              _G.lint_try_lint()
+              return
+            end
+
+            require("lint").try_lint()
+          end,
+          "lint file",
+        },
         g = { "<cmd>LintToggle<CR>", "toggle global linting" },
         B = { "<cmd>LintToggle buffer<CR>", "toggle buffer linting" },
       },

@@ -47,9 +47,9 @@ adjust your local citation workflow settings.
   - `<leader>lg` / `<leader>lB` toggle auto-linting globally or per buffer
   - `:LintToggle` / `:LintToggle buffer`
 - LSP lifecycle:
-  - `<leader>lt` start
-  - `<leader>lk` stop
-  - `<leader>ls` restart
+  - `<leader>lt` start (`:lsp enable`)
+  - `<leader>lk` stop (`:lsp stop`)
+  - `<leader>ls` restart (`:lsp restart`)
 
 ## AI Workflow
 
