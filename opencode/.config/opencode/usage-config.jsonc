@@ -1,0 +1,19 @@
+{
+  // Leave proxy settings empty when proxy usage is disabled.
+  "endpoint": "",
+  "apiKey": "",
+
+  // Keep plugin defaults for optional settings.
+  "zaiEndpoint": "https://api.z.ai",
+  "timeout": 10000,
+
+  // Hide providers not used in this setup.
+  "providers": {
+    "openai": true,
+    "proxy": false,
+    "copilot": true,
+    "zai": false,
+    "anthropic": false,
+    "openrouter": false
+  }
+}
