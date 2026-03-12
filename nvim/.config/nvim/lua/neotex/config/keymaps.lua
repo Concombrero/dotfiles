@@ -269,56 +269,6 @@ function M.setup()
   map("v", "J", "gj", {}, "Move down display line")
   map("v", "K", "gk", {}, "Move up display line")
 
-  -- TRAINING MODE (disable mouse + arrow keys) --
-  vim.g.training_mode = true -- on by default
-
-  local function set_training_mode(enabled)
-    vim.g.training_mode = enabled
-    if enabled then
-      vim.opt.mouse = ""
-      for _, mode in ipairs({ "n", "i", "v" }) do
-        for _, key in ipairs({ "<Up>", "<Down>", "<Left>", "<Right>" }) do
-          vim.keymap.set(mode, key, "", { noremap = true, silent = true, desc = "disabled (training mode)" })
-        end
-      end
-      vim.notify("Training mode ON — mouse and arrow keys disabled", vim.log.levels.INFO)
-    else
-      vim.opt.mouse = "a"
-      for _, mode in ipairs({ "n", "i", "v" }) do
-        for _, key in ipairs({ "<Up>", "<Down>", "<Left>", "<Right>" }) do
-          pcall(vim.keymap.del, mode, key)
-        end
-      end
-      vim.notify("Training mode OFF — mouse and arrow keys restored", vim.log.levels.INFO)
-    end
-  end
-
-  -- Apply training mode on startup (no notification)
-  if vim.g.training_mode then
-    vim.opt.mouse = ""
-    for _, mode in ipairs({ "n", "i", "v" }) do
-      for _, key in ipairs({ "<Up>", "<Down>", "<Left>", "<Right>" }) do
-        vim.keymap.set(mode, key, "", { noremap = true, silent = true, desc = "disabled (training mode)" })
-      end
-    end
-  end
-
-  -- Toggle command: :TrainingMode or :TrainingMode on/off
-  vim.api.nvim_create_user_command("TrainingMode", function(opts)
-    local arg = opts.args:lower()
-    if arg == "on" then
-      set_training_mode(true)
-    elseif arg == "off" then
-      set_training_mode(false)
-    else
-      set_training_mode(not vim.g.training_mode)
-    end
-  end, {
-    nargs = "?",
-    complete = function() return { "on", "off" } end,
-    desc = "Toggle training mode (disable mouse + arrow keys)",
-  })
-
   return true
 end
 
