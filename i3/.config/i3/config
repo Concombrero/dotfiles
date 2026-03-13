@@ -80,6 +80,9 @@ bindsym $mod+n exec --no-startup-id $terminal -e nvim
 #start lazygit
 bindsym $mod+g exec --no-startup-id $terminal -e lazygit
 
+#start opencode
+bindsym $mod+o exec --no-startup-id $terminal -e ~/.opencode/bin/opencode --port 
+
 # kill focused window
 bindsym $mod+q kill
 
