@@ -1,5 +1,81 @@
 if status is-interactive
-    # Commands to run in interactive sessions can go here
+    fish_vi_key_bindings insert
+
+    set -g __prompt_cmd_duration_ms 0
+
+    function __prompt_cmd_timer_start --on-event fish_preexec
+        set -g __prompt_cmd_started_at_ms (date +%s%3N)
+    end
+
+    function __prompt_cmd_timer_stop --on-event fish_postexec
+        if set -q __prompt_cmd_started_at_ms
+            set -l end_ms (date +%s%3N)
+            set -g __prompt_cmd_duration_ms (math $end_ms - $__prompt_cmd_started_at_ms)
+            set -e __prompt_cmd_started_at_ms
+        end
+    end
+
+    if type -q starship
+        starship init fish | source
+
+        function fish_right_prompt
+            switch "$fish_key_bindings"
+                case fish_hybrid_key_bindings fish_vi_key_bindings fish_helix_keybindings
+                    set STARSHIP_KEYMAP "$fish_bind_mode"
+                case '*'
+                    set STARSHIP_KEYMAP insert
+            end
+
+            set STARSHIP_CMD_PIPESTATUS $pipestatus
+            set STARSHIP_CMD_STATUS $status
+
+            set -l STARSHIP_DURATION $__prompt_cmd_duration_ms
+            if test -z "$STARSHIP_DURATION"
+                if set -q cmd_duration
+                    set STARSHIP_DURATION $cmd_duration
+                else if set -q CMD_DURATION
+                    set STARSHIP_DURATION $CMD_DURATION
+                else
+                    set STARSHIP_DURATION 0
+                end
+            end
+
+            __starship_set_job_count
+
+            if contains -- --final-rendering $argv; or test "$RIGHT_TRANSIENT" = "1"
+                set -g RIGHT_TRANSIENT 0
+                if type -q starship_transient_rprompt_func
+                    starship_transient_rprompt_func --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="$STARSHIP_CMD_PIPESTATUS" --keymap=$STARSHIP_KEYMAP --cmd-duration=$STARSHIP_DURATION --jobs=$STARSHIP_JOBS
+                else
+                    printf ""
+                end
+            else
+                switch $fish_bind_mode
+                    case default
+                        set_color --bold
+                        echo -n "N "
+                    case visual
+                        set_color --bold
+                        echo -n "V "
+                    case replace replace_one replace-one
+                        set_color --bold
+                        echo -n "R "
+                end
+
+                set_color normal
+
+                set -l starship_duration (command starship module cmd_duration --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="$STARSHIP_CMD_PIPESTATUS" --keymap=$STARSHIP_KEYMAP --cmd-duration=$STARSHIP_DURATION --jobs=$STARSHIP_JOBS | string collect)
+
+                if test -n "$starship_duration"
+                    printf "%s" "$starship_duration"
+                end
+
+                command starship prompt --right --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="$STARSHIP_CMD_PIPESTATUS" --keymap=$STARSHIP_KEYMAP --cmd-duration=$STARSHIP_DURATION --jobs=$STARSHIP_JOBS
+            end
+        end
+    else
+        fish_config prompt choose scales >/dev/null
+    end
 end
 
 # removes the mapping <C-t> which is being used to close the terminal in NeoVim
@@ -8,21 +84,6 @@ bind --erase --all \ct
 # fish is aware of the paths set by brew:
 # to ensure that brew paths are recognized inside fish, run:
 #    /opt/brew/bin/brew shellenv >> ~/.config/fish/config.fish 
-
-fish_config prompt choose scales
-
-# Customize the prompt to use ->
-function fish_prompt
-    set -l last_status $status
-    
-    # Print the current directory
-    set_color normal
-    echo -n (prompt_pwd) 
-    set_color normal
-    
-    # Print -> as prompt character
-    echo -n " ➜ "
-end
 
 # Initialize zoxide
 if type -q zoxide

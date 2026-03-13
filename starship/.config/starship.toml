@@ -1,18 +1,47 @@
-[python]
-disabled=true
+"$schema" = "https://starship.rs/config-schema.json"
 
-[php]
-disabled=true
+add_newline = false
+command_timeout = 500
 
-[nodejs]
-disabled = true
+format = """
+$directory\
+$python\
+$character\
+"""
 
-[line_break]
-disabled=true
+right_format = """
+$git_branch\
+"""
+
+[directory]
+format = "$path "
+truncation_length = 3
+fish_style_pwd_dir_length = 1
 
 [character]
-success_symbol = '[➜](bold cyan)'
-error_symbol = '[➜](bold red)'
+success_symbol = "[➜](bold #74c7ec)"
+error_symbol = "[➜](bold #f38ba8)"
+vimcmd_symbol = "[➜](bold #74c7ec)"
+vimcmd_visual_symbol = "[➜](bold #74c7ec)"
+vimcmd_replace_symbol = "[➜](bold #74c7ec)"
+vimcmd_replace_one_symbol = "[➜](bold #74c7ec)"
 
+[python]
+symbol = ""
+format = "[\\($virtualenv\\)]($style) "
+style = "dimmed"
+detect_extensions = []
+detect_files = []
+detect_folders = []
 
+[cmd_duration]
+min_time = 2000
+format = "[󰔛 $duration](#6c7086) "
+show_milliseconds = false
 
+[git_branch]
+symbol = " "
+style = "fg:#b4befe bg:#313244"
+format = "[](fg:#313244)[$symbol$branch]($style)[](fg:#313244)"
+truncation_length = 24
+truncation_symbol = "…"
