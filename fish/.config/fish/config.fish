@@ -107,29 +107,11 @@ if test -d /usr/local/cuda
     set -gx LD_LIBRARY_PATH $cuda_path/lib64 $LD_LIBRARY_PATH
 end
 
-# fzf (only if installed)
-if test -d $HOME/.fzf/bin
-    fish_add_path $HOME/.fzf/bin
-end
-
-# local binaries (e.g., zoxide)
-if test -d $HOME/.local/bin
-    fish_add_path $HOME/.local/bin
-end
-
-# juliaup (only if installed)
-if test -d $HOME/.juliaup/bin
-    fish_add_path $HOME/.juliaup/bin
-end
-
-# opencode (only if installed)
-if test -d $HOME/.opencode/bin
-    fish_add_path $HOME/.opencode/bin
-end
-
-# personal scripts (~/bin)
-if test -d $HOME/bin
-    fish_add_path $HOME/bin
+# User bin directories (only if installed)
+for path_dir in $HOME/.fzf/bin $HOME/.local/bin $HOME/.juliaup/bin $HOME/.opencode/bin $HOME/bin
+    if test -d $path_dir
+        fish_add_path $path_dir
+    end
 end
 
 # Use portal for file picker
