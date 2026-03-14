@@ -127,6 +127,11 @@ if test -d $HOME/.opencode/bin
     fish_add_path $HOME/.opencode/bin
 end
 
+# personal scripts (~/bin)
+if test -d $HOME/bin
+    fish_add_path $HOME/bin
+end
+
 # Use portal for file picker
 set -gx GTK_USE_PORTAL 1
 
