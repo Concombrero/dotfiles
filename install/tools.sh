@@ -17,7 +17,6 @@ install_tools() {
     run_step "Python tool install" install_python_tools
 
     if [ "$1" = true ]; then
-        run_step "betterlockscreen install" install_betterlockscreen
         run_step "Zen Browser install" install_zen
     fi
 }
@@ -249,27 +248,6 @@ install_lazygit() {
 
     rm -rf "$TMP_DIR"
     log "Lazygit installed."
-}
-
-install_betterlockscreen() {
-    if command -v betterlockscreen &>/dev/null; then
-        warn "betterlockscreen already installed, skipping."
-        return
-    fi
-
-    if ! command -v xset &>/dev/null; then
-        error "Missing required dependency 'xset'. Install the package that provides it before installing betterlockscreen."
-        return 1
-    fi
-
-    info "Installing betterlockscreen..."
-
-    if ! curl -fsSL https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh | sudo bash -s system; then
-        error "Failed to install betterlockscreen."
-        return 1
-    fi
-
-    log "betterlockscreen installed."
 }
 
 install_zen() {

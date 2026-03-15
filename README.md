@@ -22,7 +22,7 @@ Visually, anything that can be is themed with [Catppuccin](https://github.com/ca
     - Status bar : `polybar` 
     - App launcher / Menu : `rofi`
     - Notifications : `dunst`
-    - Lockscreen : `betterlockscreen`
+    - Lockscreen : `i3lock`
     - File Manager : `yazi` (via CLI)
 - Command Line Interface : 
   - Terminal emulator : `alacritty`
@@ -81,7 +81,7 @@ What this does at a high level:
 
 1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
-3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, and falls back to upstream installers where needed (`zen-browser`, `betterlockscreen`, etc.).
+3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, and falls back to upstream installers where needed (`zen-browser`, etc.).
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
@@ -142,7 +142,6 @@ Defined in distro-specific package lists:
 - `lazygit` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zen-browser` (official installer)
-- `betterlockscreen` (official installer)
 
 ### Python Tools (via pipx)
 Installed in isolated environments to avoid breaking system Python:
@@ -244,16 +243,7 @@ EOF
 
 If needed, you can still override manually via environment variables before launching polybar.
 
-### 4) Betterlockscreen cache (recommended)
-
-Initialize lockscreen cache from your wallpaper directory:
-
-```bash
-betterlockscreen -u ~/Pictures/Wallpapers
-betterlockscreen --lock dim
-```
-
-### 5) Workspace-local PDF/image tabs.
+### 4) Workspace-local PDF/image tabs.
 
 `zathura-tabbed` and `sxiv-tabbed` use native i3 tabbed containers. 
 
@@ -263,7 +253,7 @@ Behavior per workspace:
 - Any subsequent PDF/image opened via `xdg-open` in that workspace is appended as a new tab in the matching container.
 - Tab titles are normalized to basename-only (for example `paper.pdf`, `figure.png`).
 
-### 6) Zen Browser
+### 5) Zen Browser
 
 Zen is installed automatically by `install.sh` when using the desktop profile.
 Expected install locations:
