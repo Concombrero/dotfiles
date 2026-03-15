@@ -13,6 +13,7 @@ picom
 rofi
 dunst
 xdotool
+xclip
 xorg-xrandr
 xorg-setxkbmap
 xorg-xprop
