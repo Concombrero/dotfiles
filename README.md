@@ -69,7 +69,7 @@ If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc
 > The bootstrap installer supports **Ubuntu/Debian**, **Arch**, **CachyOS**, and other Arch-based distros that use `pacman`.
 
 > [!NOTE]
-> On Arch/CachyOS desktop installs, the installer also provisions the base X11/login/audio stack (`xorg-server`, `mesa`, `lightdm`, `lightdm-gtk-greeter`, `networkmanager`, `pipewire`, `pipewire-pulse`, `wireplumber`). VM guest helpers remain manual.
+> On Arch/CachyOS desktop installs, the installer also provisions the base X11/login/audio stack (`xorg-server`, `mesa`, `lightdm`, `lightdm-gtk-greeter`, `pipewire`, `pipewire-pulse`, `wireplumber`). VM guest helpers remain manual.
 
 What this does at a high level:
 
@@ -91,7 +91,7 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
    - `:checkhealth`
 
 > [!NOTE]
-> On Arch/CachyOS, the desktop install now enables `NetworkManager.service`, `lightdm.service`, `pipewire.service`, `pipewire-pulse.service`, and `wireplumber.service` automatically.
+> On Arch/CachyOS, the desktop install now enables `lightdm.service`, `pipewire.service`, `pipewire-pulse.service`, and `wireplumber.service` automatically. `NetworkManager` is left to the base install (for example via `archinstall`).
 
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
@@ -126,7 +126,7 @@ Defined in distro-specific package lists:
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
-- **Arch desktop extras:** `xorg-server`, `mesa`, `lightdm`, `lightdm-gtk-greeter`, `networkmanager`, `pipewire`, `pipewire-pulse`, `wireplumber`
+- **Arch desktop extras:** `xorg-server`, `mesa`, `lightdm`, `lightdm-gtk-greeter`, `pipewire`, `pipewire-pulse`, `wireplumber`
 
 ### External Tools/Binaries
 - `neovim` (official prebuilt archive on Debian/Ubuntu; official Arch package on `pacman` systems)

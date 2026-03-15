@@ -98,7 +98,7 @@ activate_desktop_integrations() {
 
 print_post_install_notes() {
     if [ "$DISTRO_FAMILY" = arch ] && [ "$INSTALL_DESKTOP" = true ]; then
-        info "Arch desktop installs provision the X11/login/audio base and enable NetworkManager, LightDM, PipeWire, PipeWire Pulse, and WirePlumber."
+        info "Arch desktop installs provision the X11/login/audio base and enable LightDM, PipeWire, PipeWire Pulse, and WirePlumber."
     fi
 
     info "Please log out and log back in for all changes to take effect."

@@ -6,7 +6,6 @@ xorg-server
 mesa
 lightdm
 lightdm-gtk-greeter
-networkmanager
 pipewire
 pipewire-pulse
 wireplumber

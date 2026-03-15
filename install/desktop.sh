@@ -57,7 +57,6 @@ install_fonts() {
 
 ensure_system_service() {
     local service=$1
-    local start_now=${2:-false}
 
     if ! has_cmd systemctl; then
         warn "systemctl not found; skipping system service setup for $service."
@@ -68,14 +67,6 @@ ensure_system_service() {
         info "Enabling system service: $service"
         if ! sudo systemctl enable "$service"; then
             warn "Failed to enable system service $service."
-            return 1
-        fi
-    fi
-
-    if [ "$start_now" = true ] && ! sudo systemctl is-active --quiet "$service"; then
-        info "Starting system service: $service"
-        if ! sudo systemctl start "$service"; then
-            warn "Failed to start system service $service."
             return 1
         fi
     fi
@@ -116,8 +107,7 @@ configure_arch_desktop_services() {
 
     [ "$DISTRO_FAMILY" = arch ] || return 0
 
-    ensure_system_service NetworkManager.service true || had_failure=true
-    ensure_system_service lightdm.service false || had_failure=true
+    ensure_system_service lightdm.service || had_failure=true
 
     for service in pipewire.service pipewire-pulse.service wireplumber.service; do
         ensure_user_service "$service" || had_failure=true
