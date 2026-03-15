@@ -75,7 +75,7 @@ What this does at a high level:
 
 1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
-3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and falls back to upstream installers where needed on Debian/Ubuntu (`zen-browser`, etc.).
+3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and falls back to upstream installers where needed on Debian/Ubuntu (`zen-browser`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
@@ -137,6 +137,7 @@ Defined in distro-specific package lists:
 - `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zen-browser` (official installer)
+- `xdg-desktop-portal-termfilechooser` (built from upstream source on desktop installs)
 
 ### Python Tools (via pipx)
 Installed in isolated environments to avoid breaking system Python:
@@ -190,18 +191,19 @@ These items are either manual setup or useful post-install checks.
 
 ### 1) `xdg-desktop-portal-termfilechooser` backend (for Yazi file picker)
 
-The config is stowed, and the normal desktop install now pulls in this backend's runtime + build dependencies. On Debian/Ubuntu that means packages like `meson`, `ninja-build`, `libinih-dev`, `libsystemd-dev`, `scdoc`; on Arch it uses the `pacman` equivalents.
+The normal desktop install now builds and installs this backend automatically from upstream source, then tries to restart the relevant portal services. This source-build path is used because there is no official Debian/Ubuntu package and no official Arch package in the main repos.
 
-The backend binary itself still needs a one-time manual install in this bootstrap flow. Ubuntu/Debian do not ship a standard package for `xdg-desktop-portal-termfilechooser`, and Arch users typically install it from AUR or from source.
+The installer already pulls in the runtime + build dependencies through the desktop package lists. On Debian/Ubuntu that means packages like `meson`, `ninja-build`, `libinih-dev`, `libsystemd-dev`, `scdoc`; on Arch it uses the `pacman` equivalents.
 
-If you installed with `--headless`/`--no-gui`, install those dependencies first before building the backend manually.
+If you installed with `--headless`, `--skip-tools`, or the source build failed, you can still install it manually with the fallback below.
 
-Then build and install it once from source:
+Fallback manual install:
 
 ```bash
 git clone https://github.com/boydaihungst/xdg-desktop-portal-termfilechooser.git /tmp/xdptf
 cd /tmp/xdptf
-meson setup build
+bash remove_legacy_file.sh
+meson setup build --prefix=/usr
 ninja -C build
 sudo ninja -C build install
 ```
@@ -209,7 +211,8 @@ sudo ninja -C build install
 If `meson setup` complains about manpage tooling, retry with:
 
 ```bash
-meson setup build -Dman-pages=disabled
+rm -rf build
+meson setup build --prefix=/usr -Dman-pages=disabled
 ```
 
 Then relogin, or run:

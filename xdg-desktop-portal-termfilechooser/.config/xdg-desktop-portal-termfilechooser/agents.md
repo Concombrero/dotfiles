@@ -28,8 +28,8 @@ Zen Browser (GTK_USE_PORTAL=1)
 ### System-level (installed from source)
 | File | Purpose |
 |------|---------|
-| `/usr/local/libexec/xdg-desktop-portal-termfilechooser` | Portal backend binary |
-| `/usr/local/lib/systemd/user/xdg-desktop-portal-termfilechooser.service` | systemd user service |
+| `/usr/libexec/xdg-desktop-portal-termfilechooser` or `/usr/lib/xdg-desktop-portal-termfilechooser` | Portal backend binary |
+| `/usr/lib/systemd/user/xdg-desktop-portal-termfilechooser.service` | systemd user service |
 | `/usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.termfilechooser.service` | D-Bus activation |
 | `/usr/share/xdg-desktop-portal/portals/termfilechooser.portal` | Portal definition (declares `UseIn=i3`) |
 

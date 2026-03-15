@@ -90,6 +90,11 @@ apply_requested_desktop_extras() {
     install_desktop_extras "$INSTALL_FONTS"
 }
 
+activate_desktop_integrations() {
+    [ "$INSTALL_DESKTOP" = true ] || return 0
+    activate_termfilechooser
+}
+
 print_post_install_notes() {
     if [ "$DISTRO_FAMILY" = arch ] && [ "$INSTALL_DESKTOP" = true ]; then
         warn "On fresh Arch installs, verify an X11 login stack is present on minimal systems, NetworkManager is enabled, and a PulseAudio-compatible audio service is running for nm-applet and pactl-based volume controls."
@@ -114,6 +119,7 @@ main() {
     install_requested_tools
     run_step "stow enforcement" stow_packages
     apply_requested_desktop_extras
+    activate_desktop_integrations
     print_install_summary
     print_post_install_notes
 }

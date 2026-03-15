@@ -30,8 +30,44 @@ install_tools() {
     run_step "Python tool install" install_python_tools
 
     if [ "$1" = true ]; then
+        run_step "termfilechooser install" install_termfilechooser
         run_step "Zen Browser install" install_zen
     fi
+}
+
+termfilechooser_is_installed() {
+    [ -x /usr/libexec/xdg-desktop-portal-termfilechooser ] || [ -x /usr/lib/xdg-desktop-portal-termfilechooser ] || return 1
+    [ -f /usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.termfilechooser.service ] || return 1
+    [ -f /usr/share/xdg-desktop-portal/portals/termfilechooser.portal ] || return 1
+}
+
+activate_termfilechooser() {
+    local env_vars=(DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH)
+
+    if ! termfilechooser_is_installed; then
+        return 0
+    fi
+
+    if ! command -v systemctl &>/dev/null; then
+        warn "systemctl not found; relogin to activate xdg-desktop-portal-termfilechooser."
+        return 0
+    fi
+
+    systemctl --user import-environment "${env_vars[@]}" &>/dev/null || true
+
+    if command -v dbus-update-activation-environment &>/dev/null; then
+        dbus-update-activation-environment --systemd "${env_vars[@]}" &>/dev/null || true
+    fi
+
+    systemctl --user daemon-reload &>/dev/null || true
+
+    if systemctl --user restart xdg-desktop-portal-termfilechooser.service xdg-desktop-portal.service &>/dev/null; then
+        log "xdg-desktop-portal-termfilechooser activated."
+        return 0
+    fi
+
+    warn "Could not restart portal services from this shell. Relogin to activate xdg-desktop-portal-termfilechooser."
+    return 0
 }
 
 install_neovim() {
@@ -331,6 +367,64 @@ install_typst() {
 
     rm -rf "$tmp_dir"
     log "Typst installed to ~/.local/opt/typst."
+}
+
+install_termfilechooser() {
+    local src_dir build_dir tmp_dir
+
+    if termfilechooser_is_installed; then
+        warn "xdg-desktop-portal-termfilechooser already installed, skipping build."
+        return
+    fi
+
+    for cmd in git meson ninja sudo; do
+        if ! command -v "$cmd" &>/dev/null; then
+            error "Missing required command for xdg-desktop-portal-termfilechooser install: $cmd"
+            return 1
+        fi
+    done
+
+    info "Installing xdg-desktop-portal-termfilechooser from source..."
+    tmp_dir="$(mktemp -d)"
+    src_dir="$tmp_dir/xdg-desktop-portal-termfilechooser"
+    build_dir="$src_dir/build"
+
+    if ! git clone --depth 1 https://github.com/boydaihungst/xdg-desktop-portal-termfilechooser.git "$src_dir"; then
+        error "Failed to clone xdg-desktop-portal-termfilechooser."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! bash "$src_dir/remove_legacy_file.sh"; then
+        error "Failed to remove legacy xdg-desktop-portal-termfilechooser files."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! meson setup "$build_dir" "$src_dir" --prefix=/usr; then
+        warn "meson setup failed; retrying without man page generation."
+        rm -rf "$build_dir"
+        if ! meson setup "$build_dir" "$src_dir" --prefix=/usr -Dman-pages=disabled; then
+            error "Failed to configure xdg-desktop-portal-termfilechooser build."
+            rm -rf "$tmp_dir"
+            return 1
+        fi
+    fi
+
+    if ! ninja -C "$build_dir"; then
+        error "Failed to build xdg-desktop-portal-termfilechooser."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! sudo ninja -C "$build_dir" install; then
+        error "Failed to install xdg-desktop-portal-termfilechooser."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "xdg-desktop-portal-termfilechooser installed."
 }
 
 install_zen() {

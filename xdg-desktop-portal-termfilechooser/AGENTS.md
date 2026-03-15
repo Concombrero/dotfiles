@@ -67,16 +67,16 @@ These details exist because the portal service may run with stale or incomplete 
 
 ## System-Level Assumptions
 
-This repo only manages the user-level config. The actual backend binary/service are system-level pieces installed separately.
+This package still only owns the user-level config, but the repo installer now provisions the backend automatically during normal desktop installs by building it from source.
 
 Expected external pieces include:
 
-- `/usr/local/libexec/xdg-desktop-portal-termfilechooser`
-- `/usr/local/lib/systemd/user/xdg-desktop-portal-termfilechooser.service`
+- `/usr/libexec/xdg-desktop-portal-termfilechooser` or `/usr/lib/xdg-desktop-portal-termfilechooser` (depends on distro Meson defaults)
+- `/usr/lib/systemd/user/xdg-desktop-portal-termfilechooser.service`
 - `/usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.termfilechooser.service`
 - `/usr/share/xdg-desktop-portal/portals/termfilechooser.portal`
 
-Do not assume the repo alone provisions those binaries.
+If those pieces are missing, review the installer path in `install/tools.sh` before changing the user config here.
 
 ## Validation
 
