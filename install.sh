@@ -124,7 +124,6 @@ main() {
 
         # Desktop-only tools
         if [ "$INSTALL_DESKTOP" = true ]; then
-            install_betterlockscreen
             install_zen
         fi
     fi

@@ -22,7 +22,7 @@ Visually, anything that can be is themed with [Catppuccin](https://github.com/ca
     - Status bar : `polybar` 
     - App launcher / Menu : `rofi`
     - Notifications : `dunst`
-    - Lockscreen : `betterlockscreen`
+    - Lockscreen : `i3lock`
     - File Manager : `yazi` (via CLI)
 - Command Line Interface : 
   - Terminal emulator : `alacritty`
@@ -128,7 +128,6 @@ Defined in `packages/common.txt` and `packages/desktop.txt`.
 - `lazygit` (GitHub release binary)
 - `opencode` (official installer)
 - `zen-browser` (official installer)
-- `betterlockscreen` (official installer)
 
 ### Python Tools (via pipx)
 Installed in isolated environments to avoid breaking system Python:
@@ -231,16 +230,7 @@ EOF
 
 If needed, you can still override manually via environment variables before launching polybar.
 
-### 4) Betterlockscreen cache (recommended)
-
-Initialize lockscreen cache from your wallpaper directory:
-
-```bash
-betterlockscreen -u ~/Pictures/Wallpapers
-betterlockscreen --lock dim
-```
-
-### 5) Workspace-local PDF/image tabs.
+### 4) Workspace-local PDF/image tabs.
 
 `zathura-tabbed` and `sxiv-tabbed` use native i3 tabbed containers. 
 
@@ -250,7 +240,7 @@ Behavior per workspace:
 - Any subsequent PDF/image opened via `xdg-open` in that workspace is appended as a new tab in the matching container.
 - Tab titles are normalized to basename-only (for example `paper.pdf`, `figure.png`).
 
-### 6) Zen Browser
+### 5) Zen Browser
 
 Zen is installed automatically by `install.sh` when using the desktop profile.
 Expected install locations:

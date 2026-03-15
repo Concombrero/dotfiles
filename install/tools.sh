@@ -128,16 +128,6 @@ install_lazygit() {
     log "Lazygit installed."
 }
 
-install_betterlockscreen() {
-    if command -v betterlockscreen &>/dev/null; then
-        warn "betterlockscreen already installed, skipping."
-        return
-    fi
-    info "Installing betterlockscreen..."
-    curl -fsSL https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh | sudo bash -s system
-    log "betterlockscreen installed."
-}
-
 install_zen() {
     if [ -x "$HOME/.local/bin/zen" ] || command -v zen &>/dev/null; then
         warn "Zen Browser already installed, skipping."
