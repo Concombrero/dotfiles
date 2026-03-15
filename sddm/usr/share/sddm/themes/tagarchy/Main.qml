@@ -5,7 +5,9 @@ Rectangle {
     id: root
     width: 640
     height: 480
-    color: "#000000"
+    color: "#1e1e2e"
+
+    property color mochaBase: "#1e1e2e"
 
     Image {
         id: backgroundImage
@@ -18,7 +20,7 @@ Rectangle {
 
     Rectangle {
         anchors.fill: parent
-        color: "#000000"
+        color: root.mochaBase
         opacity: backgroundImage.status === Image.Ready ? 0.35 : 1.0
     }
 
@@ -64,7 +66,7 @@ Rectangle {
             Rectangle {
                 width: root.width * 0.17
                 height: root.height * 0.04
-                color: "#000000"
+                color: root.mochaBase
                 border.color: "#ffffff"
                 border.width: 1
                 clip: true

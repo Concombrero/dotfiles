@@ -109,7 +109,7 @@ generate_sddm_background() {
         return 0
     fi
 
-    if ! sudo cp "$background_tmp" "$theme_dst/background-blur.jpg"; then
+    if ! sudo install -m 0644 "$background_tmp" "$theme_dst/background-blur.jpg"; then
         warn "Failed to install blurred SDDM background image."
         rm -rf "$tmp_dir"
         return 0
