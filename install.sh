@@ -143,8 +143,14 @@ main() {
     fi
 
     echo ""
-    if [ "$STOW_HAD_FAILURES" = true ]; then
-        warn "Installation completed with partial success. Stow failed for: ${STOW_FAILED_PACKAGES[*]}"
+    if [ "$PACKAGE_INSTALL_HAD_FAILURES" = true ] || [ "$STOW_HAD_FAILURES" = true ]; then
+        warn "Installation completed with partial success."
+        if [ "$PACKAGE_INSTALL_HAD_FAILURES" = true ]; then
+            warn "Skipped packages: ${PACKAGE_INSTALL_FAILED[*]}"
+        fi
+        if [ "$STOW_HAD_FAILURES" = true ]; then
+            warn "Stow failed for: ${STOW_FAILED_PACKAGES[*]}"
+        fi
     else
         log "Installation completed successfully."
     fi

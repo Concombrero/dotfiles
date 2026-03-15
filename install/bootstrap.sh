@@ -9,6 +9,8 @@ export NC='\033[0m' # No Color
 
 PACKAGE_DB_READY=false
 PACMAN_FULL_UPGRADE_DONE=false
+PACKAGE_INSTALL_HAD_FAILURES=false
+PACKAGE_INSTALL_FAILED=()
 
 # Logging Functions
 log()   { echo -e "${GREEN}[OK]${NC} $1"; }
@@ -114,12 +116,60 @@ install_pkg() {
 
     case "$DISTRO_FAMILY" in
         debian)
-            sudo apt-get install -y "${packages[@]}"
+            install_debian_packages "${packages[@]}"
             ;;
         arch)
-            sudo pacman -S --needed --noconfirm "${packages[@]}"
+            install_arch_packages "${packages[@]}"
             ;;
     esac
+}
+
+install_debian_packages() {
+    local package
+
+    for package in "$@"; do
+        if ! install_debian_package "$package"; then
+            PACKAGE_INSTALL_HAD_FAILURES=true
+            PACKAGE_INSTALL_FAILED+=("$package")
+        fi
+    done
+}
+
+install_debian_package() {
+    local package=$1
+
+    info "Installing Debian package: $package"
+
+    if sudo apt-get install -y "$package"; then
+        return 0
+    fi
+
+    warn "Skipping Debian package '$package' after apt failed."
+    return 1
+}
+
+install_arch_packages() {
+    local package
+
+    for package in "$@"; do
+        if ! install_arch_package "$package"; then
+            PACKAGE_INSTALL_HAD_FAILURES=true
+            PACKAGE_INSTALL_FAILED+=("$package")
+        fi
+    done
+}
+
+install_arch_package() {
+    local package=$1
+
+    info "Installing Arch package: $package"
+
+    if sudo pacman -S --needed --noconfirm "$package"; then
+        return 0
+    fi
+
+    warn "Skipping Arch package '$package' after pacman failed. This usually means it conflicts with something already installed or is temporarily unavailable."
+    return 1
 }
 
 # Check if a command exists
