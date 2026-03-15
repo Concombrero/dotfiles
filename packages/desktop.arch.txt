@@ -10,6 +10,7 @@ picom
 rofi
 dunst
 xdotool
+xorg-xset
 xorg-xrandr
 xorg-setxkbmap
 xorg-xprop

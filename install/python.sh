@@ -2,10 +2,14 @@
 
 install_python_tools() {
     info "Installing Python tools via pipx..."
+    local had_failure=false
 
     if ! command -v pipx &>/dev/null; then
         info "Installing pipx..."
-        install_pkg "$(pipx_package_name)"
+        if ! install_pkg "$(pipx_package_name)"; then
+            error "Failed to install pipx."
+            return 1
+        fi
     fi
     
     # Ensure pipx path is available
@@ -24,11 +28,22 @@ install_python_tools() {
             warn "$tool already installed via pipx."
         else
             info "Installing $tool..."
-            pipx install "$tool"
+            if ! pipx install "$tool"; then
+                warn "Failed to install $tool via pipx."
+                had_failure=true
+            fi
         fi
     done
     
-    pipx ensurepath
+    if ! pipx ensurepath; then
+        warn "Failed to update the pipx PATH settings."
+        had_failure=true
+    fi
+
+    if [ "$had_failure" = true ]; then
+        return 1
+    fi
+
     log "Python tools installed."
 }
 

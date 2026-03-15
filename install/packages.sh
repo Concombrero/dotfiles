@@ -3,6 +3,7 @@
 install_system_packages() {
     local desktop_mode=$1
     local pkg_file_common pkg_file_desktop
+    local had_failure=false
 
     pkg_file_common="$(package_list_file common)"
     pkg_file_desktop="$(package_list_file desktop)"
@@ -18,7 +19,9 @@ install_system_packages() {
     if [ ${#common_pkgs[@]} -eq 0 ]; then
         warn "Common package list is empty."
     else
-        install_pkg "${common_pkgs[@]}"
+        if ! install_pkg "${common_pkgs[@]}"; then
+            had_failure=true
+        fi
     fi
 
     # If desktop mode, read desktop packages
@@ -28,11 +31,17 @@ install_system_packages() {
         else
              mapfile -t desktop_pkgs < <(grep -vE "^\s*#|^\s*$" "$pkg_file_desktop")
              if [ ${#desktop_pkgs[@]} -gt 0 ]; then
-                install_pkg "${desktop_pkgs[@]}"
+                if ! install_pkg "${desktop_pkgs[@]}"; then
+                    had_failure=true
+                fi
              fi
         fi
     else
         info "Skipping desktop packages (--headless or not requested)."
+    fi
+
+    if [ "$had_failure" = true ]; then
+        return 1
     fi
 }
 

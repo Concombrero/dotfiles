@@ -105,27 +105,27 @@ main() {
     # System Packages
     if [ "$INSTALL_PACKAGES" = true ]; then
         if [ "$SKIP_PPAS" = false ]; then
-            add_ppas
+            run_step "PPA setup" add_ppas
         fi
-        install_system_packages "$INSTALL_DESKTOP"
+        run_step "system package installation" install_system_packages "$INSTALL_DESKTOP"
     fi
 
     # External Tools
     if [ "$INSTALL_TOOLS" = true ]; then
-        install_neovim
-        install_fzf
-        install_tpm
-        install_starship
-        install_zoxide
-        install_yazi
-        install_lazygit
-        install_opencode
-        install_python_tools
+        run_step "Neovim install" install_neovim
+        run_step "fzf install" install_fzf
+        run_step "TPM install" install_tpm
+        run_step "Starship install" install_starship
+        run_step "Zoxide install" install_zoxide
+        run_step "Yazi install" install_yazi
+        run_step "Lazygit install" install_lazygit
+        run_step "OpenCode install" install_opencode
+        run_step "Python tool install" install_python_tools
 
         # Desktop-only tools
         if [ "$INSTALL_DESKTOP" = true ]; then
-            install_betterlockscreen
-            install_zen
+            run_step "betterlockscreen install" install_betterlockscreen
+            run_step "Zen Browser install" install_zen
         fi
     fi
 
@@ -135,18 +135,21 @@ main() {
     # Fonts & Desktop Extras
     if [ "$INSTALL_DESKTOP" = true ]; then
         if [ "$INSTALL_FONTS" = true ]; then
-            install_fonts
+            run_step "font installation" install_fonts
         fi
 
-        set_wallpaper
-        configure_mime
+        run_step "wallpaper setup" set_wallpaper
+        run_step "MIME configuration" configure_mime
     fi
 
     echo ""
-    if [ "$PACKAGE_INSTALL_HAD_FAILURES" = true ] || [ "$STOW_HAD_FAILURES" = true ]; then
+    if [ "$PACKAGE_INSTALL_HAD_FAILURES" = true ] || [ "$STEP_HAD_FAILURES" = true ] || [ "$STOW_HAD_FAILURES" = true ]; then
         warn "Installation completed with partial success."
         if [ "$PACKAGE_INSTALL_HAD_FAILURES" = true ]; then
             warn "Skipped packages: ${PACKAGE_INSTALL_FAILED[*]}"
+        fi
+        if [ "$STEP_HAD_FAILURES" = true ]; then
+            warn "Failed steps: ${STEP_FAILED_LABELS[*]}"
         fi
         if [ "$STOW_HAD_FAILURES" = true ]; then
             warn "Stow failed for: ${STOW_FAILED_PACKAGES[*]}"

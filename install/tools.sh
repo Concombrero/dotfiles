@@ -30,13 +30,37 @@ install_neovim() {
     extracted_dir="$tmp_dir/${asset%.tar.gz}"
     install_dir="$HOME/.local/opt/nvim"
 
-    curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/${asset}" -o "$archive"
-    tar -xzf "$archive" -C "$tmp_dir"
+    if ! curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/${asset}" -o "$archive"; then
+        error "Failed to download Neovim archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
 
-    mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+    if ! tar -xzf "$archive" -C "$tmp_dir"; then
+        error "Failed to extract Neovim archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare Neovim install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
     rm -rf "$install_dir"
-    mv "$extracted_dir" "$install_dir"
-    ln -sfn "$install_dir/bin/nvim" "$HOME/.local/bin/nvim"
+
+    if ! mv "$extracted_dir" "$install_dir"; then
+        error "Failed to place Neovim under ~/.local/opt."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/bin/nvim" "$HOME/.local/bin/nvim"; then
+        error "Failed to link Neovim into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
 
     rm -rf "$tmp_dir"
     log "Neovim installed to ~/.local/opt/nvim."
@@ -54,8 +78,17 @@ install_fzf() {
     fi
 
     info "Installing fzf via git..."
-    git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-    "$HOME/.fzf/install" --bin
+
+    if ! git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"; then
+        error "Failed to clone fzf."
+        return 1
+    fi
+
+    if ! "$HOME/.fzf/install" --bin; then
+        error "Failed to install fzf binaries."
+        return 1
+    fi
+
     log "fzf installed to ~/.fzf."
 }
 
@@ -67,8 +100,17 @@ install_tpm() {
     fi
 
     info "Installing tmux plugin manager (TPM)..."
-    mkdir -p "$HOME/.tmux/plugins"
-    git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+
+    if ! mkdir -p "$HOME/.tmux/plugins"; then
+        error "Failed to create TPM directory."
+        return 1
+    fi
+
+    if ! git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"; then
+        error "Failed to clone TPM."
+        return 1
+    fi
+
     log "TPM installed."
 }
 
@@ -77,8 +119,14 @@ install_starship() {
         warn "Starship already installed, skipping."
         return
     fi
+
     info "Installing Starship prompt..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+    if ! curl -sS https://starship.rs/install.sh | sh -s -- -y; then
+        error "Failed to install Starship."
+        return 1
+    fi
+
     log "Starship installed."
 }
 
@@ -87,8 +135,14 @@ install_zoxide() {
         warn "Zoxide already installed, skipping."
         return
     fi
+
     info "Installing Zoxide..."
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+
+    if ! curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh; then
+        error "Failed to install Zoxide."
+        return 1
+    fi
+
     log "Zoxide installed."
 }
 
@@ -97,6 +151,7 @@ install_yazi() {
         warn "Yazi already installed, skipping."
         return
     fi
+
     info "Installing Yazi..."
     local YAZI_VERSION
     YAZI_VERSION=$(curl -sL https://api.github.com/repos/sxyazi/yazi/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
@@ -105,11 +160,33 @@ install_yazi() {
         return
     fi
     local YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.zip"
-    local TMP_DIR=$(mktemp -d)
-    curl -sL "$YAZI_URL" -o "$TMP_DIR/yazi.zip"
-    unzip -q "$TMP_DIR/yazi.zip" -d "$TMP_DIR"
-    sudo mv "$TMP_DIR"/yazi-*/yazi /usr/local/bin/yazi
-    sudo mv "$TMP_DIR"/yazi-*/ya /usr/local/bin/ya
+    local TMP_DIR
+    TMP_DIR=$(mktemp -d)
+
+    if ! curl -sL "$YAZI_URL" -o "$TMP_DIR/yazi.zip"; then
+        error "Failed to download Yazi."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! unzip -q "$TMP_DIR/yazi.zip" -d "$TMP_DIR"; then
+        error "Failed to extract Yazi archive."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! sudo mv "$TMP_DIR"/yazi-*/yazi /usr/local/bin/yazi; then
+        error "Failed to install Yazi binary."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! sudo mv "$TMP_DIR"/yazi-*/ya /usr/local/bin/ya; then
+        error "Failed to install Yazi helper binary."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
     rm -rf "$TMP_DIR"
     log "Yazi installed."
 }
@@ -119,6 +196,7 @@ install_lazygit() {
         warn "Lazygit already installed, skipping."
         return
     fi
+
     info "Installing Lazygit..."
     local LAZYGIT_VERSION
     LAZYGIT_VERSION=$(curl -sL https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4 | sed 's/^v//')
@@ -126,10 +204,27 @@ install_lazygit() {
         error "Could not determine latest Lazygit version. Install manually."
         return
     fi
-    local TMP_DIR=$(mktemp -d)
-    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" -o "$TMP_DIR/lazygit.tar.gz"
-    tar -xzf "$TMP_DIR/lazygit.tar.gz" -C "$TMP_DIR"
-    sudo mv "$TMP_DIR/lazygit" /usr/local/bin/lazygit
+    local TMP_DIR
+    TMP_DIR=$(mktemp -d)
+
+    if ! curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" -o "$TMP_DIR/lazygit.tar.gz"; then
+        error "Failed to download Lazygit."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! tar -xzf "$TMP_DIR/lazygit.tar.gz" -C "$TMP_DIR"; then
+        error "Failed to extract Lazygit archive."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! sudo mv "$TMP_DIR/lazygit" /usr/local/bin/lazygit; then
+        error "Failed to install Lazygit binary."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
     rm -rf "$TMP_DIR"
     log "Lazygit installed."
 }
@@ -139,8 +234,19 @@ install_betterlockscreen() {
         warn "betterlockscreen already installed, skipping."
         return
     fi
+
+    if ! command -v xset &>/dev/null; then
+        error "Missing required dependency 'xset'. Install the package that provides it before installing betterlockscreen."
+        return 1
+    fi
+
     info "Installing betterlockscreen..."
-    curl -fsSL https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh | sudo bash -s system
+
+    if ! curl -fsSL https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh | sudo bash -s system; then
+        error "Failed to install betterlockscreen."
+        return 1
+    fi
+
     log "betterlockscreen installed."
 }
 
@@ -149,8 +255,14 @@ install_zen() {
         warn "Zen Browser already installed, skipping."
         return
     fi
+
     info "Installing Zen Browser..."
-    curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+
+    if ! curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash; then
+        error "Failed to install Zen Browser."
+        return 1
+    fi
+
     log "Zen Browser installed."
 }
 
@@ -159,7 +271,13 @@ install_opencode() {
         warn "OpenCode already installed, skipping."
         return
     fi
+
     info "Installing OpenCode..."
-    curl -fsSL https://opencode.ai/install | bash
+
+    if ! curl -fsSL https://opencode.ai/install | bash; then
+        error "Failed to install OpenCode."
+        return 1
+    fi
+
     log "OpenCode installed."
 }

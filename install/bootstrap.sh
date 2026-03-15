@@ -11,6 +11,8 @@ PACKAGE_DB_READY=false
 PACMAN_FULL_UPGRADE_DONE=false
 PACKAGE_INSTALL_HAD_FAILURES=false
 PACKAGE_INSTALL_FAILED=()
+STEP_HAD_FAILURES=false
+STEP_FAILED_LABELS=()
 
 # Logging Functions
 log()   { echo -e "${GREEN}[OK]${NC} $1"; }
@@ -18,6 +20,26 @@ warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; }
 die()   { error "$1"; exit 1; }
+
+record_step_failure() {
+    local step_label=$1
+
+    STEP_HAD_FAILURES=true
+    STEP_FAILED_LABELS+=("$step_label")
+    warn "$step_label failed; continuing with remaining setup."
+}
+
+run_step() {
+    local step_label=$1
+    shift
+
+    if "$@"; then
+        return 0
+    fi
+
+    record_step_failure "$step_label"
+    return 0
+}
 
 detect_distro_family() {
     local candidate
@@ -85,14 +107,14 @@ refresh_package_database() {
         debian)
             if [ "$PACKAGE_DB_READY" != true ]; then
                 info "Refreshing apt package metadata..."
-                sudo apt-get update
+                sudo apt-get update || return 1
                 PACKAGE_DB_READY=true
             fi
             ;;
         arch)
             if [ "$PACMAN_FULL_UPGRADE_DONE" != true ]; then
                 info "Synchronizing pacman databases and upgrading installed packages..."
-                sudo pacman -Syu --noconfirm
+                sudo pacman -Syu --noconfirm || return 1
                 PACMAN_FULL_UPGRADE_DONE=true
                 PACKAGE_DB_READY=true
             fi
@@ -112,7 +134,10 @@ install_pkg() {
 
     info "Installing packages: ${packages[*]}"
 
-    refresh_package_database
+    if ! refresh_package_database; then
+        error "Failed to refresh package database for $DISTRO_FAMILY."
+        return 1
+    fi
 
     case "$DISTRO_FAMILY" in
         debian)
