@@ -7,7 +7,7 @@ return {
     require('lualine').setup({
       options = {
         icons_enabled = true,
-        theme = 'catppuccin',
+        theme = 'auto',
         globalstatus = false,
         disabled_filetypes = {
           statusline = { "dashboard", "alpha", "starter" },
