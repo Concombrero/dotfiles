@@ -14,6 +14,7 @@ Rectangle {
     property int fieldWidth: Math.round(root.width * 0.17)
     property int fieldHeight: Math.round(root.height * 0.04)
     property int fieldPadding: Math.round(root.height * 0.008)
+    property int usernameFontSize: Math.round(root.height * 0.02)
     property int passwordFontSize: Math.round(root.height * 0.02)
     property int errorFontSize: Math.round(root.height * 0.018)
     property int errorHeight: Math.round(root.height * 0.03)
@@ -35,12 +36,7 @@ Rectangle {
 
     property string currentUser: userModel.lastUser
     property int sessionIndex: {
-        for (var i = 0; i < sessionModel.rowCount(); i++) {
-            var name = (sessionModel.data(sessionModel.index(i, 0), Qt.DisplayRole) || "").toString()
-            if (name.indexOf("uwsm") !== -1)
-                return i
-        }
-        return sessionModel.lastIndex
+        return sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0
     }
 
     Connections {
@@ -48,7 +44,10 @@ Rectangle {
         function onLoginFailed() {
             errorMessage.text = "Login failed"
             password.text = ""
-            password.forceActiveFocus()
+            if (username.text === "")
+                username.forceActiveFocus()
+            else
+                password.forceActiveFocus()
         }
         function onLoginSucceeded() {
             errorMessage.text = ""
@@ -59,6 +58,46 @@ Rectangle {
         anchors.centerIn: parent
         spacing: root.columnSpacing
         width: parent.width
+
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: root.rowSpacing
+
+            Text {
+                text: "\uf007"
+                color: "#ffffff"
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: root.lockSize
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Rectangle {
+                width: root.fieldWidth
+                height: root.fieldHeight
+                color: root.mochaBase
+                border.color: "#ffffff"
+                border.width: 1
+                clip: true
+
+                TextInput {
+                    id: username
+                    anchors.fill: parent
+                    anchors.margins: root.fieldPadding
+                    verticalAlignment: TextInput.AlignVCenter
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: root.usernameFontSize
+                    color: "#ffffff"
+                    text: root.currentUser
+
+                    Keys.onPressed: {
+                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                            password.forceActiveFocus()
+                            event.accepted = true
+                        }
+                    }
+                }
+            }
+        }
 
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -95,7 +134,7 @@ Rectangle {
 
                     Keys.onPressed: {
                         if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            sddm.login(root.currentUser, password.text, root.sessionIndex)
+                            sddm.login(username.text, password.text, root.sessionIndex)
                             event.accepted = true
                         }
                     }
@@ -117,5 +156,10 @@ Rectangle {
         }
     }
 
-    Component.onCompleted: password.forceActiveFocus()
+    Component.onCompleted: {
+        if (username.text === "")
+            username.forceActiveFocus()
+        else
+            password.forceActiveFocus()
+    }
 }
