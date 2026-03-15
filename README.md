@@ -50,10 +50,16 @@ cd ~/dotfiles
 ./install.sh
 ```
 
-**Arch / CachyOS:**
+**Arch Linux:**
+
+If you are running archinstall to install Arch Linux, enter chroot as soon as the script finishes and run the following :
 ```bash
-sudo pacman -Syu --needed git
-git clone <your-repo-url> ~/dotfiles
+sudo pacman -Syu --needed git sddm
+
+```
+Reboot the system, login, and run the following for the full system install :
+```
+git clone https://github.com/Malik-Hacini/dotfiles ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```
