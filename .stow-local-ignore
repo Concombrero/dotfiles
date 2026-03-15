@@ -7,6 +7,7 @@ install\.sh
 install\.log
 README\.md
 LICENSE
+^AGENTS\.md$
 
 # opencode runtime files that should remain machine-local
 ^\.config/opencode/package\.json$

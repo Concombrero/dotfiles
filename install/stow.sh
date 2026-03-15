@@ -24,7 +24,7 @@ stow_packages() {
         if [ -d "$DOTFILES_DIR/$pkg" ]; then
             info "Stowing $pkg..."
             # Using --restow (-R) to ensure symlinks are refreshed
-            stow -R -d "$DOTFILES_DIR" -t "$HOME" --no-folding "$pkg" 2>&1 | tee -a "$LOG_FILE"
+            stow -R -d "$DOTFILES_DIR" -t "$HOME" --no-folding --ignore='^AGENTS\.md$' "$pkg" 2>&1 | tee -a "$LOG_FILE"
             if [ "${PIPESTATUS[0]}" -ne 0 ]; then
                 warn "Failed to stow $pkg. Check for conflicts."
                 failed+=("$pkg")
