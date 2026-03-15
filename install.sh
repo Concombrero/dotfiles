@@ -119,6 +119,7 @@ main() {
     install_requested_packages
     install_requested_tools
     run_step "stow enforcement" stow_packages
+    run_step "Neovim plugin sync" sync_neovim_plugins
     apply_requested_desktop_extras
     activate_desktop_integrations
     print_install_summary

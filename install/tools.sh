@@ -35,6 +35,29 @@ install_tools() {
     fi
 }
 
+sync_neovim_plugins() {
+    local config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+    if ! command -v nvim &>/dev/null; then
+        warn "Neovim is not installed; skipping plugin sync."
+        return 0
+    fi
+
+    if [ ! -f "$config_home/nvim/init.lua" ]; then
+        warn "Neovim config not found in $config_home/nvim; skipping plugin sync."
+        return 0
+    fi
+
+    info "Syncing Neovim plugins with lazy.nvim..."
+
+    if ! nvim --headless "+Lazy sync" +qa; then
+        error "Failed to sync Neovim plugins."
+        return 1
+    fi
+
+    log "Neovim plugins synced."
+}
+
 termfilechooser_is_installed() {
     [ -x /usr/libexec/xdg-desktop-portal-termfilechooser ] || [ -x /usr/lib/xdg-desktop-portal-termfilechooser ] || return 1
     [ -f /usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.termfilechooser.service ] || return 1

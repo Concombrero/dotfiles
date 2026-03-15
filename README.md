@@ -87,9 +87,11 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 
 1. Log out and back in.
 2. Open Neovim and run:
-   - `:Lazy sync`
    - `:Mason`
    - `:checkhealth`
+
+> [!NOTE]
+> `install.sh` now runs a headless `:Lazy sync` automatically after stowing the Neovim config, so plugins like `nvim-treesitter` are present on first launch.
 
 > [!NOTE]
 > On Arch/CachyOS, the desktop install enables `sddm.service` automatically, replacing an existing `display-manager.service` symlink when a distro default like LightDM is already enabled, and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme. NetworkManager, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
