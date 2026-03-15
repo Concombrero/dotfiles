@@ -8,6 +8,15 @@ Rectangle {
     color: "#1e1e2e"
 
     property color mochaBase: "#1e1e2e"
+    property int columnSpacing: Math.round(root.height * 0.04)
+    property int rowSpacing: Math.round(root.width * 0.007)
+    property int lockSize: Math.round(root.height * 0.025)
+    property int fieldWidth: Math.round(root.width * 0.17)
+    property int fieldHeight: Math.round(root.height * 0.04)
+    property int fieldPadding: Math.round(root.height * 0.008)
+    property int passwordFontSize: Math.round(root.height * 0.02)
+    property int errorFontSize: Math.round(root.height * 0.018)
+    property int errorHeight: Math.round(root.height * 0.03)
 
     Image {
         id: backgroundImage
@@ -39,7 +48,7 @@ Rectangle {
         function onLoginFailed() {
             errorMessage.text = "Login failed"
             password.text = ""
-            password.focus = true
+            password.forceActiveFocus()
         }
         function onLoginSucceeded() {
             errorMessage.text = ""
@@ -48,24 +57,24 @@ Rectangle {
 
     Column {
         anchors.centerIn: parent
-        spacing: root.height * 0.04
+        spacing: root.columnSpacing
         width: parent.width
 
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: root.width * 0.007
+            spacing: root.rowSpacing
 
             Text {
                 text: "\uf023"
                 color: "#ffffff"
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: root.height * 0.025
+                font.pixelSize: root.lockSize
                 anchors.verticalCenter: parent.verticalCenter
             }
 
             Rectangle {
-                width: root.width * 0.17
-                height: root.height * 0.04
+                width: root.fieldWidth
+                height: root.fieldHeight
                 color: root.mochaBase
                 border.color: "#ffffff"
                 border.width: 1
@@ -74,11 +83,11 @@ Rectangle {
                 TextInput {
                     id: password
                     anchors.fill: parent
-                    anchors.margins: root.height * 0.008
+                    anchors.margins: root.fieldPadding
                     verticalAlignment: TextInput.AlignVCenter
                     echoMode: TextInput.Password
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: root.height * 0.02
+                    font.pixelSize: root.passwordFontSize
                     font.letterSpacing: root.height * 0.004
                     passwordCharacter: "\u2022"
                     color: "#ffffff"
@@ -97,9 +106,13 @@ Rectangle {
         Text {
             id: errorMessage
             text: ""
+            height: root.errorHeight
             color: "#f7768e"
             font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: root.height * 0.018
+            font.pixelSize: root.errorFontSize
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            opacity: text.length > 0 ? 1 : 0
             anchors.horizontalCenter: parent.horizontalCenter
         }
     }
