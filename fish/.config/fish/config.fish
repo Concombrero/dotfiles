@@ -1,4 +1,6 @@
 if status is-interactive
+    set -g fish_greeting
+
     fish_vi_key_bindings insert
     set -g fish_cursor_insert block
 
