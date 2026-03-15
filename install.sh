@@ -92,12 +92,13 @@ apply_requested_desktop_extras() {
 
 activate_desktop_integrations() {
     [ "$INSTALL_DESKTOP" = true ] || return 0
+    [ "$DISTRO_FAMILY" = arch ] && run_step "Arch desktop service setup" configure_arch_desktop_services
     activate_termfilechooser
 }
 
 print_post_install_notes() {
     if [ "$DISTRO_FAMILY" = arch ] && [ "$INSTALL_DESKTOP" = true ]; then
-        warn "On fresh Arch installs, verify an X11 login stack is present on minimal systems, NetworkManager is enabled, and a PulseAudio-compatible audio service is running for nm-applet and pactl-based volume controls."
+        info "Arch desktop installs provision the X11/login/audio base and enable NetworkManager, LightDM, PipeWire, PipeWire Pulse, and WirePlumber."
     fi
 
     info "Please log out and log back in for all changes to take effect."

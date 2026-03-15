@@ -1,6 +1,16 @@
 # Arch package names verified against the official package database:
 # https://archlinux.org/packages/
 
+# Base X11 / login / audio stack
+xorg-server
+mesa
+lightdm
+lightdm-gtk-greeter
+networkmanager
+pipewire
+pipewire-pulse
+wireplumber
+
 # Window Manager
 i3-wm
 i3lock
