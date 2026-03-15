@@ -101,6 +101,7 @@ Be careful when changing shell startup, portal, tmux, i3 startup, or PATH logic:
 - `install.sh`: bootstrap entrypoint for supported Debian/Ubuntu and Arch-based installs
 - `install/`: modular installer logic for packages, tools, desktop setup, and Stow
 - `packages/`: distro-specific package lists and Stow package list
+- `sddm/`: system-level SDDM theme assets copied into place by the installer
 - `fish/`, `bash/`, `starship/`, `git/`: shell and CLI environment
 - `i3/`, `picom/`, `polybar/`, `rofi/`, `dunst/`, `x11/`, `gtk/`: desktop/X11 stack
 - `alacritty/`, `tmux/`, `lazygit/`, `fastfetch/`, `btop/`: terminal tooling

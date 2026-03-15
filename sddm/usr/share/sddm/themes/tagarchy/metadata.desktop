@@ -1,0 +1,6 @@
+[SddmGreeterTheme]
+Name=Tagarchy
+Description=Minimal terminal-style login theme matching the Omarchy SDDM aesthetic
+Author=Tagarchy
+Type=sddm-theme
+Version=1.0

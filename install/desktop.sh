@@ -79,6 +79,49 @@ configure_arch_desktop_services() {
     ensure_system_service sddm.service
 }
 
+install_sddm_theme() {
+    local theme_src="$DOTFILES_DIR/sddm/usr/share/sddm/themes/tagarchy"
+    local theme_dst="/usr/share/sddm/themes/tagarchy"
+    local conf_src="$DOTFILES_DIR/sddm/etc/sddm.conf.d/zz-tagarchy-theme.conf"
+    local conf_dst="/etc/sddm.conf.d/zz-tagarchy-theme.conf"
+
+    [ "$DISTRO_FAMILY" = arch ] || return 0
+
+    if ! has_cmd sddm; then
+        warn "SDDM is not installed; skipping Tagarchy theme install."
+        return 0
+    fi
+
+    if [ ! -d "$theme_src" ] || [ ! -f "$conf_src" ]; then
+        error "Missing tracked SDDM theme files under $DOTFILES_DIR/sddm."
+        return 1
+    fi
+
+    info "Installing Tagarchy SDDM theme..."
+
+    if ! sudo mkdir -p /usr/share/sddm/themes /etc/sddm.conf.d; then
+        error "Failed to create SDDM theme/config directories."
+        return 1
+    fi
+
+    if ! sudo rm -rf "$theme_dst"; then
+        error "Failed to replace existing Tagarchy SDDM theme directory."
+        return 1
+    fi
+
+    if ! sudo cp -r "$theme_src" "$theme_dst"; then
+        error "Failed to install Tagarchy SDDM theme files."
+        return 1
+    fi
+
+    if ! sudo cp "$conf_src" "$conf_dst"; then
+        error "Failed to install SDDM theme selection config."
+        return 1
+    fi
+
+    log "Tagarchy SDDM theme installed."
+}
+
 set_wallpaper() {
     local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
 
@@ -213,6 +256,7 @@ install_desktop_extras() {
     local fonts_enabled=$1
 
     [ "$fonts_enabled" = true ] && run_step "font installation" install_fonts
+    [ "$DISTRO_FAMILY" = arch ] && run_step "SDDM theme install" install_sddm_theme
     run_step "wallpaper setup" set_wallpaper
     run_step "MIME configuration" configure_mime
 }
