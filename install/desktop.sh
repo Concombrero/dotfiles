@@ -76,7 +76,7 @@ ensure_system_service() {
 
 configure_arch_desktop_services() {
     [ "$DISTRO_FAMILY" = arch ] || return 0
-    ensure_system_service lightdm.service
+    ensure_system_service sddm.service
 }
 
 set_wallpaper() {

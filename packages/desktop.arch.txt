@@ -2,8 +2,7 @@
 # https://archlinux.org/packages/
 
 # Base login stack
-lightdm
-lightdm-gtk-greeter
+sddm
 
 # Window Manager
 i3-wm
