@@ -1,47 +1,20 @@
 #!/usr/bin/env bash
 
+source "$DOTFILES_DIR/install/stow_helpers.sh"
+
 stow_packages() {
-    info "Stowing dotfiles packages..."
+    info "Enforcing stowed dotfiles..."
 
-    local stow_list="$DOTFILES_DIR/packages/stow_list.txt"
-    if [ ! -f "$stow_list" ]; then
-        error "Stow package list not found: $stow_list"
-        return
-    fi
+    load_stow_packages "$DOTFILES_DIR" || return 1
+    STOW_DRY_RUN=false
+    STOW_BACKUP_DIR=${STOW_BACKUP_DIR:-$HOME/dotfiles-stow-backup-$(date +%F-%H%M%S)}
 
-    # Ensure target directories exist
-    mkdir -p "$HOME/.config"
-    mkdir -p "$HOME/.local/bin"
-    mkdir -p "$HOME/.local/share/applications"
-
-    local failed=()
-    STOW_HAD_FAILURES=false
-    STOW_FAILED_PACKAGES=()
-
-    while read -r pkg; do
-        [[ -z "$pkg" || "$pkg" =~ ^# ]] && continue
-
-        if [ -d "$DOTFILES_DIR/$pkg" ]; then
-            info "Stowing $pkg..."
-            # Using --restow (-R) to ensure symlinks are refreshed
-            stow -R -d "$DOTFILES_DIR" -t "$HOME" --no-folding "$pkg" 2>&1 | tee -a "$LOG_FILE"
-            if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-                warn "Failed to stow $pkg. Check for conflicts."
-                failed+=("$pkg")
-            fi
-        else
-            warn "Package directory $pkg not found, skipping."
-        fi
-    done < "$stow_list"
-
-    if [ ${#failed[@]} -gt 0 ]; then
-        STOW_HAD_FAILURES=true
-        STOW_FAILED_PACKAGES=("${failed[@]}")
-        warn "Failed packages: ${failed[*]}"
-        warn "You may need to manually move existing files out of the way."
-    else
+    if force_stow_packages "$DOTFILES_DIR" "${STOW_PACKAGE_LIST[@]}"; then
         log "All stow packages applied successfully."
+        return 0
     fi
 
-    log "Stow process complete."
+    warn "Stow completed with conflicts. Backup dir: $STOW_BACKUP_DIR"
+    warn "Failed packages: ${STOW_FAILED_PACKAGES[*]}"
+    return 1
 }

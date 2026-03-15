@@ -1,5 +1,5 @@
 # Workstation Dotfiles
-GNU Stow-managed dotfiles for a full Ubuntu/Debian + i3 workstation, with X11 as the primary session model.
+GNU Stow-managed dotfiles for a full Ubuntu/Debian or Arch-based + i3 workstation, with X11 as the primary session model.
 
 ![Home screen](preview.png)
 ## System Overview
@@ -39,51 +39,50 @@ The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`
 
 ## Installation Guide
 
-### 1) Prerequisites
-
-You only need `git` to start.
+### Quick start
 
 **Ubuntu/Debian:**
 ```bash
 sudo apt update
 sudo apt install -y git
-```
-
-### 2) Clone this repo
-
-```bash
 git clone <your-repo-url> ~/dotfiles
 cd ~/dotfiles
-```
-
-### 3) Run bootstrap installer
-
-```bash
 ./install.sh
 ```
 
-**For Servers or Headless Systems:**
-If you don't want the desktop environment (i3, polybar, fonts, etc.), run:
+**Arch / CachyOS:**
+```bash
+sudo pacman -Syu --needed git
+git clone <your-repo-url> ~/dotfiles
+cd ~/dotfiles
+./install.sh
+```
+
+**Headless install:**
+If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc.), run:
 
 ```bash
 ./install.sh --headless
 ```
 
 > [!NOTE]
-> The bootstrap installer currently supports **Ubuntu and Debian only**.
+> The bootstrap installer supports **Ubuntu/Debian**, **Arch**, **CachyOS**, and other Arch-based distros that use `pacman`.
+
+> [!NOTE]
+> On a minimal Arch install, the desktop profile still expects an existing X11 login stack before first graphical login (for example `lightdm`, `lightdm-gtk-greeter`, and `mesa`).
 
 What this does at a high level:
 
-1. **Detects OS:** Verifies Ubuntu/Debian and uses `apt`.
-2. **Installs Packages:** Core CLI packages and desktop packages (if not headless).
-3. **Installs Binaries:** `neovim` (official release archive), `starship`, `zoxide`, `yazi`, `lazygit`, `fzf` (via git clone to `~/.fzf`), `opencode`, `zen-browser`.
+1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
+2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
+3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and falls back to upstream installers where needed on Debian/Ubuntu (`zen-browser`, etc.).
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
-6. **Stows Configs:** Symlinks all dotfiles into `$HOME`.
+6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 
-Installer log: `~/dotfiles/install.log`
+Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/install.log`)
 
-### 4) First login checks
+### First login checks
 
 1. Log out and back in.
 2. Open Neovim and run:
@@ -91,16 +90,22 @@ Installer log: `~/dotfiles/install.log`
    - `:Mason`
    - `:checkhealth`
 
+> [!NOTE]
+> On fresh Arch installs, `nm-applet` expects `NetworkManager.service` to be enabled, and the volume bindings expect a PulseAudio-compatible service that provides `pactl` (PulseAudio itself or PipeWire with `pipewire-pulse`).
+
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
+
+> [!NOTE]
+> The installer force-restows packages by default. If an existing file in `$HOME` conflicts with a tracked dotfile, it is moved to `~/dotfiles-stow-backup-...` and the repo version is stowed in its place.
 
 ## Installer Flags
 
 | Flag | Meaning |
 |---|---|
 | `--headless`, `--no-gui` | Skip desktop/GUI packages (i3, polybar, fonts, wallpapers, Zen browser). |
-| `--skip-packages` | Skip system package installation (`apt`). |
-| `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, etc.). |
+| `--skip-packages` | Skip system package installation (`apt`/`pacman`). |
+| `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, `typst`, etc.). |
 | `--skip-fonts` | Skip Nerd Fonts installation. |
 | `--skip-ppas` | Skip adding Ubuntu PPAs (Debian skips PPAs automatically). |
 | `--stow-only` | Only run stow (skip all installations). |
@@ -114,19 +119,23 @@ Example:
 ## What `install.sh` Provisions
 
 ### Packages (via System Package Manager)
-Defined in `packages/common.txt` and `packages/desktop.txt`.
+Defined in distro-specific package lists:
 
-- **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, `build-essential`, `cmake`, `python3`, `nodejs`, `npm`, `btop`
+- Debian/Ubuntu: `packages/common.txt` and `packages/desktop.txt`
+- Arch-based: `packages/common.arch.txt` and `packages/desktop.arch.txt`
+
+- **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
 
 ### External Tools/Binaries
-- `neovim` (official prebuilt archive from GitHub releases)
-- `fzf` (git clone to `~/.fzf`)
-- `starship` (official installer)
-- `zoxide` (official installer)
-- `yazi` + `ya` (GitHub release binary)
-- `lazygit` (GitHub release binary)
-- `opencode` (official installer)
+- `neovim` (official prebuilt archive on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `fzf` (git clone to `~/.fzf` on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `starship` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `zoxide` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `yazi` + `ya` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `lazygit` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zen-browser` (official installer)
 
 ### Python Tools (via pipx)
@@ -169,10 +178,11 @@ Installed in isolated environments to avoid breaking system Python:
 | `scripts` | `~/.local/bin/` and `~/.local/share/applications/` |
 | `wallpapers` | `~/Pictures/Wallpapers/` |
 | `opencode` | `~/.config/opencode/opencode.json` |
+| `x11` | `~/.xprofile` |
+| `gtk` | `~/.config/gtk-3.0/` and `~/.config/gtk-4.0/` |
 
 > [!NOTE]
-> tmux-continuum may have already generated `~/.config/systemd/user/tmux.service`.
-> If stowing `systemd` reports a conflict, move that file aside once and restow.
+> Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply the repo aggressively after a distro installer or another tool has recreated config files under `$HOME`.
 
 ## Manual Setup Checklist
 
@@ -180,9 +190,9 @@ These items are either manual setup or useful post-install checks.
 
 ### 1) `xdg-desktop-portal-termfilechooser` backend (for Yazi file picker)
 
-The config is stowed, and the normal desktop install now pulls in this backend's runtime + build dependencies (`meson`, `ninja-build`, `libinih-dev`, `libsystemd-dev`, `scdoc`).
+The config is stowed, and the normal desktop install now pulls in this backend's runtime + build dependencies. On Debian/Ubuntu that means packages like `meson`, `ninja-build`, `libinih-dev`, `libsystemd-dev`, `scdoc`; on Arch it uses the `pacman` equivalents.
 
-The backend binary itself still needs a one-time manual source install because there is no standard Ubuntu/Debian package for `xdg-desktop-portal-termfilechooser`.
+The backend binary itself still needs a one-time manual install in this bootstrap flow. Ubuntu/Debian do not ship a standard package for `xdg-desktop-portal-termfilechooser`, and Arch users typically install it from AUR or from source.
 
 If you installed with `--headless`/`--no-gui`, install those dependencies first before building the backend manually.
 
@@ -247,7 +257,7 @@ Expected install locations:
 - `~/.tarball-installations/zen`
 - `~/.local/bin/zen`
 
-### 7) CUDA (optional)
+### 6) CUDA (optional)
 
 Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
 

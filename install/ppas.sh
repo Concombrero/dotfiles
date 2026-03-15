@@ -1,37 +1,41 @@
 #!/usr/bin/env bash
 
+ensure_ubuntu_ppa() {
+    local grep_pattern=$1
+    local ppa_name=$2
+    local label=$3
+
+    if grep -q "$grep_pattern" /etc/apt/sources.list.d/* 2>/dev/null; then
+        warn "$label PPA already present."
+        return 0
+    fi
+
+    if sudo add-apt-repository -y "$ppa_name"; then
+        log "$label PPA added."
+        return 0
+    fi
+
+    warn "Failed to add $label PPA."
+    return 1
+}
+
 add_ppas() {
-    # PPAs are Ubuntu-specific. Debian uses official repos.
-    if [[ "$DISTRO" == "debian" ]]; then
-        info "Skipping PPAs on Debian."
-        return
+    if [ "$DISTRO_FAMILY" != "debian" ]; then
+        info "Skipping PPAs on $DISTRO_FAMILY-based distro."
+        return 0
     fi
 
-    if [[ "$DISTRO" != "ubuntu" ]]; then
-        info "Skipping PPAs (unsupported distribution: $DISTRO)"
-        return
+    if [ "$DISTRO" != "ubuntu" ]; then
+        info "Skipping PPAs on $DISTRO."
+        return 0
     fi
 
-    if ! command -v add-apt-repository >/dev/null 2>&1; then
+    if ! has_cmd add-apt-repository; then
         warn "add-apt-repository not found; install software-properties-common or use --skip-ppas."
-        return
+        return 0
     fi
 
     info "Adding PPAs..."
-
-    # Fish Shell
-    if ! grep -q "fish-shell/release-4" /etc/apt/sources.list.d/* 2>/dev/null; then
-        sudo add-apt-repository -y ppa:fish-shell/release-4
-        log "Fish PPA added."
-    else
-        warn "Fish PPA already present."
-    fi
-
-    # Alacritty
-    if ! grep -q "aslatter/ppa" /etc/apt/sources.list.d/* 2>/dev/null; then
-        sudo add-apt-repository -y ppa:aslatter/ppa
-        log "Alacritty PPA added."
-    else
-        warn "Alacritty PPA already present."
-    fi
+    ensure_ubuntu_ppa "fish-shell/release-4" ppa:fish-shell/release-4 Fish || return 1
+    ensure_ubuntu_ppa "aslatter/ppa" ppa:aslatter/ppa Alacritty || return 1
 }

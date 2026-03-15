@@ -1,0 +1,43 @@
+# Arch package names verified against the official package database:
+# https://archlinux.org/packages/
+
+# Core Tools
+git
+stow
+tmux
+curl
+wget
+unzip
+bc
+xdg-utils
+btop
+ripgrep
+fd
+bat
+jq
+tldr
+nodejs
+npm
+
+# Build Essentials
+base-devel
+cmake
+pkgconf
+python
+python-pip
+# Arch's `python` package already ships the stdlib `venv` module.
+
+# Use official Arch packages when available instead of upstream installers.
+neovim
+fzf
+starship
+zoxide
+yazi
+lazygit
+opencode
+typst
+python-pipx
+
+# Shell
+zsh
+fish

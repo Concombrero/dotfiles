@@ -1,5 +1,39 @@
 #!/usr/bin/env bash
 
+github_latest_release_tag() {
+    local repo=$1
+    curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4
+}
+
+install_upstream_tools() {
+    run_step "Neovim install" install_neovim
+    run_step "fzf install" install_fzf
+    run_step "Starship install" install_starship
+    run_step "Zoxide install" install_zoxide
+    run_step "Yazi install" install_yazi
+    run_step "Lazygit install" install_lazygit
+    run_step "OpenCode install" install_opencode
+    run_step "Typst install" install_typst
+}
+
+install_tools() {
+    run_step "TPM install" install_tpm
+
+    if [ "$DISTRO_FAMILY" = "debian" ]; then
+        install_upstream_tools
+    elif [ "$INSTALL_PACKAGES" = true ]; then
+        info "Using pacman packages for Arch-managed CLI tools."
+    else
+        warn "Skipping Arch-managed CLI tools because package installation was disabled."
+    fi
+
+    run_step "Python tool install" install_python_tools
+
+    if [ "$1" = true ]; then
+        run_step "Zen Browser install" install_zen
+    fi
+}
+
 install_neovim() {
     if command -v nvim &>/dev/null; then
         warn "Neovim already installed, skipping."
@@ -30,26 +64,65 @@ install_neovim() {
     extracted_dir="$tmp_dir/${asset%.tar.gz}"
     install_dir="$HOME/.local/opt/nvim"
 
-    curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/${asset}" -o "$archive"
-    tar -xzf "$archive" -C "$tmp_dir"
+    if ! curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/${asset}" -o "$archive"; then
+        error "Failed to download Neovim archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
 
-    mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+    if ! tar -xzf "$archive" -C "$tmp_dir"; then
+        error "Failed to extract Neovim archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare Neovim install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
     rm -rf "$install_dir"
-    mv "$extracted_dir" "$install_dir"
-    ln -sfn "$install_dir/bin/nvim" "$HOME/.local/bin/nvim"
+
+    if ! mv "$extracted_dir" "$install_dir"; then
+        error "Failed to place Neovim under ~/.local/opt."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/bin/nvim" "$HOME/.local/bin/nvim"; then
+        error "Failed to link Neovim into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
 
     rm -rf "$tmp_dir"
     log "Neovim installed to ~/.local/opt/nvim."
 }
 
 install_fzf() {
+    if command -v fzf &>/dev/null; then
+        warn "fzf already installed, skipping."
+        return
+    fi
+
     if [ -d "$HOME/.fzf" ]; then
         warn "fzf already installed at ~/.fzf, skipping."
         return
     fi
+
     info "Installing fzf via git..."
-    git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-    "$HOME/.fzf/install" --bin
+
+    if ! git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"; then
+        error "Failed to clone fzf."
+        return 1
+    fi
+
+    if ! "$HOME/.fzf/install" --bin; then
+        error "Failed to install fzf binaries."
+        return 1
+    fi
+
     log "fzf installed to ~/.fzf."
 }
 
@@ -61,8 +134,17 @@ install_tpm() {
     fi
 
     info "Installing tmux plugin manager (TPM)..."
-    mkdir -p "$HOME/.tmux/plugins"
-    git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+
+    if ! mkdir -p "$HOME/.tmux/plugins"; then
+        error "Failed to create TPM directory."
+        return 1
+    fi
+
+    if ! git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"; then
+        error "Failed to clone TPM."
+        return 1
+    fi
+
     log "TPM installed."
 }
 
@@ -71,8 +153,14 @@ install_starship() {
         warn "Starship already installed, skipping."
         return
     fi
+
     info "Installing Starship prompt..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+    if ! curl -sS https://starship.rs/install.sh | sh -s -- -y; then
+        error "Failed to install Starship."
+        return 1
+    fi
+
     log "Starship installed."
 }
 
@@ -81,8 +169,14 @@ install_zoxide() {
         warn "Zoxide already installed, skipping."
         return
     fi
+
     info "Installing Zoxide..."
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+
+    if ! curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh; then
+        error "Failed to install Zoxide."
+        return 1
+    fi
+
     log "Zoxide installed."
 }
 
@@ -91,19 +185,42 @@ install_yazi() {
         warn "Yazi already installed, skipping."
         return
     fi
+
     info "Installing Yazi..."
     local YAZI_VERSION
-    YAZI_VERSION=$(curl -sL https://api.github.com/repos/sxyazi/yazi/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+    YAZI_VERSION=$(github_latest_release_tag sxyazi/yazi)
     if [ -z "$YAZI_VERSION" ]; then
         error "Could not determine latest Yazi version. Install manually."
-        return
+        return 1
     fi
     local YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.zip"
-    local TMP_DIR=$(mktemp -d)
-    curl -sL "$YAZI_URL" -o "$TMP_DIR/yazi.zip"
-    unzip -q "$TMP_DIR/yazi.zip" -d "$TMP_DIR"
-    sudo mv "$TMP_DIR"/yazi-*/yazi /usr/local/bin/yazi
-    sudo mv "$TMP_DIR"/yazi-*/ya /usr/local/bin/ya
+    local TMP_DIR
+    TMP_DIR=$(mktemp -d)
+
+    if ! curl -sL "$YAZI_URL" -o "$TMP_DIR/yazi.zip"; then
+        error "Failed to download Yazi."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! unzip -q "$TMP_DIR/yazi.zip" -d "$TMP_DIR"; then
+        error "Failed to extract Yazi archive."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! sudo mv "$TMP_DIR"/yazi-*/yazi /usr/local/bin/yazi; then
+        error "Failed to install Yazi binary."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! sudo mv "$TMP_DIR"/yazi-*/ya /usr/local/bin/ya; then
+        error "Failed to install Yazi helper binary."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
     rm -rf "$TMP_DIR"
     log "Yazi installed."
 }
@@ -113,19 +230,107 @@ install_lazygit() {
         warn "Lazygit already installed, skipping."
         return
     fi
+
     info "Installing Lazygit..."
     local LAZYGIT_VERSION
-    LAZYGIT_VERSION=$(curl -sL https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4 | sed 's/^v//')
+    LAZYGIT_VERSION=$(github_latest_release_tag jesseduffield/lazygit | sed 's/^v//')
     if [ -z "$LAZYGIT_VERSION" ]; then
         error "Could not determine latest Lazygit version. Install manually."
-        return
+        return 1
     fi
-    local TMP_DIR=$(mktemp -d)
-    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" -o "$TMP_DIR/lazygit.tar.gz"
-    tar -xzf "$TMP_DIR/lazygit.tar.gz" -C "$TMP_DIR"
-    sudo mv "$TMP_DIR/lazygit" /usr/local/bin/lazygit
+    local TMP_DIR
+    TMP_DIR=$(mktemp -d)
+
+    if ! curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" -o "$TMP_DIR/lazygit.tar.gz"; then
+        error "Failed to download Lazygit."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! tar -xzf "$TMP_DIR/lazygit.tar.gz" -C "$TMP_DIR"; then
+        error "Failed to extract Lazygit archive."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
+    if ! sudo mv "$TMP_DIR/lazygit" /usr/local/bin/lazygit; then
+        error "Failed to install Lazygit binary."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
     rm -rf "$TMP_DIR"
     log "Lazygit installed."
+}
+
+install_typst() {
+    if command -v typst &>/dev/null; then
+        warn "Typst already installed, skipping."
+        return
+    fi
+
+    info "Installing Typst from official release archive..."
+
+    local arch asset version tmp_dir archive extracted_dir install_dir
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset="typst-x86_64-unknown-linux-musl.tar.xz"
+            ;;
+        aarch64|arm64)
+            asset="typst-aarch64-unknown-linux-musl.tar.xz"
+            ;;
+        *)
+            error "Unsupported architecture for Typst prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    version="$(github_latest_release_tag typst/typst)"
+    if [ -z "$version" ]; then
+        error "Could not determine latest Typst version. Install manually."
+        return 1
+    fi
+
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/$asset"
+    extracted_dir="$tmp_dir/${asset%.tar.xz}"
+    install_dir="$HOME/.local/opt/typst"
+
+    if ! curl -fsSL "https://github.com/typst/typst/releases/download/${version}/${asset}" -o "$archive"; then
+        error "Failed to download Typst archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xJf "$archive" -C "$tmp_dir"; then
+        error "Failed to extract Typst archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare Typst install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$install_dir"
+    if ! mv "$extracted_dir" "$install_dir"; then
+        error "Failed to place Typst under ~/.local/opt."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/typst" "$HOME/.local/bin/typst"; then
+        error "Failed to link Typst into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "Typst installed to ~/.local/opt/typst."
 }
 
 install_zen() {
@@ -133,8 +338,14 @@ install_zen() {
         warn "Zen Browser already installed, skipping."
         return
     fi
+
     info "Installing Zen Browser..."
-    curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+
+    if ! curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash; then
+        error "Failed to install Zen Browser."
+        return 1
+    fi
+
     log "Zen Browser installed."
 }
 
@@ -143,7 +354,13 @@ install_opencode() {
         warn "OpenCode already installed, skipping."
         return
     fi
+
     info "Installing OpenCode..."
-    curl -fsSL https://opencode.ai/install | bash
+
+    if ! curl -fsSL https://opencode.ai/install | bash; then
+        error "Failed to install OpenCode."
+        return 1
+    fi
+
     log "OpenCode installed."
 }

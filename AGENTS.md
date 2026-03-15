@@ -2,10 +2,10 @@
 
 ## Overview
 
-This repository is a GNU Stow-managed dotfiles setup for a keyboard-first Ubuntu/Debian workstation.
+This repository is a GNU Stow-managed dotfiles setup for a keyboard-first Ubuntu/Debian or Arch-based workstation.
 It is organized as package directories that mirror the final paths under `$HOME`.
 
-- Primary platform: Ubuntu/Debian on X11
+- Primary platform: Ubuntu/Debian and Arch-based distros on X11
 - Window manager: `i3`
 - Compositor: `picom`
 - Status bar: `polybar`
@@ -61,7 +61,7 @@ Prefer portable, machine-agnostic code and config.
 - Prefer discovery, environment variables, conditional checks, and safe fallbacks.
 - Keep hardware- or host-specific overrides in local files outside git whenever possible.
 - If a config must reference a local path, make it optional and guarded with existence checks.
-- Preserve cross-machine behavior for Ubuntu/Debian systems; do not silently narrow support to one exact machine.
+- Preserve cross-machine behavior for Ubuntu/Debian and Arch-based systems; do not silently narrow support to one exact machine.
 
 Good patterns already used in this repo:
 
@@ -98,9 +98,9 @@ Be careful when changing shell startup, portal, tmux, i3 startup, or PATH logic:
 
 ## Repo Layout
 
-- `install.sh`: bootstrap entrypoint for Ubuntu/Debian installs
+- `install.sh`: bootstrap entrypoint for supported Debian/Ubuntu and Arch-based installs
 - `install/`: modular installer logic for packages, tools, desktop setup, and Stow
-- `packages/`: apt package lists and Stow package list
+- `packages/`: distro-specific package lists and Stow package list
 - `fish/`, `bash/`, `starship/`, `git/`: shell and CLI environment
 - `i3/`, `picom/`, `polybar/`, `rofi/`, `dunst/`, `x11/`, `gtk/`: desktop/X11 stack
 - `alacritty/`, `tmux/`, `lazygit/`, `fastfetch/`, `btop/`: terminal tooling

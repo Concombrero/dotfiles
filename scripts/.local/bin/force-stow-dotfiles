@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+set -u
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+log() { printf '%b[OK]%b %s\n' "$GREEN" "$NC" "$1"; }
+info() { printf '%b[INFO]%b %s\n' "$BLUE" "$NC" "$1"; }
+warn() { printf '%b[WARN]%b %s\n' "$YELLOW" "$NC" "$1"; }
+error() { printf '%b[ERROR]%b %s\n' "$RED" "$NC" "$1" >&2; }
+die() { error "$1"; exit 1; }
+
+show_help() {
+    cat <<'EOF'
+Usage: force-stow-dotfiles [OPTIONS] [PACKAGE...]
+
+Back up conflicting target files in $HOME, then restow the selected packages.
+If no package names are given, all packages from packages/stow_list.txt are used.
+
+Options:
+  --repo-dir PATH     Dotfiles repo root (default: current repo, $PWD, or ~/dotfiles)
+  --backup-dir PATH   Backup destination (default: ~/dotfiles-stow-backup-<timestamp>)
+  -n, --dry-run       Show what would be moved and stowed without changing anything
+  -h, --help          Show this help text
+EOF
+}
+
+SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_REPO_DIR=$(cd "$(dirname "$SCRIPT_PATH")/../../.." && pwd)
+source "$SCRIPT_REPO_DIR/install/stow_helpers.sh"
+
+main() {
+    local repo_dir=""
+    local default_repo_dir="$SCRIPT_REPO_DIR"
+    local package
+    local -a packages=()
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --repo-dir)
+                [ "$#" -ge 2 ] || die "--repo-dir requires a path"
+                repo_dir=$2
+                shift 2
+                ;;
+            --backup-dir)
+                [ "$#" -ge 2 ] || die "--backup-dir requires a path"
+                STOW_BACKUP_DIR=$2
+                shift 2
+                ;;
+            -n|--dry-run)
+                STOW_DRY_RUN=true
+                shift
+                ;;
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            *)
+                packages+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    command -v stow >/dev/null 2>&1 || die "GNU Stow is required but was not found in PATH"
+
+    if [ -z "$repo_dir" ]; then
+        repo_dir=$(resolve_stow_repo_dir "$default_repo_dir") || die "Could not locate the dotfiles repo. Run from the repo root or pass --repo-dir"
+    fi
+
+    if [ ${#packages[@]} -eq 0 ]; then
+        load_stow_packages "$repo_dir"
+        packages=("${STOW_PACKAGE_LIST[@]}")
+    fi
+
+    if [ "$STOW_DRY_RUN" = true ]; then
+        info "Dry run mode enabled. No files will be moved."
+    elif [ -z "$STOW_BACKUP_DIR" ]; then
+        STOW_BACKUP_DIR="$HOME/dotfiles-stow-backup-$(date +%F-%H%M%S)"
+    fi
+
+    info "Repo directory: $repo_dir"
+    [ -n "$STOW_BACKUP_DIR" ] && info "Backup directory: $STOW_BACKUP_DIR"
+
+    if force_stow_packages "$repo_dir" "${packages[@]}"; then
+        log "Selected packages were restowed successfully."
+        return 0
+    fi
+
+    warn "Some packages still failed to stow: ${STOW_FAILED_PACKAGES[*]}"
+    return 1
+}
+
+main "$@"
