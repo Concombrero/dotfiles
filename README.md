@@ -1,5 +1,5 @@
 # Workstation Dotfiles
-GNU Stow-managed dotfiles for a full Ubuntu/Debian or Arch-based + i3 workstation, with X11 as the primary session model.
+GNU Stow-managed dotfiles for a full Ubuntu/Debian or Arch-based + i3 workstation, with an experience mostly driven by the [i3](https://i3wm.org/) tiling window manager.
 
 ![Home screen](preview.png)
 ## System Overview
@@ -45,20 +45,15 @@ The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`
 ```bash
 sudo apt update
 sudo apt install -y git
-git clone <your-repo-url> ~/dotfiles
+git clone https://github.com/Malik-Hacini/dotfiles ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```
 
 **Arch Linux:**
 
-If you are running archinstall to install Arch Linux, enter chroot as soon as the script finishes and run the following :
 ```bash
-sudo pacman -Syu --needed git sddm
-
-```
-Reboot the system, login, and run the following for the full system install :
-```
+sudo pacman -Syu --needed git 
 git clone https://github.com/Malik-Hacini/dotfiles ~/dotfiles
 cd ~/dotfiles
 ./install.sh
@@ -72,7 +67,7 @@ If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc
 ```
 
 > [!NOTE]
-> The bootstrap installer supports **Ubuntu/Debian**, **Arch**, **CachyOS**, and other Arch-based distros that use `pacman`.
+> The bootstrap installer supports **Ubuntu/Debian**, **Arch** and other Arch-based distros that use `pacman`.
 
 > [!NOTE]
 > On Arch/CachyOS desktop installs, the installer also provisions the SDDM login stack (`sddm`). VM guest helpers and any optional Archinstall-managed desktop services remain manual.
@@ -97,7 +92,7 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
    - `:checkhealth`
 
 > [!NOTE]
-> On Arch/CachyOS, the desktop install now enables `sddm.service` automatically and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme, with the logo removed. `NetworkManager`, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
+> On Arch/CachyOS, the desktop install  enables `sddm.service` automatically and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme. NetworkManager, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
 
 > [!NOTE]
 > The desktop install writes `~/.fehbg` and uses it from i3 so the wallpaper persists across logins. The SDDM theme also generates a blurred background from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when ImageMagick is available.
@@ -214,17 +209,6 @@ Installed in isolated environments to avoid breaking system Python:
 ## Manual Setup Checklist
 
 These items are still machine-specific or useful post-install checks.
-
-### 1) Machine-specific monitor config
-
-Create `~/.config/i3/local.conf` for monitor/layout overrides:
-
-```bash
-cat > ~/.config/i3/local.conf << 'EOF'
-# Example
-exec --no-startup-id xrandr --output eDP-1 --off --output HDMI-1 --auto
-EOF
-```
 
 ### 3) Workspace-local PDF/image tabs.
 
