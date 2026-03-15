@@ -111,7 +111,9 @@ configure_mime() {
 }
 
 install_desktop_extras() {
-    install_fonts
-    configure_mime
-    set_wallpaper
+    local fonts_enabled=$1
+
+    [ "$fonts_enabled" = true ] && run_step "font installation" install_fonts
+    run_step "wallpaper setup" set_wallpaper
+    run_step "MIME configuration" configure_mime
 }

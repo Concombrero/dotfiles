@@ -84,7 +84,7 @@ What this does at a high level:
 3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, and falls back to upstream installers where needed (`zen-browser`, `betterlockscreen`, etc.).
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
-6. **Stows Configs:** Symlinks all dotfiles into `$HOME`.
+6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 
 Installer log: `~/dotfiles/install.log`
 
@@ -101,6 +101,9 @@ Installer log: `~/dotfiles/install.log`
 
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
+
+> [!NOTE]
+> The installer force-restows packages by default. If an existing file in `$HOME` conflicts with a tracked dotfile, it is moved to `~/dotfiles-stow-backup-...` and the repo version is stowed in its place.
 
 ## Installer Flags
 
@@ -183,8 +186,7 @@ Installed in isolated environments to avoid breaking system Python:
 | `opencode` | `~/.config/opencode/opencode.json` |
 
 > [!NOTE]
-> tmux-continuum may have already generated `~/.config/systemd/user/tmux.service`.
-> If stowing `systemd` reports a conflict, move that file aside once and restow.
+> Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply the repo aggressively after a distro installer or another tool has recreated config files under `$HOME`.
 
 ## Manual Setup Checklist
 

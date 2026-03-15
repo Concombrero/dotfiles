@@ -1,58 +1,51 @@
 #!/usr/bin/env bash
 
-install_system_packages() {
-    local desktop_mode=$1
-    local pkg_file_common pkg_file_desktop
-    local had_failure=false
-
-    pkg_file_common="$(package_list_file common)"
-    pkg_file_desktop="$(package_list_file desktop)"
-
-    if [ ! -f "$pkg_file_common" ]; then
-        error "Package list not found: $pkg_file_common"
-        exit 1
-    fi
-
-    # Read common packages
-    mapfile -t common_pkgs < <(grep -vE "^\s*#|^\s*$" "$pkg_file_common")
-
-    if [ ${#common_pkgs[@]} -eq 0 ]; then
-        warn "Common package list is empty."
-    else
-        if ! install_pkg "${common_pkgs[@]}"; then
-            had_failure=true
-        fi
-    fi
-
-    # If desktop mode, read desktop packages
-    if [ "$desktop_mode" = true ]; then
-        if [ ! -f "$pkg_file_desktop" ]; then
-            warn "Desktop package list not found: $pkg_file_desktop"
-        else
-             mapfile -t desktop_pkgs < <(grep -vE "^\s*#|^\s*$" "$pkg_file_desktop")
-             if [ ${#desktop_pkgs[@]} -gt 0 ]; then
-                if ! install_pkg "${desktop_pkgs[@]}"; then
-                    had_failure=true
-                fi
-             fi
-        fi
-    else
-        info "Skipping desktop packages (--headless or not requested)."
-    fi
-
-    if [ "$had_failure" = true ]; then
-        return 1
-    fi
-}
-
 package_list_file() {
     local base_name=$1
     local distro_specific="$DOTFILES_DIR/packages/${base_name}.${DISTRO_FAMILY}.txt"
     local default_file="$DOTFILES_DIR/packages/${base_name}.txt"
 
-    if [ -f "$distro_specific" ]; then
-        printf '%s\n' "$distro_specific"
-    else
-        printf '%s\n' "$default_file"
+    [ -f "$distro_specific" ] && printf '%s\n' "$distro_specific" || printf '%s\n' "$default_file"
+}
+
+read_package_list() {
+    local file=$1
+    local -n packages_ref=$2
+
+    mapfile -t packages_ref < <(grep -vE '^\s*#|^\s*$' "$file")
+}
+
+install_package_file() {
+    local file=$1
+    local label=$2
+    local packages=()
+
+    if [ ! -f "$file" ]; then
+        [ "$label" = desktop ] && warn "Desktop package list not found: $file" && return 0
+        error "Package list not found: $file"
+        return 1
     fi
+
+    read_package_list "$file" packages
+    if [ ${#packages[@]} -eq 0 ]; then
+        warn "${label^} package list is empty."
+        return 0
+    fi
+
+    install_pkg "${packages[@]}"
+}
+
+install_system_packages() {
+    local desktop_mode=$1
+    local had_failure=false
+
+    install_package_file "$(package_list_file common)" common || had_failure=true
+
+    if [ "$desktop_mode" = true ]; then
+        install_package_file "$(package_list_file desktop)" desktop || had_failure=true
+    else
+        info "Skipping desktop packages (--headless or not requested)."
+    fi
+
+    [ "$had_failure" = false ]
 }

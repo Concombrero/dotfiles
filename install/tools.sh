@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
 
+github_latest_release_tag() {
+    local repo=$1
+    curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4
+}
+
+install_tools() {
+    run_step "Neovim install" install_neovim
+    run_step "fzf install" install_fzf
+    run_step "TPM install" install_tpm
+    run_step "Starship install" install_starship
+    run_step "Zoxide install" install_zoxide
+    run_step "Yazi install" install_yazi
+    run_step "Lazygit install" install_lazygit
+    run_step "OpenCode install" install_opencode
+    run_step "Python tool install" install_python_tools
+
+    if [ "$1" = true ]; then
+        run_step "betterlockscreen install" install_betterlockscreen
+        run_step "Zen Browser install" install_zen
+    fi
+}
+
 install_neovim() {
     if command -v nvim &>/dev/null; then
         warn "Neovim already installed, skipping."
@@ -154,10 +176,10 @@ install_yazi() {
 
     info "Installing Yazi..."
     local YAZI_VERSION
-    YAZI_VERSION=$(curl -sL https://api.github.com/repos/sxyazi/yazi/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+    YAZI_VERSION=$(github_latest_release_tag sxyazi/yazi)
     if [ -z "$YAZI_VERSION" ]; then
         error "Could not determine latest Yazi version. Install manually."
-        return
+        return 1
     fi
     local YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.zip"
     local TMP_DIR
@@ -199,10 +221,10 @@ install_lazygit() {
 
     info "Installing Lazygit..."
     local LAZYGIT_VERSION
-    LAZYGIT_VERSION=$(curl -sL https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4 | sed 's/^v//')
+    LAZYGIT_VERSION=$(github_latest_release_tag jesseduffield/lazygit | sed 's/^v//')
     if [ -z "$LAZYGIT_VERSION" ]; then
         error "Could not determine latest Lazygit version. Install manually."
-        return
+        return 1
     fi
     local TMP_DIR
     TMP_DIR=$(mktemp -d)

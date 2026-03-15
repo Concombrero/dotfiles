@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 
-# ============================================================
-# Dotfiles Bootstrap Script (Modular)
-# ============================================================
-# Usage: ./install.sh [OPTIONS]
-
 set -e
 
-# Default Settings
 INSTALL_PACKAGES=true
 INSTALL_TOOLS=true
 INSTALL_FONTS=true
@@ -15,29 +9,37 @@ INSTALL_DESKTOP=true
 STOW_ONLY=false
 SKIP_PPAS=false
 
-# 1. Parse Arguments
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
+show_help() {
+    cat <<'EOF'
+Usage: ./install.sh [OPTIONS]
+
+Options:
+  --headless, --no-gui  Skip desktop/GUI packages and fonts
+  --skip-packages       Skip system package installation
+  --skip-tools          Skip external tool installation (cargo/go/pip binaries)
+  --skip-fonts          Skip font installation
+  --skip-ppas           Skip adding PPAs (Ubuntu only)
+  --stow-only           Only run stow (skip all installations)
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
         --headless|--no-gui)
             INSTALL_DESKTOP=false
             INSTALL_FONTS=false
-            shift
             ;;
         --skip-packages)
             INSTALL_PACKAGES=false
-            shift
             ;;
         --skip-tools)
             INSTALL_TOOLS=false
-            shift
             ;;
         --skip-fonts)
             INSTALL_FONTS=false
-            shift
             ;;
         --skip-ppas)
             SKIP_PPAS=true
-            shift
             ;;
         --stow-only)
             STOW_ONLY=true
@@ -45,17 +47,9 @@ while [[ "$#" -gt 0 ]]; do
             INSTALL_TOOLS=false
             INSTALL_FONTS=false
             INSTALL_DESKTOP=false
-            shift
             ;;
         --help|-h)
-            echo "Usage: ./install.sh [OPTIONS]"
-            echo "Options:"
-            echo "  --headless, --no-gui  Skip desktop/GUI packages and fonts"
-            echo "  --skip-packages       Skip system package installation"
-            echo "  --skip-tools          Skip external tool installation (cargo/go/pip binaries)"
-            echo "  --skip-fonts          Skip font installation"
-            echo "  --skip-ppas           Skip adding PPAs (Ubuntu only)"
-            echo "  --stow-only           Only run stow (skip all installations)"
+            show_help
             exit 0
             ;;
         *)
@@ -63,17 +57,15 @@ while [[ "$#" -gt 0 ]]; do
             exit 1
             ;;
     esac
+    shift
 done
 
-# 2. Setup Environment
 export DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export LOG_FILE="$DOTFILES_DIR/install.log"
 export STOW_HAD_FAILURES=false
 
-# Initialize Log
-echo "" > "$LOG_FILE"
+: > "$LOG_FILE"
 
-# Source Modules
 source "$DOTFILES_DIR/install/bootstrap.sh"
 source "$DOTFILES_DIR/install/ppas.sh"
 source "$DOTFILES_DIR/install/packages.sh"
@@ -82,87 +74,48 @@ source "$DOTFILES_DIR/install/python.sh"
 source "$DOTFILES_DIR/install/desktop.sh"
 source "$DOTFILES_DIR/install/stow.sh"
 
-# 3. Main Execution
+install_requested_packages() {
+    [ "$INSTALL_PACKAGES" = true ] || return 0
+    [ "$SKIP_PPAS" = true ] || run_step "PPA setup" add_ppas
+    run_step "system package installation" install_system_packages "$INSTALL_DESKTOP"
+}
+
+install_requested_tools() {
+    [ "$INSTALL_TOOLS" = true ] || return 0
+    install_tools "$INSTALL_DESKTOP"
+}
+
+apply_requested_desktop_extras() {
+    [ "$INSTALL_DESKTOP" = true ] || return 0
+    install_desktop_extras "$INSTALL_FONTS"
+}
+
+print_post_install_notes() {
+    if [ "$DISTRO_FAMILY" = arch ] && [ "$INSTALL_DESKTOP" = true ]; then
+        warn "On fresh Arch installs, verify NetworkManager is enabled and a PulseAudio-compatible audio service is running for nm-applet and pactl-based volume controls."
+    fi
+
+    info "Please log out and log back in for all changes to take effect."
+}
+
 main() {
     info "Starting Dotfiles Installation..."
     info "OS: $OS, Distro: $DISTRO, Family: $DISTRO_FAMILY"
     info "Log file: $LOG_FILE"
 
-    # Stow Only Mode
     if [ "$STOW_ONLY" = true ]; then
-        stow_packages
-        echo ""
-        if [ "$STOW_HAD_FAILURES" = true ]; then
-            warn "Stow-only mode completed with partial success. Failed packages: ${STOW_FAILED_PACKAGES[*]}"
-        else
-            log "Stow-only mode completed successfully."
-        fi
-        return
+        run_step "stow enforcement" stow_packages
+        print_install_summary
+        return 0
     fi
 
     ensure_supported_distro
-
-    # System Packages
-    if [ "$INSTALL_PACKAGES" = true ]; then
-        if [ "$SKIP_PPAS" = false ]; then
-            run_step "PPA setup" add_ppas
-        fi
-        run_step "system package installation" install_system_packages "$INSTALL_DESKTOP"
-    fi
-
-    # External Tools
-    if [ "$INSTALL_TOOLS" = true ]; then
-        run_step "Neovim install" install_neovim
-        run_step "fzf install" install_fzf
-        run_step "TPM install" install_tpm
-        run_step "Starship install" install_starship
-        run_step "Zoxide install" install_zoxide
-        run_step "Yazi install" install_yazi
-        run_step "Lazygit install" install_lazygit
-        run_step "OpenCode install" install_opencode
-        run_step "Python tool install" install_python_tools
-
-        # Desktop-only tools
-        if [ "$INSTALL_DESKTOP" = true ]; then
-            run_step "betterlockscreen install" install_betterlockscreen
-            run_step "Zen Browser install" install_zen
-        fi
-    fi
-
-    # Stow Packages
-    stow_packages
-
-    # Fonts & Desktop Extras
-    if [ "$INSTALL_DESKTOP" = true ]; then
-        if [ "$INSTALL_FONTS" = true ]; then
-            run_step "font installation" install_fonts
-        fi
-
-        run_step "wallpaper setup" set_wallpaper
-        run_step "MIME configuration" configure_mime
-    fi
-
-    echo ""
-    if [ "$PACKAGE_INSTALL_HAD_FAILURES" = true ] || [ "$STEP_HAD_FAILURES" = true ] || [ "$STOW_HAD_FAILURES" = true ]; then
-        warn "Installation completed with partial success."
-        if [ "$PACKAGE_INSTALL_HAD_FAILURES" = true ]; then
-            warn "Skipped packages: ${PACKAGE_INSTALL_FAILED[*]}"
-        fi
-        if [ "$STEP_HAD_FAILURES" = true ]; then
-            warn "Failed steps: ${STEP_FAILED_LABELS[*]}"
-        fi
-        if [ "$STOW_HAD_FAILURES" = true ]; then
-            warn "Stow failed for: ${STOW_FAILED_PACKAGES[*]}"
-        fi
-    else
-        log "Installation completed successfully."
-    fi
-
-    if [ "$DISTRO_FAMILY" = "arch" ] && [ "$INSTALL_DESKTOP" = true ]; then
-        warn "On fresh Arch installs, verify NetworkManager is enabled and a PulseAudio-compatible audio service is running for nm-applet and pactl-based volume controls."
-    fi
-
-    info "Please log out and log back in for all changes to take effect."
+    install_requested_packages
+    install_requested_tools
+    run_step "stow enforcement" stow_packages
+    apply_requested_desktop_extras
+    print_install_summary
+    print_post_install_notes
 }
 
 main

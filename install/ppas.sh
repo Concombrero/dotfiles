@@ -1,50 +1,41 @@
 #!/usr/bin/env bash
 
+ensure_ubuntu_ppa() {
+    local grep_pattern=$1
+    local ppa_name=$2
+    local label=$3
+
+    if grep -q "$grep_pattern" /etc/apt/sources.list.d/* 2>/dev/null; then
+        warn "$label PPA already present."
+        return 0
+    fi
+
+    if sudo add-apt-repository -y "$ppa_name"; then
+        log "$label PPA added."
+        return 0
+    fi
+
+    warn "Failed to add $label PPA."
+    return 1
+}
+
 add_ppas() {
-    # PPAs are Ubuntu-specific. Debian and Arch-based distros use their own official repos.
-    if [[ "$DISTRO_FAMILY" != "debian" ]]; then
+    if [ "$DISTRO_FAMILY" != "debian" ]; then
         info "Skipping PPAs on $DISTRO_FAMILY-based distro."
-        return
+        return 0
     fi
 
-    if [[ "$DISTRO" != "ubuntu" ]]; then
+    if [ "$DISTRO" != "ubuntu" ]; then
         info "Skipping PPAs on $DISTRO."
-        return
+        return 0
     fi
 
-    if ! command -v add-apt-repository >/dev/null 2>&1; then
+    if ! has_cmd add-apt-repository; then
         warn "add-apt-repository not found; install software-properties-common or use --skip-ppas."
-        return
+        return 0
     fi
 
     info "Adding PPAs..."
-    local had_failure=false
-
-    # Fish Shell
-    if ! grep -q "fish-shell/release-4" /etc/apt/sources.list.d/* 2>/dev/null; then
-        if sudo add-apt-repository -y ppa:fish-shell/release-4; then
-            log "Fish PPA added."
-        else
-            warn "Failed to add Fish PPA."
-            had_failure=true
-        fi
-    else
-        warn "Fish PPA already present."
-    fi
-
-    # Alacritty
-    if ! grep -q "aslatter/ppa" /etc/apt/sources.list.d/* 2>/dev/null; then
-        if sudo add-apt-repository -y ppa:aslatter/ppa; then
-            log "Alacritty PPA added."
-        else
-            warn "Failed to add Alacritty PPA."
-            had_failure=true
-        fi
-    else
-        warn "Alacritty PPA already present."
-    fi
-
-    if [ "$had_failure" = true ]; then
-        return 1
-    fi
+    ensure_ubuntu_ppa "fish-shell/release-4" ppa:fish-shell/release-4 Fish || return 1
+    ensure_ubuntu_ppa "aslatter/ppa" ppa:aslatter/ppa Alacritty || return 1
 }
