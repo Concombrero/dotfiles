@@ -69,7 +69,7 @@ If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc
 > The bootstrap installer supports **Ubuntu/Debian**, **Arch**, **CachyOS**, and other Arch-based distros that use `pacman`.
 
 > [!NOTE]
-> On Arch/CachyOS desktop installs, the installer also provisions the base X11/login/audio stack (`xorg-server`, `mesa`, `lightdm`, `lightdm-gtk-greeter`, `pipewire`, `pipewire-pulse`, `wireplumber`). VM guest helpers remain manual.
+> On Arch/CachyOS desktop installs, the installer also provisions the LightDM login stack (`lightdm`, `lightdm-gtk-greeter`). VM guest helpers and any optional Archinstall-managed desktop services remain manual.
 
 What this does at a high level:
 
@@ -77,7 +77,7 @@ What this does at a high level:
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
 3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and falls back to upstream installers where needed on Debian/Ubuntu (`zen-browser`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Adds fonts (optional), sets wallpaper, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables the desktop/audio services that the profile expects.
+5. **Configures System:** Adds fonts (optional), sets wallpaper, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `lightdm.service` for the desktop login flow.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 
 Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/install.log`)
@@ -91,7 +91,7 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
    - `:checkhealth`
 
 > [!NOTE]
-> On Arch/CachyOS, the desktop install now enables `lightdm.service`, `pipewire.service`, `pipewire-pulse.service`, and `wireplumber.service` automatically. `NetworkManager` is left to the base install (for example via `archinstall`).
+> On Arch/CachyOS, the desktop install now enables `lightdm.service` automatically. `NetworkManager`, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
 
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
@@ -126,7 +126,7 @@ Defined in distro-specific package lists:
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
-- **Arch desktop extras:** `xorg-server`, `mesa`, `lightdm`, `lightdm-gtk-greeter`, `pipewire`, `pipewire-pulse`, `wireplumber`
+- **Arch desktop extras:** `lightdm`, `lightdm-gtk-greeter`
 
 ### External Tools/Binaries
 - `neovim` (official prebuilt archive on Debian/Ubuntu; official Arch package on `pacman` systems)
