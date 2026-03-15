@@ -7,6 +7,21 @@ Rectangle {
     height: 480
     color: "#000000"
 
+    Image {
+        id: backgroundImage
+        anchors.fill: parent
+        source: "background-blur.jpg"
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        visible: status === Image.Ready
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "#000000"
+        opacity: backgroundImage.status === Image.Ready ? 0.35 : 1.0
+    }
+
     property string currentUser: userModel.lastUser
     property int sessionIndex: {
         for (var i = 0; i < sessionModel.rowCount(); i++) {

@@ -77,7 +77,7 @@ What this does at a high level:
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
 3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and falls back to upstream installers where needed on Debian/Ubuntu (`zen-browser`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Adds fonts (optional), sets wallpaper, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
+5. **Configures System:** Adds fonts (optional), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 
 Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/install.log`)
@@ -92,6 +92,9 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 
 > [!NOTE]
 > On Arch/CachyOS, the desktop install now enables `sddm.service` automatically and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme, with the logo removed. `NetworkManager`, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
+
+> [!NOTE]
+> The desktop install writes `~/.fehbg` and uses it from i3 so the wallpaper persists across logins. The SDDM theme also generates a blurred background from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when ImageMagick is available.
 
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
@@ -144,6 +147,7 @@ Defined in distro-specific package lists:
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`
 - theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf`
 - visual layout copied from Omarchy's SDDM theme, with the logo removed and renamed to Tagarchy
+- blurred background generated from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when possible
 
 ### Python Tools (via pipx)
 Installed in isolated environments to avoid breaking system Python:

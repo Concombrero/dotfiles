@@ -79,11 +79,52 @@ configure_arch_desktop_services() {
     ensure_system_service sddm.service
 }
 
+generate_sddm_background() {
+    local wallpaper=$1
+    local theme_dst=$2
+    local image_cmd
+    local tmp_dir
+    local background_tmp
+
+    if [ ! -f "$wallpaper" ]; then
+        warn "Wallpaper not found at $wallpaper; SDDM will fall back to a plain dark background."
+        return 0
+    fi
+
+    if has_cmd magick; then
+        image_cmd=magick
+    elif has_cmd convert; then
+        image_cmd=convert
+    else
+        warn "ImageMagick not found; SDDM will fall back to a plain dark background."
+        return 0
+    fi
+
+    tmp_dir=$(mktemp -d)
+    background_tmp="$tmp_dir/background-blur.jpg"
+
+    if ! "$image_cmd" "$wallpaper" -resize 1920x1080^ -gravity center -extent 1920x1080 -blur 0x24 "$background_tmp"; then
+        warn "Failed to generate blurred SDDM background from wallpaper."
+        rm -rf "$tmp_dir"
+        return 0
+    fi
+
+    if ! sudo cp "$background_tmp" "$theme_dst/background-blur.jpg"; then
+        warn "Failed to install blurred SDDM background image."
+        rm -rf "$tmp_dir"
+        return 0
+    fi
+
+    rm -rf "$tmp_dir"
+    log "Blurred SDDM background generated from wallpaper."
+}
+
 install_sddm_theme() {
     local theme_src="$DOTFILES_DIR/sddm/usr/share/sddm/themes/tagarchy"
     local theme_dst="/usr/share/sddm/themes/tagarchy"
     local conf_src="$DOTFILES_DIR/sddm/etc/sddm.conf.d/zz-tagarchy-theme.conf"
     local conf_dst="/etc/sddm.conf.d/zz-tagarchy-theme.conf"
+    local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
 
     [ "$DISTRO_FAMILY" = arch ] || return 0
 
@@ -119,29 +160,47 @@ install_sddm_theme() {
         return 1
     fi
 
+    generate_sddm_background "$wallpaper" "$theme_dst"
+
     log "Tagarchy SDDM theme installed."
 }
 
 set_wallpaper() {
     local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
+    local fehbg="$HOME/.fehbg"
 
     if [ ! -f "$wallpaper" ]; then
         warn "Wallpaper not found at $wallpaper"
         return
     fi
 
-    if [ -z "${DISPLAY:-}" ]; then
-        warn "No DISPLAY detected, skipping wallpaper application."
+    if ! command -v feh &>/dev/null; then
+        warn "feh not found; skipping wallpaper setup."
         return
     fi
 
-    if command -v feh &>/dev/null; then
-        if feh --bg-fill "$wallpaper"; then
-            log "Wallpaper set."
-        else
-            warn "Failed to set wallpaper."
-            return 1
-        fi
+    if ! mkdir -p "$(dirname "$fehbg")"; then
+        warn "Failed to prepare wallpaper launcher directory."
+        return 1
+    fi
+
+    if ! printf '#!/usr/bin/env sh\nfeh --no-fehbg --bg-fill "%s"\n' "$wallpaper" > "$fehbg"; then
+        warn "Failed to write $fehbg."
+        return 1
+    fi
+
+    chmod +x "$fehbg"
+
+    if [ -z "${DISPLAY:-}" ]; then
+        info "No DISPLAY detected; wallpaper launcher written to $fehbg and will apply on graphical login."
+        return
+    fi
+
+    if "$fehbg"; then
+        log "Wallpaper set via feh."
+    else
+        warn "Failed to set wallpaper."
+        return 1
     fi
 }
 
