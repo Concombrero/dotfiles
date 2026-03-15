@@ -1,0 +1,21 @@
+[MIME Cache]
+application/acrobat=zathura-tabbed.desktop;
+application/pdf=zathura-tabbed.desktop;
+application/vnd.pdf=zathura-tabbed.desktop;
+application/x-pdf=zathura-tabbed.desktop;
+application/xhtml+xml=zen.desktop;
+application/xml=zen.desktop;
+image/bmp=sxiv-tabbed.desktop;
+image/gif=sxiv-tabbed.desktop;
+image/jpeg=sxiv-tabbed.desktop;
+image/png=sxiv-tabbed.desktop;
+image/tiff=sxiv-tabbed.desktop;
+image/webp=sxiv-tabbed.desktop;
+inode/directory=yazi.desktop;
+text/html=zen.desktop;
+text/pdf=zathura-tabbed.desktop;
+text/x-pdf=zathura-tabbed.desktop;
+text/xml=zen.desktop;
+x-scheme-handler/ftp=zen.desktop;
+x-scheme-handler/http=zen.desktop;
+x-scheme-handler/https=zen.desktop;

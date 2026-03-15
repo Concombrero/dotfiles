@@ -271,7 +271,7 @@ configure_mime() {
         application/pdf
         application/x-pdf
         application/acrobat
-        applications/vnd.pdf
+        application/vnd.pdf
         text/pdf
         text/x-pdf
     )
