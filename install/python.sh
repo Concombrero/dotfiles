@@ -5,6 +5,11 @@ install_python_tools() {
     local had_failure=false
 
     if ! command -v pipx &>/dev/null; then
+        if [ "$INSTALL_PACKAGES" != true ]; then
+            warn "pipx is not installed and package installation was skipped. Skipping Python tools."
+            return 1
+        fi
+
         info "Installing pipx..."
         if ! install_pkg "$(pipx_package_name)"; then
             error "Failed to install pipx."

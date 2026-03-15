@@ -5,15 +5,28 @@ github_latest_release_tag() {
     curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4
 }
 
-install_tools() {
+install_upstream_tools() {
     run_step "Neovim install" install_neovim
     run_step "fzf install" install_fzf
-    run_step "TPM install" install_tpm
     run_step "Starship install" install_starship
     run_step "Zoxide install" install_zoxide
     run_step "Yazi install" install_yazi
     run_step "Lazygit install" install_lazygit
     run_step "OpenCode install" install_opencode
+    run_step "Typst install" install_typst
+}
+
+install_tools() {
+    run_step "TPM install" install_tpm
+
+    if [ "$DISTRO_FAMILY" = "debian" ]; then
+        install_upstream_tools
+    elif [ "$INSTALL_PACKAGES" = true ]; then
+        info "Using pacman packages for Arch-managed CLI tools."
+    else
+        warn "Skipping Arch-managed CLI tools because package installation was disabled."
+    fi
+
     run_step "Python tool install" install_python_tools
 
     if [ "$1" = true ]; then
@@ -248,6 +261,76 @@ install_lazygit() {
 
     rm -rf "$TMP_DIR"
     log "Lazygit installed."
+}
+
+install_typst() {
+    if command -v typst &>/dev/null; then
+        warn "Typst already installed, skipping."
+        return
+    fi
+
+    info "Installing Typst from official release archive..."
+
+    local arch asset version tmp_dir archive extracted_dir install_dir
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset="typst-x86_64-unknown-linux-musl.tar.xz"
+            ;;
+        aarch64|arm64)
+            asset="typst-aarch64-unknown-linux-musl.tar.xz"
+            ;;
+        *)
+            error "Unsupported architecture for Typst prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    version="$(github_latest_release_tag typst/typst)"
+    if [ -z "$version" ]; then
+        error "Could not determine latest Typst version. Install manually."
+        return 1
+    fi
+
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/$asset"
+    extracted_dir="$tmp_dir/${asset%.tar.xz}"
+    install_dir="$HOME/.local/opt/typst"
+
+    if ! curl -fsSL "https://github.com/typst/typst/releases/download/${version}/${asset}" -o "$archive"; then
+        error "Failed to download Typst archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xJf "$archive" -C "$tmp_dir"; then
+        error "Failed to extract Typst archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare Typst install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$install_dir"
+    if ! mv "$extracted_dir" "$install_dir"; then
+        error "Failed to place Typst under ~/.local/opt."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/typst" "$HOME/.local/bin/typst"; then
+        error "Failed to link Typst into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "Typst installed to ~/.local/opt/typst."
 }
 
 install_zen() {

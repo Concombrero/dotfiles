@@ -35,6 +35,7 @@ zoxide
 yazi
 lazygit
 opencode
+typst
 python-pipx
 
 # Shell

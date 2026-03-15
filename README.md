@@ -39,56 +39,50 @@ The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`
 
 ## Installation Guide
 
-### 1) Prerequisites
-
-You only need `git` to start.
+### Quick start
 
 **Ubuntu/Debian:**
 ```bash
 sudo apt update
 sudo apt install -y git
-```
-
-**Arch / pacman-based:**
-```bash
-sudo pacman -Syu --needed git
-```
-
-### 2) Clone this repo
-
-```bash
 git clone <your-repo-url> ~/dotfiles
 cd ~/dotfiles
-```
-
-### 3) Run bootstrap installer
-
-```bash
 ./install.sh
 ```
 
-**For Servers or Headless Systems:**
-If you don't want the desktop environment (i3, polybar, fonts, etc.), run:
+**Arch / CachyOS:**
+```bash
+sudo pacman -Syu --needed git
+git clone <your-repo-url> ~/dotfiles
+cd ~/dotfiles
+./install.sh
+```
+
+**Headless install:**
+If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc.), run:
 
 ```bash
 ./install.sh --headless
 ```
 
 > [!NOTE]
-> The bootstrap installer supports **Ubuntu/Debian** and **Arch-based distros that use `pacman`**.
+> The bootstrap installer supports **Ubuntu/Debian**, **Arch**, **CachyOS**, and other Arch-based distros that use `pacman`.
+
+> [!NOTE]
+> On a minimal Arch install, the desktop profile still expects an existing X11 login stack before first graphical login (for example `lightdm`, `lightdm-gtk-greeter`, and `mesa`).
 
 What this does at a high level:
 
 1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
-3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, and falls back to upstream installers where needed (`zen-browser`, etc.).
+3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and falls back to upstream installers where needed on Debian/Ubuntu (`zen-browser`, etc.).
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 
-Installer log: `~/dotfiles/install.log`
+Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/install.log`)
 
-### 4) First login checks
+### First login checks
 
 1. Log out and back in.
 2. Open Neovim and run:
@@ -111,7 +105,7 @@ Installer log: `~/dotfiles/install.log`
 |---|---|
 | `--headless`, `--no-gui` | Skip desktop/GUI packages (i3, polybar, fonts, wallpapers, Zen browser). |
 | `--skip-packages` | Skip system package installation (`apt`/`pacman`). |
-| `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, etc.). |
+| `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, `typst`, etc.). |
 | `--skip-fonts` | Skip Nerd Fonts installation. |
 | `--skip-ppas` | Skip adding Ubuntu PPAs (Debian skips PPAs automatically). |
 | `--stow-only` | Only run stow (skip all installations). |
@@ -141,6 +135,7 @@ Defined in distro-specific package lists:
 - `yazi` + `ya` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `lazygit` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zen-browser` (official installer)
 
 ### Python Tools (via pipx)
@@ -183,6 +178,8 @@ Installed in isolated environments to avoid breaking system Python:
 | `scripts` | `~/.local/bin/` and `~/.local/share/applications/` |
 | `wallpapers` | `~/Pictures/Wallpapers/` |
 | `opencode` | `~/.config/opencode/opencode.json` |
+| `x11` | `~/.xprofile` |
+| `gtk` | `~/.config/gtk-3.0/` and `~/.config/gtk-4.0/` |
 
 > [!NOTE]
 > Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply the repo aggressively after a distro installer or another tool has recreated config files under `$HOME`.
@@ -260,7 +257,7 @@ Expected install locations:
 - `~/.tarball-installations/zen`
 - `~/.local/bin/zen`
 
-### 7) CUDA (optional)
+### 6) CUDA (optional)
 
 Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
 

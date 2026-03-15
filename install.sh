@@ -16,7 +16,7 @@ Usage: ./install.sh [OPTIONS]
 Options:
   --headless, --no-gui  Skip desktop/GUI packages and fonts
   --skip-packages       Skip system package installation
-  --skip-tools          Skip external tool installation (cargo/go/pip binaries)
+  --skip-tools          Skip external tool installation (upstream binaries and pipx tools)
   --skip-fonts          Skip font installation
   --skip-ppas           Skip adding PPAs (Ubuntu only)
   --stow-only           Only run stow (skip all installations)
@@ -92,7 +92,7 @@ apply_requested_desktop_extras() {
 
 print_post_install_notes() {
     if [ "$DISTRO_FAMILY" = arch ] && [ "$INSTALL_DESKTOP" = true ]; then
-        warn "On fresh Arch installs, verify NetworkManager is enabled and a PulseAudio-compatible audio service is running for nm-applet and pactl-based volume controls."
+        warn "On fresh Arch installs, verify an X11 login stack is present on minimal systems, NetworkManager is enabled, and a PulseAudio-compatible audio service is running for nm-applet and pactl-based volume controls."
     fi
 
     info "Please log out and log back in for all changes to take effect."
