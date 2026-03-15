@@ -15,6 +15,12 @@ return {
   config = function()
     local telescope = require("telescope")
     local actions = require("telescope.actions")
+    local bibliography_candidates = {
+      vim.fn.expand('~/texmf/bibtex/bib/Zotero.bib'),
+    }
+    local bibliography_files = vim.tbl_filter(function(path)
+      return vim.fn.filereadable(path) == 1
+    end, bibliography_candidates)
 
     -- On Ubuntu, fd-find installs as "fdfind" since /usr/bin/fd is fdclone
     local fd_cmd = vim.fn.executable("fdfind") == 1 and "fdfind" or "fd"
@@ -88,7 +94,7 @@ return {
         bibtex = {
           depth = 1,
           -- Depth for the *.bib file
-          global_files = { '~/texmf/bibtex/bib/Zotero.bib' },
+          global_files = bibliography_files,
           -- Path to global bibliographies (placed outside of the project)
           search_keys = { 'author', 'year', 'title' },
           -- Define the search keys to use in the picker

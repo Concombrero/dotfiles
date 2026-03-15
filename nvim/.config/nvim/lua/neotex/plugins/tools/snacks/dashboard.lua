@@ -1,4 +1,5 @@
 local M = {}
+local config_readme = vim.fs.joinpath(vim.fn.stdpath("config"), "README.md")
 
 M.preset = {
   pick = "telescope",
@@ -10,7 +11,7 @@ M.preset = {
     { icon = "󰱼 ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
     { icon = "󰈔 ", key = "n", desc = "New File", action = ":ene | startinsert" },
     { icon = "󰒓 ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
-    { icon = "󰋽 ", key = "i", desc = "Info", action = ":e ~/.config/CheatSheet.md" },
+    { icon = "󰋽 ", key = "i", desc = "Info", action = ":execute 'edit ' .. fnameescape('" .. config_readme .. "')" },
     { icon = "󰏗 ", key = "m", desc = "Manage Plugins", action = ":Lazy", enabled = package.loaded.lazy ~= nil },
     { icon = "󰓙 ", key = "h", desc = "Checkhealth", action = ":checkhealth" },
     { icon = "󰩈 ", key = "q", desc = "Quit", action = ":qa!" },
