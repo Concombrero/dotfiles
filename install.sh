@@ -18,7 +18,7 @@ Options:
   --skip-packages       Skip system package installation
   --skip-tools          Skip external tool installation (upstream binaries and pipx tools)
   --skip-fonts          Skip font installation
-  --skip-ppas           Skip adding PPAs (Ubuntu only)
+  --skip-ppas           Skip adding external apt repos/PPAs (Debian/Ubuntu only)
   --stow-only           Only run stow (skip all installations)
 EOF
 }

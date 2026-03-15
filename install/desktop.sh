@@ -125,6 +125,7 @@ install_sddm_theme() {
     local conf_src="$DOTFILES_DIR/sddm/etc/sddm.conf.d/zz-tagarchy-theme.conf"
     local conf_dst="/etc/sddm.conf.d/zz-tagarchy-theme.conf"
     local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
+    local repo_wallpaper="$DOTFILES_DIR/wallpapers/Pictures/Wallpapers/catppuccin_gyro.jpg"
 
     [ "$DISTRO_FAMILY" = arch ] || return 0
 
@@ -158,6 +159,10 @@ install_sddm_theme() {
     if ! sudo cp "$conf_src" "$conf_dst"; then
         error "Failed to install SDDM theme selection config."
         return 1
+    fi
+
+    if [ ! -f "$wallpaper" ] && [ -f "$repo_wallpaper" ]; then
+        wallpaper="$repo_wallpaper"
     fi
 
     generate_sddm_background "$wallpaper" "$theme_dst"

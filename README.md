@@ -96,6 +96,9 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 > [!NOTE]
 > The desktop install writes `~/.fehbg` and uses it from i3 so the wallpaper persists across logins. The SDDM theme also generates a blurred background from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when ImageMagick is available.
 
+> [!NOTE]
+> On Debian/Ubuntu, `ueberzugpp` is installed from the upstream openSUSE Build Service apt repository recommended by the project README.
+
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
 
@@ -110,7 +113,7 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 | `--skip-packages` | Skip system package installation (`apt`/`pacman`). |
 | `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, `typst`, etc.). |
 | `--skip-fonts` | Skip Nerd Fonts installation. |
-| `--skip-ppas` | Skip adding Ubuntu PPAs (Debian skips PPAs automatically). |
+| `--skip-ppas` | Skip adding Ubuntu PPAs and Debian/Ubuntu external apt repos. |
 | `--stow-only` | Only run stow (skip all installations). |
 
 Example:
@@ -130,6 +133,7 @@ Defined in distro-specific package lists:
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
 - **Arch desktop extras:** `sddm`
+- **Image helpers:** `imagemagick`, `ueberzugpp`
 
 ### External Tools/Binaries
 - `neovim` (official prebuilt archive on Debian/Ubuntu; official Arch package on `pacman` systems)
