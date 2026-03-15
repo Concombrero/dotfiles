@@ -206,15 +206,6 @@ exec --no-startup-id xrandr --output eDP-1 --off --output HDMI-1 --auto
 EOF
 ```
 
-### 2) Polybar hardware names
-
-`polybar/.config/polybar/config.ini` uses auto-detection by default:
-
-- Wireless interface is auto-detected in `polybar/.config/polybar/launch_polybar.sh` and exported as `POLYBAR_WLAN_INTERFACE`.
-- Battery/AC names are auto-detected in `polybar/.config/polybar/launch_polybar.sh` and exported as `POLYBAR_BATTERY`/`POLYBAR_ADAPTER`.
-
-If needed, you can still override manually via environment variables before launching polybar.
-
 ### 3) Workspace-local PDF/image tabs.
 
 `zathura-tabbed` and `sxiv-tabbed` use native i3 tabbed containers. 
