@@ -55,6 +55,7 @@ Rectangle {
     }
 
     Column {
+        id: loginForm
         anchors.centerIn: parent
         spacing: root.columnSpacing
         width: parent.width
@@ -142,18 +143,21 @@ Rectangle {
             }
         }
 
-        Text {
-            id: errorMessage
-            text: ""
-            height: root.errorHeight
-            color: "#f7768e"
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: root.errorFontSize
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            opacity: text.length > 0 ? 1 : 0
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
+    }
+
+    Text {
+        id: errorMessage
+        anchors.top: loginForm.bottom
+        anchors.topMargin: root.columnSpacing
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: ""
+        height: root.errorHeight
+        color: "#f7768e"
+        font.family: "JetBrainsMono Nerd Font"
+        font.pixelSize: root.errorFontSize
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        opacity: text.length > 0 ? 1 : 0
     }
 
     Component.onCompleted: {
