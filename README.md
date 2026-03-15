@@ -77,7 +77,7 @@ What this does at a high level:
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
 3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and falls back to upstream installers where needed on Debian/Ubuntu (`zen-browser`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Adds fonts (optional), sets wallpaper, configures MIME handlers.
+5. **Configures System:** Adds fonts (optional), sets wallpaper, and configures `xdg-open` defaults for PDFs/images/browser handlers.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 
 Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/install.log`)
@@ -143,6 +143,12 @@ Defined in distro-specific package lists:
 Installed in isolated environments to avoid breaking system Python:
 - `ipython`, `jupytext`, `black`, `isort`, `pylint`
 
+### Default `xdg-open` handlers
+- `zathura-tabbed.desktop` for PDF and common PDF-like MIME aliases
+- `sxiv-tabbed.desktop` for common image MIME types
+- `zen.desktop` for HTML/XML documents and `http`/`https`/`ftp` URL schemes
+- `yazi.desktop` for directory opens (`inode/directory`)
+
 ### Fonts
 - `JetBrainsMono Nerd Font`
 - `RobotoMono Nerd Font`
@@ -187,43 +193,9 @@ Installed in isolated environments to avoid breaking system Python:
 
 ## Manual Setup Checklist
 
-These items are either manual setup or useful post-install checks.
+These items are still machine-specific or useful post-install checks.
 
-### 1) `xdg-desktop-portal-termfilechooser` backend (for Yazi file picker)
-
-The normal desktop install now builds and installs this backend automatically from upstream source, then tries to restart the relevant portal services. This source-build path is used because there is no official Debian/Ubuntu package and no official Arch package in the main repos.
-
-The installer already pulls in the runtime + build dependencies through the desktop package lists. On Debian/Ubuntu that means packages like `meson`, `ninja-build`, `libinih-dev`, `libsystemd-dev`, `scdoc`; on Arch it uses the `pacman` equivalents.
-
-If you installed with `--headless`, `--skip-tools`, or the source build failed, you can still install it manually with the fallback below.
-
-Fallback manual install:
-
-```bash
-git clone https://github.com/boydaihungst/xdg-desktop-portal-termfilechooser.git /tmp/xdptf
-cd /tmp/xdptf
-bash remove_legacy_file.sh
-meson setup build --prefix=/usr
-ninja -C build
-sudo ninja -C build install
-```
-
-If `meson setup` complains about manpage tooling, retry with:
-
-```bash
-rm -rf build
-meson setup build --prefix=/usr -Dman-pages=disabled
-```
-
-Then relogin, or run:
-
-```bash
-systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH
-dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH
-systemctl --user restart xdg-desktop-portal-termfilechooser.service
-```
-
-### 2) Machine-specific monitor config
+### 1) Machine-specific monitor config
 
 Create `~/.config/i3/local.conf` for monitor/layout overrides:
 
@@ -234,7 +206,7 @@ exec --no-startup-id xrandr --output eDP-1 --off --output HDMI-1 --auto
 EOF
 ```
 
-### 3) Polybar hardware names
+### 2) Polybar hardware names
 
 `polybar/.config/polybar/config.ini` uses auto-detection by default:
 
@@ -243,7 +215,7 @@ EOF
 
 If needed, you can still override manually via environment variables before launching polybar.
 
-### 4) Workspace-local PDF/image tabs.
+### 3) Workspace-local PDF/image tabs.
 
 `zathura-tabbed` and `sxiv-tabbed` use native i3 tabbed containers. 
 
@@ -253,14 +225,7 @@ Behavior per workspace:
 - Any subsequent PDF/image opened via `xdg-open` in that workspace is appended as a new tab in the matching container.
 - Tab titles are normalized to basename-only (for example `paper.pdf`, `figure.png`).
 
-### 5) Zen Browser
-
-Zen is installed automatically by `install.sh` when using the desktop profile.
-Expected install locations:
-- `~/.tarball-installations/zen`
-- `~/.local/bin/zen`
-
-### 6) CUDA (optional)
+### 4) CUDA (optional)
 
 Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
 

@@ -78,27 +78,102 @@ set_wallpaper() {
     fi
 }
 
+set_default_mime_handler() {
+    local desktop_entry=$1
+    shift
+    local mime_type
+    local had_failure=false
+
+    for mime_type in "$@"; do
+        if ! xdg-mime default "$desktop_entry" "$mime_type"; then
+            warn "Failed to set $desktop_entry as the default handler for $mime_type."
+            had_failure=true
+        fi
+    done
+
+    [ "$had_failure" = false ]
+}
+
+set_default_browser() {
+    local had_failure=false
+    local browser_mimes=(
+        text/html
+        text/xml
+        application/xhtml+xml
+        application/xml
+        x-scheme-handler/http
+        x-scheme-handler/https
+        x-scheme-handler/ftp
+    )
+
+    if [ ! -x "$HOME/.local/bin/zen" ] && ! command -v zen &>/dev/null; then
+        warn "Zen Browser is not installed; skipping default browser configuration."
+        return 0
+    fi
+
+    if ! set_default_mime_handler zen.desktop "${browser_mimes[@]}"; then
+        had_failure=true
+    fi
+
+    if command -v xdg-settings &>/dev/null; then
+        if ! xdg-settings set default-web-browser zen.desktop; then
+            warn "Failed to set Zen Browser as the desktop default web browser."
+        fi
+    fi
+
+    [ "$had_failure" = false ]
+}
+
+set_default_file_manager() {
+    if ! command -v yazi &>/dev/null; then
+        warn "Yazi is not installed; skipping default file manager configuration."
+        return 0
+    fi
+
+    set_default_mime_handler yazi.desktop inode/directory
+}
+
 configure_mime() {
     info "Configuring MIME types..."
     local had_failure=false
+    local pdf_mimes=(
+        application/pdf
+        application/x-pdf
+        application/acrobat
+        applications/vnd.pdf
+        text/pdf
+        text/x-pdf
+    )
+    local image_mimes=(image/jpeg image/png image/gif image/bmp image/tiff image/webp)
 
     if ! command -v xdg-mime &>/dev/null; then
         warn "xdg-mime not found."
         return
     fi
 
-    if ! xdg-mime default zathura-tabbed.desktop application/pdf; then
-        warn "Failed to set the default PDF handler."
+    if command -v update-desktop-database &>/dev/null; then
+        update-desktop-database "$HOME/.local/share/applications" || true
+    fi
+
+    if ! set_default_mime_handler zathura-tabbed.desktop "${pdf_mimes[@]}"; then
+        warn "Failed to fully configure Zathura as the default PDF handler."
         had_failure=true
     fi
-    
-    local image_mimes=(image/jpeg image/png image/gif image/bmp image/tiff image/webp)
-    for mime in "${image_mimes[@]}"; do
-        if ! xdg-mime default sxiv-tabbed.desktop "$mime"; then
-            warn "Failed to set the default handler for $mime."
-            had_failure=true
-        fi
-    done
+
+    if ! set_default_mime_handler sxiv-tabbed.desktop "${image_mimes[@]}"; then
+        warn "Failed to fully configure Sxiv as the default image handler."
+        had_failure=true
+    fi
+
+    if ! set_default_browser; then
+        warn "Failed to fully configure Zen Browser as the default browser."
+        had_failure=true
+    fi
+
+    if ! set_default_file_manager; then
+        warn "Failed to configure Yazi as the default file manager."
+        had_failure=true
+    fi
 
     if command -v update-desktop-database &>/dev/null; then
         update-desktop-database "$HOME/.local/share/applications" || true

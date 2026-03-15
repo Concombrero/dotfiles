@@ -5,5 +5,5 @@ Comment=Open PDFs in i3 workspace-local tabbed containers
 Exec=/usr/bin/env zathura-tabbed %U
 Terminal=false
 Categories=Office;Viewer;
-MimeType=application/pdf;
+MimeType=application/pdf;application/x-pdf;application/acrobat;applications/vnd.pdf;text/pdf;text/x-pdf;
 NoDisplay=false
