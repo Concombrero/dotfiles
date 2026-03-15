@@ -43,10 +43,16 @@ install_neovim() {
 }
 
 install_fzf() {
+    if command -v fzf &>/dev/null; then
+        warn "fzf already installed, skipping."
+        return
+    fi
+
     if [ -d "$HOME/.fzf" ]; then
         warn "fzf already installed at ~/.fzf, skipping."
         return
     fi
+
     info "Installing fzf via git..."
     git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
     "$HOME/.fzf/install" --bin

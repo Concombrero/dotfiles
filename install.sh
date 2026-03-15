@@ -85,7 +85,7 @@ source "$DOTFILES_DIR/install/stow.sh"
 # 3. Main Execution
 main() {
     info "Starting Dotfiles Installation..."
-    info "OS: $OS, Distro: $DISTRO"
+    info "OS: $OS, Distro: $DISTRO, Family: $DISTRO_FAMILY"
     info "Log file: $LOG_FILE"
 
     # Stow Only Mode
@@ -148,6 +148,11 @@ main() {
     else
         log "Installation completed successfully."
     fi
+
+    if [ "$DISTRO_FAMILY" = "arch" ] && [ "$INSTALL_DESKTOP" = true ]; then
+        warn "On fresh Arch installs, verify NetworkManager is enabled and a PulseAudio-compatible audio service is running for nm-applet and pactl-based volume controls."
+    fi
+
     info "Please log out and log back in for all changes to take effect."
 }
 

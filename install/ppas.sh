@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 add_ppas() {
-    # PPAs are Ubuntu-specific. Debian uses official repos.
-    if [[ "$DISTRO" == "debian" ]]; then
-        info "Skipping PPAs on Debian."
+    # PPAs are Ubuntu-specific. Debian and Arch-based distros use their own official repos.
+    if [[ "$DISTRO_FAMILY" != "debian" ]]; then
+        info "Skipping PPAs on $DISTRO_FAMILY-based distro."
         return
     fi
 
     if [[ "$DISTRO" != "ubuntu" ]]; then
-        info "Skipping PPAs (unsupported distribution: $DISTRO)"
+        info "Skipping PPAs on $DISTRO."
         return
     fi
 

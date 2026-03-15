@@ -5,7 +5,7 @@ install_python_tools() {
 
     if ! command -v pipx &>/dev/null; then
         info "Installing pipx..."
-        install_pkg pipx
+        install_pkg "$(pipx_package_name)"
     fi
     
     # Ensure pipx path is available
@@ -30,4 +30,15 @@ install_python_tools() {
     
     pipx ensurepath
     log "Python tools installed."
+}
+
+pipx_package_name() {
+    case "$DISTRO_FAMILY" in
+        arch)
+            printf 'python-pipx\n'
+            ;;
+        *)
+            printf 'pipx\n'
+            ;;
+    esac
 }

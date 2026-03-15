@@ -2,8 +2,10 @@
 
 install_system_packages() {
     local desktop_mode=$1
-    local pkg_file_common="$DOTFILES_DIR/packages/common.txt"
-    local pkg_file_desktop="$DOTFILES_DIR/packages/desktop.txt"
+    local pkg_file_common pkg_file_desktop
+
+    pkg_file_common="$(package_list_file common)"
+    pkg_file_desktop="$(package_list_file desktop)"
 
     if [ ! -f "$pkg_file_common" ]; then
         error "Package list not found: $pkg_file_common"
@@ -31,5 +33,17 @@ install_system_packages() {
         fi
     else
         info "Skipping desktop packages (--headless or not requested)."
+    fi
+}
+
+package_list_file() {
+    local base_name=$1
+    local distro_specific="$DOTFILES_DIR/packages/${base_name}.${DISTRO_FAMILY}.txt"
+    local default_file="$DOTFILES_DIR/packages/${base_name}.txt"
+
+    if [ -f "$distro_specific" ]; then
+        printf '%s\n' "$distro_specific"
+    else
+        printf '%s\n' "$default_file"
     fi
 }

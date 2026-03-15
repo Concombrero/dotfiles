@@ -1,0 +1,50 @@
+# Arch package names verified against the official package database:
+# https://archlinux.org/packages/
+
+# Window Manager
+i3-wm
+i3lock
+i3status
+polybar
+picom
+rofi
+dunst
+xdotool
+xorg-xrandr
+xorg-setxkbmap
+xorg-xprop
+xorg-xrdb
+xorg-xsetroot
+dex
+xss-lock
+network-manager-applet
+# `libpulse` provides `pactl` and the other PulseAudio client tools on Arch.
+libpulse
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+
+# Image/Graphics
+imagemagick
+feh
+sxiv
+flameshot
+
+# Documents
+zathura
+zathura-pdf-poppler
+# `latexmk` is shipped by `texlive-binextra` on Arch.
+texlive-binextra
+
+# Other
+vlc
+qutebrowser
+alacritty
+fastfetch
+
+# Portal file chooser backend build deps
+meson
+ninja
+libinih
+# Arch ships the headers needed by termfilechooser in the main `systemd` package.
+systemd
+scdoc
