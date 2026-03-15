@@ -92,7 +92,7 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
    - `:checkhealth`
 
 > [!NOTE]
-> On Arch/CachyOS, the desktop install  enables `sddm.service` automatically and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme. NetworkManager, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
+> On Arch/CachyOS, the desktop install enables `sddm.service` automatically, replacing an existing `display-manager.service` symlink when a distro default like LightDM is already enabled, and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme. NetworkManager, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
 
 > [!NOTE]
 > The desktop install writes `~/.fehbg` and uses it from i3 so the wallpaper persists across logins. The SDDM theme also generates a blurred background from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when ImageMagick is available.

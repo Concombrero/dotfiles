@@ -57,6 +57,9 @@ install_fonts() {
 
 ensure_system_service() {
     local service=$1
+    local force_enable=${2:-false}
+    local current_dm_target current_dm_unit
+    local -a enable_cmd=(enable)
 
     if ! has_cmd systemctl; then
         warn "systemctl not found; skipping system service setup for $service."
@@ -64,8 +67,20 @@ ensure_system_service() {
     fi
 
     if ! sudo systemctl is-enabled --quiet "$service"; then
+        if [ "$force_enable" = true ] && sudo test -L /etc/systemd/system/display-manager.service; then
+            current_dm_target=$(sudo readlink -f /etc/systemd/system/display-manager.service 2>/dev/null || true)
+            current_dm_unit=$(basename "$current_dm_target")
+
+            if [ -n "$current_dm_unit" ] && [ "$current_dm_unit" != "$service" ]; then
+                info "Replacing existing display manager service: $current_dm_unit -> $service"
+                sudo systemctl disable "$current_dm_unit" >/dev/null 2>&1 || true
+            fi
+
+            enable_cmd+=(--force)
+        fi
+
         info "Enabling system service: $service"
-        if ! sudo systemctl enable "$service"; then
+        if ! sudo systemctl "${enable_cmd[@]}" "$service"; then
             warn "Failed to enable system service $service."
             return 1
         fi
@@ -76,7 +91,7 @@ ensure_system_service() {
 
 configure_arch_desktop_services() {
     [ "$DISTRO_FAMILY" = arch ] || return 0
-    ensure_system_service sddm.service
+    ensure_system_service sddm.service true
 }
 
 generate_sddm_background() {
