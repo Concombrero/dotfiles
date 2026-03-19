@@ -18,6 +18,7 @@ install_upstream_tools() {
 
 install_tools() {
     run_step "TPM install" install_tpm
+    run_step "Clipboard install" install_clipboard
 
     if [ "$DISTRO_FAMILY" = "debian" ]; then
         install_upstream_tools
@@ -390,6 +391,89 @@ install_typst() {
 
     rm -rf "$tmp_dir"
     log "Typst installed to ~/.local/opt/typst."
+}
+
+install_clipboard() {
+    if command -v cb &>/dev/null; then
+        warn "Clipboard already installed, skipping."
+        return
+    fi
+
+    info "Installing Clipboard from official release archive..."
+
+    local arch asset version tmp_dir archive extracted_dir install_dir
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset="clipboard-linux-amd64.zip"
+            ;;
+        aarch64|arm64)
+            asset="clipboard-linux-arm64.zip"
+            ;;
+        *)
+            error "Unsupported architecture for Clipboard prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    version="$(github_latest_release_tag Slackadays/Clipboard)"
+    if [ -z "$version" ]; then
+        error "Could not determine latest Clipboard version. Install manually."
+        return 1
+    fi
+
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/$asset"
+    extracted_dir="$tmp_dir/clipboard"
+    install_dir="$HOME/.local/opt/clipboard"
+
+    if ! curl -fsSL "https://github.com/Slackadays/Clipboard/releases/download/${version}/${asset}" -o "$archive"; then
+        error "Failed to download Clipboard archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$extracted_dir"; then
+        error "Failed to prepare Clipboard extraction directory."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! unzip -q "$archive" -d "$extracted_dir"; then
+        error "Failed to extract Clipboard archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare Clipboard install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$install_dir"
+    if ! mv "$extracted_dir" "$install_dir"; then
+        error "Failed to place Clipboard under ~/.local/opt."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/bin/cb" "$HOME/.local/bin/cb"; then
+        error "Failed to link Clipboard into ~/.local/bin."
+        rm -rf "$tmp_dir" "$install_dir"
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/cb" --help >/dev/null 2>&1; then
+        error "Clipboard installed but failed smoke test. Check runtime libraries like ALSA."
+        rm -rf "$tmp_dir" "$install_dir"
+        rm -f "$HOME/.local/bin/cb"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "Clipboard installed to ~/.local/opt/clipboard."
 }
 
 install_termfilechooser() {

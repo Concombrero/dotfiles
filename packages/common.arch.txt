@@ -27,6 +27,9 @@ python
 python-pip
 # Arch's `python` package already ships the stdlib `venv` module.
 
+# Runtime libraries for upstream CLI tools
+alsa-lib
+
 # Use official Arch packages when available instead of upstream installers.
 neovim
 fzf

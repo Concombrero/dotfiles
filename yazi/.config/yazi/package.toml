@@ -3,6 +3,11 @@ use = "yazi-rs/plugins:git"
 rev = "88990a6"
 hash = "270915fa8282a19908449530ff66f7e2"
 
+[[plugin.deps]]
+use = "orhnk/system-clipboard"
+rev = "75a5330"
+hash = "2eca70f99d25c661e0a92000843d001e"
+
 [[flavor.deps]]
 use = "yazi-rs/flavors:catppuccin-mocha"
 rev = "9e053d0"
