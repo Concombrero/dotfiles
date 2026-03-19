@@ -142,6 +142,16 @@ Validate the smallest relevant surface after edits.
 
 If you cannot run a full end-to-end check, say what should be manually verified on a real desktop session.
 
+## GitHub Access
+
+When working with public GitHub repositories, issues, pull requests, releases, or files, prefer the GitHub CLI over scraping HTML pages.
+
+- Use `gh` first for GitHub-native inspection such as `gh repo view`, `gh api`, `gh pr view`, `gh issue view`, and `gh release view`.
+- If the user provides a GitHub URL, extract the owner/repo and query it with `gh` rather than treating the page as a generic website.
+- For public repos, prefer read-only `gh` access before cloning; clone only when local search, editing, or build/test execution is actually needed.
+- Fall back to raw URLs or generic web fetches only when `gh` cannot provide the needed data or when GitHub rate/auth limits block the request.
+- Keep GitHub auth state and tokens machine-local; never commit credentials or hardcode them into tracked config.
+
 ## Documentation Index
 
 Start here, then follow the package-specific docs.

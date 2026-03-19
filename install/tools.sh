@@ -12,6 +12,7 @@ install_upstream_tools() {
     run_step "Zoxide install" install_zoxide
     run_step "Yazi install" install_yazi
     run_step "Lazygit install" install_lazygit
+    run_step "GitHub CLI install" install_gh
     run_step "OpenCode install" install_opencode
     run_step "Typst install" install_typst
 }
@@ -321,6 +322,86 @@ install_lazygit() {
 
     rm -rf "$TMP_DIR"
     log "Lazygit installed."
+}
+
+install_gh() {
+    if command -v gh &>/dev/null; then
+        warn "GitHub CLI already installed, skipping."
+        return
+    fi
+
+    info "Installing GitHub CLI from official release archive..."
+
+    local arch asset asset_arch version version_no_v tmp_dir archive extracted_dir install_dir
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset_arch="amd64"
+            ;;
+        aarch64|arm64)
+            asset_arch="arm64"
+            ;;
+        *)
+            error "Unsupported architecture for GitHub CLI prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    version="$(github_latest_release_tag cli/cli)"
+    if [ -z "$version" ]; then
+        error "Could not determine latest GitHub CLI version. Install manually."
+        return 1
+    fi
+
+    version_no_v="${version#v}"
+    asset="gh_${version_no_v}_linux_${asset_arch}.tar.gz"
+
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/$asset"
+    extracted_dir="$tmp_dir/gh_${version_no_v}_linux_${asset_arch}"
+    install_dir="$HOME/.local/opt/gh"
+
+    if ! curl -fsSL "https://github.com/cli/cli/releases/download/${version}/${asset}" -o "$archive"; then
+        error "Failed to download GitHub CLI archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xzf "$archive" -C "$tmp_dir"; then
+        error "Failed to extract GitHub CLI archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare GitHub CLI install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$install_dir"
+    if ! mv "$extracted_dir" "$install_dir"; then
+        error "Failed to place GitHub CLI under ~/.local/opt."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/bin/gh" "$HOME/.local/bin/gh"; then
+        error "Failed to link GitHub CLI into ~/.local/bin."
+        rm -rf "$tmp_dir" "$install_dir"
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/gh" --version >/dev/null 2>&1; then
+        error "GitHub CLI installed but failed smoke test."
+        rm -rf "$tmp_dir" "$install_dir"
+        rm -f "$HOME/.local/bin/gh"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "GitHub CLI installed to ~/.local/opt/gh."
 }
 
 install_typst() {

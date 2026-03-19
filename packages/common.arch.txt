@@ -3,6 +3,7 @@
 
 # Core Tools
 git
+github-cli
 stow
 tmux
 curl
