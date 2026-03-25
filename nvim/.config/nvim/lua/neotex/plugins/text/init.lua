@@ -5,6 +5,7 @@
 -- - vimtex.lua: LaTeX integration
 -- - jupyter/: Jupyter notebook integration
 -- - markdown-preview.lua: Markdown preview functionality
+-- - freefem.lua: FreeFem++ syntax and filetype support
 --
 -- The module uses a consistent error handling approach to ensure
 -- NeoVim starts properly even if some plugin specifications fail.
@@ -46,6 +47,7 @@ end
 local vimtex_module = safe_require("neotex.plugins.text.vimtex")
 local jupyter_module = safe_require("neotex.plugins.text.jupyter")
 local markdown_preview_module = safe_require("neotex.plugins.text.markdown-preview")
+local freefem_module = safe_require("neotex.plugins.text.freefem")
 
 -- Create array of valid plugin specs
 local plugins = {}
@@ -61,7 +63,7 @@ end
 add_if_valid(vimtex_module)
 add_if_valid(jupyter_module)
 add_if_valid(markdown_preview_module)
+add_if_valid(freefem_module)
 
 -- Return only valid plugin specs
 return plugins
-
