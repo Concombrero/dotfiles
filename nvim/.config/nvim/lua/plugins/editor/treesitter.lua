@@ -1,89 +1,103 @@
+local api = vim.api
+
+local ensure_installed = {
+  "lua",
+  "vim",
+  "vimdoc",
+  "query",
+  "markdown",
+  "markdown_inline",
+  "julia",
+  "python",
+  "bash",
+  "bibtex",
+  "nix",
+  "json",
+  "yaml",
+  "toml",
+  "gitignore",
+  "c",
+  "cpp",
+  "cmake",
+  "haskell",
+  "norg",
+}
+
+local highlight_disabled = {
+  css = true,
+  cls = true,
+  latex = true,
+  typst = true,
+}
+
+local indent_disabled = {
+  latex = true,
+}
+
+local function get_language(bufnr)
+  local filetype = vim.bo[bufnr].filetype
+  local ok, language = pcall(vim.treesitter.language.get_lang, filetype)
+  return filetype, (ok and language) or filetype
+end
+
+local function has_parser(bufnr, language)
+  return pcall(vim.treesitter.get_parser, bufnr, language)
+end
+
+local function sync_parsers()
+  if vim.fn.executable("tree-sitter") ~= 1 then
+    vim.notify_once("Skipping nvim-treesitter install/update: tree-sitter CLI not found", vim.log.levels.WARN)
+    return
+  end
+
+  local treesitter = require("nvim-treesitter")
+  treesitter.install(ensure_installed, { summary = true }):wait(300000)
+  treesitter.update(nil, { summary = true }):wait(300000)
+end
+
+local function enable_buffer_features(bufnr)
+  local filetype, language = get_language(bufnr)
+
+  if filetype == "tex" or filetype == "latex" or language == "latex" then
+    vim.bo[bufnr].syntax = "tex"
+  end
+
+  if not has_parser(bufnr, language) then
+    return
+  end
+
+  if not highlight_disabled[filetype] and not highlight_disabled[language] then
+    local started = pcall(vim.treesitter.start, bufnr, language)
+    if started and (filetype == "python" or language == "python") then
+      vim.bo[bufnr].syntax = "python"
+    end
+  end
+
+  if not indent_disabled[filetype] and not indent_disabled[language] then
+    vim.bo[bufnr].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end
+end
+
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = "master",
-    event = { "BufReadPre", "BufNewFile" },
-    build = ":TSUpdate",
+    branch = "main",
+    lazy = false,
+    build = sync_parsers,
     config = function()
-      require("nvim-treesitter.configs").setup({
-        -- enable syntax highlighting
-        highlight = {
-          enable = true,
-          disable = { "css", "cls", "latex", "typst" }, -- list of language that will be disabled
-          -- Note: using vim's regex highlighting for latex instead of treesitter
-          additional_vim_regex_highlighting = { "python" }, -- for jupyter notebooks
-        },
-        -- enable indentation
-        indent = { enable = true, disable = { "latex" } },
-        -- Define .ipynb injection queries to properly highlight code in markdown files
-        injections = {
-          {
-            filetype = "markdown",
-            query = [[
-              (fenced_code_block
-                language: (info_string) @language
-                content: (code_fence_content) @content)
-            ]],
-          }
-        },
-        -- ensure these language parsers are installed
-        ensure_installed = {
-          -- Essential languages
-          "lua",           -- For Neovim configuration
-          "vim",           -- For Vim script
-          "vimdoc",        -- For Neovim help docs
-          "query",         -- For treesitter queries
-          "markdown",      -- For documentation and Lectic support
-          "markdown_inline", -- For inline markdown syntax
-          "julia",         -- For Julia source files
-          "python",        -- For Python scripts
-          "bash",          -- For shell scripts
-          -- "latex" removed as requested - will be handled separately
-          "bibtex",        -- For bibliography files
-          "nix",           -- For NixOS configuration
-          
-          -- Utility formats
-          "json",
-          "yaml",
-          "toml",
-          "gitignore",
-          
-          -- Additional languages
-          "c",
-          "cpp",
-          "cmake",
-          "haskell",
-          "norg",
-        },
-        auto_install = true,
-        ignore_install = { "latex" }, -- Ignore latex to avoid installation issues
-        autopairs = {
-          enable = true,
-        },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "<C-n>",
-            node_incremental = "<C-n>",
-            scope_incremental = false,
-            node_decremental = "<C-p>",
-          },
-        },
-      })
-      
-      -- Set up filetype detection for LaTeX files to ensure proper syntax highlighting
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = {"tex", "latex"},
-        callback = function()
-          -- Enable Vim's built-in syntax highlighting for LaTeX
-          vim.opt_local.syntax = "tex"
-          -- Disable treesitter for LaTeX files
-          vim.cmd[[TSBufDisable highlight]]
-        end
+      require("nvim-treesitter").setup()
+
+      local group = api.nvim_create_augroup("DotfilesTreesitter", { clear = true })
+      api.nvim_create_autocmd("FileType", {
+        group = group,
+        pattern = "*",
+        callback = function(event)
+          enable_buffer_features(event.buf)
+        end,
       })
     end,
   },
-  
+
   {
     "JoosepAlviste/nvim-ts-context-commentstring",
     lazy = true,
