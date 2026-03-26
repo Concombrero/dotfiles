@@ -248,7 +248,7 @@ return {
         name = "list",
       },
       l = {
-        name = "lsp & lint",
+        name = "lsp",
         -- LSP operations
         b = { "<cmd>Telescope diagnostics bufnr=0<CR>", "buffer diagnostics" },
         c = { "<cmd>lua vim.lsp.buf.code_action()<CR>", "code action" },
