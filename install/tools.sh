@@ -17,9 +17,81 @@ install_upstream_tools() {
     run_step "Typst install" install_typst
 }
 
+ensure_local_bin_dir() {
+    mkdir -p "$HOME/.local/bin"
+}
+
+link_cargo_binary() {
+    local binary=$1
+    local source_path="$HOME/.cargo/bin/$binary"
+
+    [ -x "$source_path" ] || return 0
+
+    ensure_local_bin_dir || return 1
+    ln -sfn "$source_path" "$HOME/.local/bin/$binary"
+}
+
+install_rust_toolchain() {
+    if ! command -v rustup &>/dev/null; then
+        info "Installing rustup..."
+
+        if ! curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable --no-modify-path; then
+            error "Failed to install rustup."
+            return 1
+        fi
+    fi
+
+    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+    if ! rustup default stable >/dev/null 2>&1; then
+        error "Failed to install or activate the stable Rust toolchain."
+        return 1
+    fi
+
+    link_cargo_binary rustup || return 1
+    link_cargo_binary cargo || return 1
+    link_cargo_binary rustc || return 1
+
+    log "Rust toolchain ready."
+}
+
+install_tree_sitter_cli() {
+    if command -v tree-sitter &>/dev/null; then
+        warn "tree-sitter CLI already installed, skipping."
+        return
+    fi
+
+    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+    if ! command -v cargo &>/dev/null; then
+        if ! install_rust_toolchain; then
+            error "Rust toolchain is required to install tree-sitter CLI."
+            return 1
+        fi
+    fi
+
+    info "Installing tree-sitter CLI via cargo..."
+
+    if ! cargo install --locked tree-sitter-cli; then
+        error "Failed to install tree-sitter CLI."
+        return 1
+    fi
+
+    link_cargo_binary tree-sitter || return 1
+
+    if ! command -v tree-sitter &>/dev/null; then
+        error "tree-sitter CLI installed but is not available on PATH."
+        return 1
+    fi
+
+    log "tree-sitter CLI installed."
+}
+
 install_tools() {
     run_step "TPM install" install_tpm
     run_step "Clipboard install" install_clipboard
+    run_step "Rust toolchain install" install_rust_toolchain
+    run_step "tree-sitter CLI install" install_tree_sitter_cli
 
     if [ "$DISTRO_FAMILY" = "debian" ]; then
         install_upstream_tools
