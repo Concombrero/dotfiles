@@ -106,18 +106,5 @@ return {
       -- Respect .editorconfig when present
       respect_gitignore = true,
     })
-
-    -- Add which-key integration if available
-    local has_which_key, which_key = pcall(require, "which-key")
-    if has_which_key then
-      which_key.register({
-        m = {
-          p = { 
-            function() require("conform").format({ async = true, lsp_fallback = true }) end, 
-            "Format code" 
-          },
-        },
-      }, { prefix = "<leader>" })
-    end
   end,
 }

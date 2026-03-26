@@ -88,7 +88,6 @@ return {
     })
 
     -- Create a custom yank_history function that doesn't rely on the extension
-    -- This will override the default mappings from which-key
     _G.YankyTelescopeHistory = function()
       local tele_status, telescope = pcall(require, "telescope")
       if not tele_status then
@@ -169,16 +168,10 @@ return {
         pcall(function()
           local wk = require("which-key")
           
-          -- Update both keymaps that use yank history
+          -- Update the find menu entry after plugins are fully loaded
           wk.register({
             f = { 
               y = { function() _G.YankyTelescopeHistory() end, "yanks" },
-            }
-          }, { prefix = "<leader>" })
-          
-          wk.register({
-            y = { 
-              h = { function() _G.YankyTelescopeHistory() end, "history" },
             }
           }, { prefix = "<leader>" })
         end)

@@ -2,37 +2,37 @@
 -----------------------------------------------------------
 This reference mirrors mappings defined in the following files:
 - this file: `lua/neotex/plugins/editor/which-key.lua` (`opts.defaults`)
-- `lua/neotex/plugins/editor/formatting.lua` (`<leader>lf` via conform.nvim, plus `<leader>mp` helper)
+- `lua/neotex/plugins/editor/formatting.lua` (`<leader>lf` via conform.nvim)
 - `lua/neotex/plugins/text/markdown-preview.lua` (`<leader>mo`)
-- `lua/neotex/plugins/tools/yanky.lua` (`<leader>fy`, `<leader>yh`)
+- `lua/neotex/plugins/tools/yanky.lua` (`<leader>fy`)
 - `lua/neotex/plugins/tools/opencode.lua` (`<leader>o` plugin config; actions mapped here)
 
 TOP-LEVEL (<leader>)                            | LABEL
 -----------------------------------------------------------
 <leader>b                                       | build
 <leader>d                                       | delete buffer
-<leader>e                                       | EXPLORER
+<leader>e                                       | explorer
 <leader>g                                       | lazygit
 <leader>h                                       | create split
-<leader>i                                       | index
+<leader>p                                       | alternate buffer
 <leader>q                                       | quit
 <leader>u                                       | undo
-<leader>v                                       | view
 <leader>w                                       | write
+<leader>x                                       | latex
 <leader>y                                       | yank history
 
-ACTIONS (<leader>a)                             | LABEL
+latex (<leader>x)                               | LABEL
 -----------------------------------------------------------
-<leader>ab                                      | bib export
-<leader>ac                                      | clear vimtex
-<leader>ae                                      | error report
-<leader>af                                      | format
-<leader>ak                                      | kill aux
-<leader>at                                      | tex format
-<leader>av                                      | vimtex menu
-<leader>aw                                      | word count
+<leader>xb                                      | bib export
+<leader>xc                                      | clear vimtex
+<leader>xe                                      | error report
+<leader>xi                                      | index
+<leader>xk                                      | kill aux
+<leader>xm                                      | vimtex menu
+<leader>xv                                      | view
+<leader>xw                                      | word count
 
-COPILOT (<leader>c)                             | LABEL
+copilot (<leader>c)                             | LABEL
 -----------------------------------------------------------
 <leader>ce                                      | copilot enable
 <leader>cd                                      | copilot disable
@@ -44,11 +44,11 @@ COPILOT (<leader>c)                             | LABEL
 <leader>cw                                      | copilot word
 <leader>cx                                      | copilot dismiss
 
-EXPLORER (<leader>e)                            | LABEL
+explorer (<leader>e)                            | LABEL
 -----------------------------------------------------------
-<leader>e                                       | yazi here
+<leader>e                                       | explorer
 
-FIND (<leader>f)                                | LABEL
+find (<leader>f)                                | LABEL
 -----------------------------------------------------------
 <leader>fa                                      | all files
 <leader>fb                                      | buffers
@@ -66,7 +66,7 @@ FIND (<leader>f)                                | LABEL
 <leader>fw                                      | word
 <leader>fy                                      | yanks (from yanky.lua)
 
-JUPYTER (<leader>j)                             | LABEL
+jupyter (<leader>j)                             | LABEL
 -----------------------------------------------------------
 <leader>ja                                      | run all cells
 <leader>jb                                      | run selected and below
@@ -82,7 +82,7 @@ JUPYTER (<leader>j)                             | LABEL
 <leader>jS                                      | save ipynb with outputs
 <leader>jv                                      | bootstrap .venv (py3.12)
 
-LSP & LINT (<leader>l)                          | LABEL
+lsp & lint (<leader>l)                          | LABEL
 -----------------------------------------------------------
 <leader>lB                                      | toggle buffer linting
 <leader>lD                                      | declaration
@@ -106,37 +106,34 @@ LSP & LINT (<leader>l)                          | LABEL
 <leader>lt                                      | start lsp
 <leader>ly                                      | copy diagnostics to clipboard
 
-MARKDOWN (<leader>m)                            | LABEL
+markdown (<leader>m)                            | LABEL
 -----------------------------------------------------------
 <leader>ma                                      | toggle all folds
 <leader>mf                                      | toggle fold under cursor
 <leader>mo                                      | open markdown preview (from markdown-preview.lua)
-<leader>mp                                      | Format code helper (from formatting.lua)
 <leader>ms                                      | submit selection with message
 <leader>mt                                      | toggle folding method
 <leader>mu                                      | open URL under cursor
 
-SESSIONS (<leader>s)                            | LABEL
+sessions (<leader>s)                            | LABEL
 -----------------------------------------------------------
 <leader>sd                                      | delete
 <leader>sl                                      | load
 <leader>ss                                      | save
 
-TYPST (<leader>t)                               | LABEL
+typst (<leader>t)                               | LABEL
 -----------------------------------------------------------
-<leader>tb                                      | build (update | make)
 <leader>tf                                      | toggle cursor follow
 <leader>to                                      | preview
 <leader>tp                                      | toggle preview
 <leader>ts                                      | stop preview
 <leader>tw                                      | watch
 
-YANK (<leader>y)                                | LABEL
+yank (<leader>y)                                | LABEL
 -----------------------------------------------------------
 <leader>y                                       | yank history
-<leader>yh                                      | history (from yanky.lua)
 
-OPENCODE (<leader>o)
+opencode (<leader>o)
 -----------------------------------------------------------
 <leader>oa                                      | ask
 <leader>o[                                      | previous diff
@@ -168,9 +165,9 @@ OPENCODE (<leader>o)
 <leader>oy                                      | add visual selection to context
 <leader>oz                                      | toggle zoom
 
-RESERVED GROUPS
+reserved groups
 -----------------------------------------------------------
-<leader>L                                       | LIST (group name only in this file)
+<leader>L                                       | list (group name only in this file)
 ]]
 
 local function opencode_call(method, ...)
@@ -194,6 +191,37 @@ local function run_buffer_command(command_name, missing_message)
 
     vim.notify(missing_message, vim.log.levels.WARN)
   end
+end
+
+local function build_current_buffer()
+  if vim.bo.makeprg == nil or vim.bo.makeprg == "" then
+    local target = vim.bo.filetype ~= "" and (vim.bo.filetype .. " buffers") or "this buffer"
+    vim.notify("No build command configured for " .. target, vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd("update")
+  vim.cmd("make")
+end
+
+local function open_yank_history()
+  local lazy_ok, lazy = pcall(require, "lazy")
+  if lazy_ok then
+    lazy.load({ plugins = { "yanky.nvim" } })
+  end
+
+  if type(_G.YankyTelescopeHistory) == "function" then
+    _G.YankyTelescopeHistory()
+    return
+  end
+
+  local telescope_ok, telescope = pcall(require, "telescope")
+  if telescope_ok and telescope.extensions and telescope.extensions.yank_history then
+    telescope.extensions.yank_history.yank_history()
+    return
+  end
+
+  vim.notify("Yank history is unavailable", vim.log.levels.WARN)
 end
 
 return {
@@ -250,7 +278,9 @@ return {
       icons = {
         breadcrumb = "»", -- symbol used in the command line area that shows your active key combo
         separator = "➜", -- Separator between key and label
-        group = "+", -- The symbol prepended to a group
+        group = "",
+        mappings = false,
+        colors = false,
       },
       layout = {
         width = { min = 20, max = 50 }, -- min and max width of the columns
@@ -277,29 +307,28 @@ return {
       nowait = true,  -- use `nowait` when creating keymaps
       prefix = "<leader>",
       mode = { "n", "v" },
-      b = { "<cmd>VimtexCompile<CR>", "build" },
+      b = { build_current_buffer, "build", mode = "n" },
       h = { "<cmd>vert sb<CR>", "create split" },
       d = { "<cmd>update! | lua Snacks.bufdelete()<CR>", "delete buffer" },
-      e = { "<cmd>Yazi<CR>", "yazi here" },
+      e = { "<cmd>Yazi<CR>", "explorer" },
       g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
-      i = { "<cmd>VimtexTocOpen<CR>", "index" },
+      p = { "<cmd>b#<CR>", "alternate buffer", mode = "n" },
       q = { "<cmd>wa! | qa!<CR>", "quit" },
       u = { "<cmd>Telescope undo<CR>", "undo" },
-      v = { "<cmd>VimtexView<CR>", "view" },
       w = { "<cmd>wa!<CR>", "write" },
-      a = {
-        name = "ACTIONS",
+      x = {
+        name = "latex",
         b = { "<cmd>terminal bibexport -o %:p:r.bib %:p:r.aux<CR>", "bib export" },
         c = { "<cmd>:VimtexClearCache All<CR>", "clear vimtex" },
         e = { "<cmd>VimtexErrors<CR>", "error report" },
-        f = { "<cmd>lua vim.lsp.buf.format()<CR>", "format" },
+        i = { "<cmd>VimtexTocOpen<CR>", "index" },
         k = { "<cmd>VimtexClean<CR>", "kill aux" },
-        t = { "<cmd>terminal latexindent -w %:p:r.tex<CR>", "tex format" },
-        v = { "<plug>(vimtex-context-menu)", "vimtex menu" },
+        m = { "<plug>(vimtex-context-menu)", "vimtex menu" },
+        v = { "<cmd>VimtexView<CR>", "view" },
         w = { "<cmd>VimtexCountWords!<CR>", "word count" },
       },
-        f = {
-        name = "FIND",
+      f = {
+        name = "find",
         a = { "<cmd>lua require('telescope.builtin').find_files({ no_ignore = true, hidden = true, search_dirs = { '~/' } })<CR>", "all files" },
         b = {
           "<cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown{previewer = false})<CR>",
@@ -320,7 +349,7 @@ return {
       },
       g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
       c = {
-        name = "COPILOT",
+        name = "copilot",
         e = { "<cmd>Copilot enable<CR>", "copilot enable" },
         d = { "<cmd>Copilot disable<CR>", "copilot disable" },
         s = { "<cmd>Copilot status<CR>", "copilot status" },
@@ -332,7 +361,7 @@ return {
         x = { function() require("copilot.suggestion").dismiss() end, "copilot dismiss" },
       },
       o = {
-        name = "OPENCODE",
+        name = "opencode",
         a = { opencode_call("quick_chat"), "ask" },
         ["["] = { opencode_call("diff_prev"), "previous diff" },
         ["]"] = { opencode_call("diff_next"), "next diff" },
@@ -349,7 +378,7 @@ return {
         p = { opencode_call("configure_provider"), "configure provider" },
         q = { opencode_call("close"), "close opencode window" },
         r = {
-          name = "RESTORE/REVERT",
+          name = "restore/revert",
           a = { opencode_call("diff_revert_all_last_prompt"), "revert all (last prompt)" },
           A = { opencode_call("diff_revert_all"), "revert all changes" },
           r = { opencode_call("diff_restore_snapshot_file"), "restore file snapshot" },
@@ -368,7 +397,7 @@ return {
       },
       -- LIST MAPPINGS
       j = {
-        name = "JUPYTER",
+        name = "jupyter",
         c = { "<cmd>Neopyter connect<CR>", "connect Neopyter" },
         i = { "<cmd>Neopyter status<CR>", "Neopyter status" },
         I = { "<cmd>lua require('neotex.util.jupyter').convert_current_ipynb_to_ju()<CR>", "convert ipynb to ju.py" },
@@ -384,10 +413,10 @@ return {
         S = { "<cmd>lua require('neotex.util.jupyter').save_current_as_ipynb()<CR>", "save ipynb with outputs" },
       },
       L = {
-        name = "LIST",
+        name = "list",
       },
       l = {
-        name = "LSP & LINT",
+        name = "lsp & lint",
         -- LSP operations
         b = { "<cmd>Telescope diagnostics bufnr=0<CR>", "buffer diagnostics" },
         c = { "<cmd>lua vim.lsp.buf.code_action()<CR>", "code action" },
@@ -438,7 +467,7 @@ return {
       },
       -- MARKDOWN MAPPINGS
       m = {
-        name = "MARKDOWN",
+        name = "markdown",
         s = { "<cmd>LecticSubmitSelection<CR>", "submit selection with message" },
 
         -- MARKDOWN/PREVIEW
@@ -451,7 +480,7 @@ return {
         t = { "<cmd>lua ToggleFoldingMethod()<CR>", "toggle folding method" },
       },
       s = {
-        name = "SESSIONS",
+        name = "sessions",
         s = { "<cmd>SessionManager save_current_session<CR>", "save" },
         d = { "<cmd>SessionManager delete_session<CR>", "delete" },
         l = { "<cmd>SessionManager load_session<CR>", "load" },
@@ -460,138 +489,21 @@ return {
 
 
       t = {
-        name = "TYPST",
-        b = { "<cmd>update | make<CR>", "build" },
+        name = "typst",
         o = { "<cmd>TypstPreview<CR>", "preview" },
         p = { "<cmd>TypstPreviewToggle<CR>", "toggle preview" },
         s = { "<cmd>TypstPreviewStop<CR>", "stop preview" },
         f = { "<cmd>TypstPreviewFollowCursorToggle<CR>", "toggle cursor follow" },
         w = { "<cmd>TypstWatch<CR>", "watch" },
       },
-      y = { function() require("telescope").extensions.yank_history.yank_history() end, "yank history" },
+      y = { open_yank_history, "yank history", mode = "n" },
 
     },
   },
   config = function(_, opts)
     local wk = require("which-key")
 
-    -- Set up the base configuration
     wk.setup(opts.setup)
-
-    -- Define our icon map with explicit spacing to position them right after the separator arrow
-    local icons = {
-      -- Top level command icons
-      b = "󰖷 ", -- build
-      d = "󰩺 ", -- delete buffer
-      e = "󰙅 ", -- explorer
-      g = "󰊢 ", -- lazygit
-      h = "󰁪 ", -- create split
-      i = "󰋽 ", -- index
-      q = "󰗼 ", -- quit
-      u = "󰕌 ", -- undo
-      v = "󰛓 ", -- view
-      w = "󰆓 ", -- write
-
-      -- Group icons
-      ["ACTIONS"] = "󰌵 ",
-      ["COPILOT"] = "󰚩 ",
-      ["FIND"] = "󰍉 ",
-      ["JUPYTER"] = "󰌠 ",
-      ["LIST"] = "󰔱 ",
-      ["LSP & LINT"] = "󰒕 ",
-      ["MARKDOWN"] = "󱀈 ",
-      ["OPENCODE"] = " ",
-      ["SESSIONS"] = "󰆔 ",
-      ["TYPST"] = "󰈭 ",
-      ["TEXT"] = "󰊪 ",
-      ["YANK"] = "󰆏 ",
-    }
-
-    -- Monkey patch the which-key view module to insert icons at exactly the right place
-    -- We replace the separator symbol with our custom icon
-    local which_key_separator = opts.setup.icons.separator
-
-    -- Store the original item function from the view module
-    local view_ok, view = pcall(require, "which-key.view")
-    if not view_ok then
-      vim.notify("Failed to load which-key view module", vim.log.levels.WARN)
-      wk.register(opts.defaults)
-      return
-    end
-
-    -- Save the original function
-    local orig_item = view.item
-
-    -- Replace with our custom version that adds icons
-    view.item = function(key, item, label)
-      -- Get the standard formatting
-      local columns = orig_item(key, item, label)
-
-      -- Check if we need to add an icon after the separator
-      local icon_to_add = nil
-
-      -- Case 1: Single-character top-level commands (like b, c, d, etc.)
-      if type(key) == "string" and #key == 1 and icons[key] then
-        icon_to_add = icons[key]
-      end
-
-      -- Case 2: Group items with name property
-      if type(item) == "table" and item.name and icons[item.name] then
-        icon_to_add = icons[item.name]
-      end
-
-      -- Case 3: Default icons for common commands based on description
-      if not icon_to_add and type(item) == "table" and #item >= 2 and type(item[2]) == "string" then
-        local desc = item[2]:lower()
-
-        -- Map common descriptions to icons if not already assigned
-        if desc == "build" then
-          icon_to_add = "󰖷 "
-        elseif desc == "create split" then
-          icon_to_add = "󰁪 "
-        elseif desc == "delete buffer" then
-          icon_to_add = "󰩺 "
-        elseif desc == "explorer" then
-          icon_to_add = "󰙅 "
-        elseif desc == "lazygit" then
-          icon_to_add = "󰊢 "
-        elseif desc == "index" then
-          icon_to_add = "󰋽 "
-        elseif desc == "quit" then
-          icon_to_add = "󰗼 "
-        elseif desc == "undo" then
-          icon_to_add = "󰕌 "
-        elseif desc == "view" then
-          icon_to_add = "󰛓 "
-        elseif desc == "write" then
-          icon_to_add = "󰆓 "
-        elseif desc == "write all" then
-          icon_to_add = "󰆓 "
-        elseif desc:match("format") then
-          icon_to_add = "󰉣 "
-        elseif desc:match("search") or desc:match("find") then
-          icon_to_add = "󰍉 "
-        elseif desc:match("file") then
-          icon_to_add = "󰈙 "
-        elseif desc:match("todo") or desc:match("todos") then
-          icon_to_add = "󰄬 "
-        end
-      end
-
-      -- If we have an icon to add, add it after the separator
-      if icon_to_add then
-        for i, col in ipairs(columns) do
-          if col == which_key_separator then
-            columns[i] = which_key_separator .. icon_to_add
-            break
-          end
-        end
-      end
-
-      return columns
-    end
-
-    -- Register the defaults
     wk.register(opts.defaults)
   end,
 }

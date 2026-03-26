@@ -4,6 +4,10 @@
 -- Disable spell checking for LaTeX files
 vim.opt_local.spell = false
 
+if vim.bo.makeprg == "" then
+  pcall(vim.cmd, "compiler tex")
+end
+
 -- This file includes buffer-specific surround configuration
 require("nvim-surround").buffer_setup({
   surrounds = {
