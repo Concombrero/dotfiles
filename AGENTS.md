@@ -14,7 +14,7 @@ It is organized as package directories that mirror the final paths under `$HOME`
 - Terminal: `alacritty`
 - Shell: `fish`
 - Prompt: `starship`
-- Editor: `neovim` (`NeoTex` config)
+- Editor: `neovim`
 - Terminal multiplexer: `tmux`
 - File manager: `yazi`
 - Browser stack: `Zen Browser` for daily use, `qutebrowser` config also present
@@ -105,7 +105,7 @@ Be careful when changing shell startup, portal, tmux, i3 startup, or PATH logic:
 - `fish/`, `bash/`, `starship/`, `git/`: shell and CLI environment
 - `i3/`, `picom/`, `polybar/`, `rofi/`, `dunst/`, `x11/`, `gtk/`: desktop/X11 stack
 - `alacritty/`, `tmux/`, `lazygit/`, `fastfetch/`, `btop/`: terminal tooling
-- `nvim/`: NeoTex Neovim config
+- `nvim/`: Neovim config
 - `yazi/`, `zathura/`, `qutebrowser/`: application configs
 - `xdg-desktop-portal/`, `xdg-desktop-portal-termfilechooser/`: portal routing and terminal file chooser integration
 - `scripts/`: local executables and desktop entries
@@ -163,16 +163,16 @@ Start here, then follow the package-specific docs.
 - Scripts package guidance: `scripts/AGENTS.md`
 - XDG desktop portal routing guidance: `xdg-desktop-portal/AGENTS.md`
 - OpenCode config notes: `opencode/.config/opencode/README.md`
-- NeoTex overview: `nvim/.config/nvim/README.md`
-- NeoTex agent conventions: `nvim/.config/nvim/AGENTS.md`
-- NeoTex plugin layout: `nvim/.config/nvim/lua/neotex/plugins/README.md`
-- NeoTex config modules: `nvim/.config/nvim/lua/neotex/config/README.md`
-- NeoTex utility modules: `nvim/.config/nvim/lua/neotex/util/README.md`
-- NeoTex editor plugins: `nvim/.config/nvim/lua/neotex/plugins/editor/README.md`
-- NeoTex text plugins: `nvim/.config/nvim/lua/neotex/plugins/text/README.md`
-- NeoTex tools/plugins: `nvim/.config/nvim/lua/neotex/plugins/tools/README.md`
-- NeoTex tools/snacks notes: `nvim/.config/nvim/lua/neotex/plugins/tools/snacks/README.md`
-- NeoTex UI plugins: `nvim/.config/nvim/lua/neotex/plugins/ui/README.md`
+- Neovim overview: `nvim/.config/nvim/README.md`
+- Neovim agent conventions: `nvim/.config/nvim/AGENTS.md`
+- Neovim plugin layout: `nvim/.config/nvim/lua/plugins/README.md`
+- Neovim config modules: `nvim/.config/nvim/lua/config/README.md`
+- Neovim utility modules: `nvim/.config/nvim/lua/util/README.md`
+- Neovim editor plugins: `nvim/.config/nvim/lua/plugins/editor/README.md`
+- Neovim text plugins: `nvim/.config/nvim/lua/plugins/text/README.md`
+- Neovim tools/plugins: `nvim/.config/nvim/lua/plugins/tools/README.md`
+- Neovim tools/snacks notes: `nvim/.config/nvim/lua/plugins/tools/snacks/README.md`
+- Neovim UI plugins: `nvim/.config/nvim/lua/plugins/ui/README.md`
 - Terminal file chooser package guidance: `xdg-desktop-portal-termfilechooser/AGENTS.md`
 - Terminal file chooser implementation notes: `xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser/agents.md`
 

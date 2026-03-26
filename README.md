@@ -29,7 +29,7 @@ Visually, anything that can be is themed with [Catppuccin](https://github.com/ca
   - Shell : `fish`
   - Prompt : `starship`
   - Enhancements : `tmux`, `lazygit`, `zoxide`, `fzf` and more
-- Editing: `neovim` (see [NeoTex README](nvim/.config/nvim/README.md) for details).
+- Editing: `neovim` (see the [Neovim config README](nvim/.config/nvim/README.md) for details).
 - Web : Zen Browser
 - AI workflow : OpenCode agent, with integration in Neovim. 
 - Workspace-local document/media tabs: PDFs/images are grouped into dedicated i3 tabbed containers per workspace.

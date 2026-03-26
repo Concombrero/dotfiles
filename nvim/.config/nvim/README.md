@@ -1,6 +1,6 @@
-# NeoTex Neovim Configuration
+# Neovim Configuration
 
-NeoTex is a Lua-first Neovim configuration focused on:
+This is a Lua-first Neovim configuration focused on:
 
 - academic writing (LaTeX, Markdown, Typst)
 - Python and notebook workflows
@@ -22,7 +22,7 @@ This file is intentionally concise and points to focused docs in this repo.
 
 ## Bibliography (Zotero)
 
-NeoTex bibliography tooling expects the Zotero export at:
+The bibliography tooling expects the Zotero export at:
 
 - `~/texmf/bibtex/bib/Zotero.bib`
 
@@ -73,7 +73,7 @@ Notes:
 
 ## Jupyter Workflow
 
-NeoTex uses a two-file notebook model:
+This config uses a two-file notebook model:
 
 - `.ju.py` (or `.ju.*`) is the editable source in Neovim.
 - `.ipynb` is the browser/shareable notebook representation.
@@ -198,9 +198,9 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ## Directory Map
 
 - `init.lua`: entry point
-- `lua/neotex/config/`: options, keymaps, autocmds
-- `lua/neotex/plugins/`: lazy.nvim plugin specs by domain
-- `lua/neotex/util/`: reusable helper modules and user commands
+- `lua/config/`: options, keymaps, autocmds
+- `lua/plugins/`: lazy.nvim plugin specs by domain
+- `lua/util/`: reusable helper modules and user commands
 - `after/ftplugin/`, `after/ftdetect/`: filetype-specific behavior
 - `templates/`, `snippets/`, `LuaSnip/`: writing support assets
 
@@ -216,6 +216,6 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
 - `AGENTS.md`: machine-readable project context and conventions
 - `OPTIMIZATION.md`: optimization strategy and workflow
-- `lua/neotex/plugins/README.md`: plugin category layout
-- `lua/neotex/config/README.md`: core config module notes
-- `lua/neotex/util/README.md`: utility modules and user commands
+- `lua/plugins/README.md`: plugin category layout
+- `lua/config/README.md`: core config module notes
+- `lua/util/README.md`: utility modules and user commands

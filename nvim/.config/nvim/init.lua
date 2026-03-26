@@ -8,10 +8,10 @@
 -- starts properly even if there are errors in the configuration.
 --
 -- Structure:
--- - neotex/bootstrap.lua: Handles plugin and feature initialization
--- - neotex/config/: Core configuration modules
--- - neotex/util/: Utility functions
--- - neotex/plugins/: Plugin specification and configuration
+-- - bootstrap.lua: Handles plugin and feature initialization
+-- - config/: Core configuration modules
+-- - util/: Utility functions
+-- - plugins/: Plugin specification and configuration
 -----------------------------------------------------------
 
 -- Set notification level to show only important messages
@@ -64,8 +64,8 @@ prepend_to_path("~/.opencode/bin")                      -- opencode CLI
 prepend_to_path("~/typst-x86_64-unknown-linux-musl")    -- typst binary
 
 -- Load configuration with improved error handling
-local config_ok, config = pcall(require, "neotex.config")
-local bootstrap_ok, bootstrap = pcall(require, "neotex.bootstrap")
+local config_ok, config = pcall(require, "config")
+local bootstrap_ok, bootstrap = pcall(require, "bootstrap")
 
 -- Make sure bootstrap exists before trying to use it
 if bootstrap_ok and type(bootstrap) == "table" and type(bootstrap.init) == "function" then

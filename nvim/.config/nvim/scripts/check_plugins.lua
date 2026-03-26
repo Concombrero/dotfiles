@@ -13,9 +13,9 @@ end
 
 local function get_plugins_by_category()
   -- Get the categories from our new plugin organization
-  local ok, plugins_module = pcall(require, "neotex.plugins")
+  local ok, plugins_module = pcall(require, "plugins")
   if not ok then
-    print("❌ Failed to load neotex.plugins module")
+    print("❌ Failed to load plugins module")
     return nil
   end
   
@@ -45,8 +45,8 @@ local function get_plugins_by_category()
       if not found then
         -- Try to match the plugin to one of our category modules
         for _, mod_name in ipairs({
-          "neotex.plugins." .. cat_name .. "." .. plugin.name,
-          "neotex.plugins." .. plugin.name
+          "plugins." .. cat_name .. "." .. plugin.name,
+          "plugins." .. plugin.name
         }) do
           local mod_ok = pcall(require, mod_name)
           if mod_ok then

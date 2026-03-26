@@ -1,6 +1,6 @@
-# NeoTex Optimization Guide
+# Optimization Guide
 
-This document tracks the current optimization strategy for NeoTex.
+This document tracks the current optimization strategy for this Neovim config.
 
 ## Goals
 

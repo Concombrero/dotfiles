@@ -1,7 +1,7 @@
-# AGENTS.md - NeoTex NeoVim Configuration
+# AGENTS.md - Neovim Configuration
 
 Author: Malik Hacini
-Config name: NeoTex
+Config name: Neovim
 
 ## Overview
 
@@ -73,7 +73,7 @@ There is no traditional build system. This is a NeoVim Lua configuration managed
 
 ```
 init.lua                          Entry point: sets leader, loads config + bootstrap
-lua/neotex/
+lua/
   bootstrap.lua                   Installs lazy.nvim, loads plugin specs, inits utils
   config/
     init.lua                      Loads options -> keymaps -> autocmds in sequence
@@ -107,12 +107,12 @@ scripts/                          Shell/Lua maintenance scripts (plugin/tool che
 
 ## Bootstrap Chain
 
-1. `init.lua` sets `vim.g.mapleader = " "`, then `pcall(require, "neotex.config")` and `pcall(require, "neotex.bootstrap")`
-2. `neotex.config.init` calls `setup()` on options, keymaps, autocmds in order
-3. `neotex.bootstrap.init()` runs a sequential step pipeline:
+1. `init.lua` sets `vim.g.mapleader = " "`, then `pcall(require, "config")` and `pcall(require, "bootstrap")`
+2. `config.init` calls `setup()` on options, keymaps, autocmds in order
+3. `bootstrap.init()` runs a sequential step pipeline:
    cleanup_tmp_dirs -> ensure_lazy -> validate_lockfile -> setup_lazy -> setup_utils
 4. `setup_lazy()` calls `require("lazy").setup(...)` with imports for each plugin category
-5. `setup_utils()` loads all `neotex.util.*` submodules and calls their `setup()` functions
+5. `setup_utils()` loads all `util.*` submodules and calls their `setup()` functions
 
 ## Code Style Guidelines
 
@@ -159,7 +159,7 @@ Setup functions return `true` on success for pipeline checking.
 ### Backward Compatibility
 - Expose global aliases: `_G.FunctionName = M.function_name` for backward compat
 - Modules check for both new module path and legacy `_G` functions
-- Example: `neotex.util.fold` sets `_G.LoadFoldingState = M.load_folding_state`
+- Example: `util.fold` sets `_G.LoadFoldingState = M.load_folding_state`
 
 ### Plugin Specs (lazy.nvim)
 - One plugin per file, returning a table (or table of tables)

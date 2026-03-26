@@ -1,5 +1,5 @@
 -- We're now using nvim-surround instead of mini.surround
--- LaTeX-specific surround configurations are in lua/neotex/plugins/tools/surround.lua
+-- LaTeX-specific surround configurations are in lua/plugins/tools/surround.lua
 
 -- Disable spell checking for LaTeX files
 vim.opt_local.spell = false
