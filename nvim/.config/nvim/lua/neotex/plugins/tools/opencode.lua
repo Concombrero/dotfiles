@@ -7,8 +7,7 @@ return {
   },
   config = function()
     require("opencode").setup({
-      -- Use built-in keymaps under <leader>o
-      keymap_prefix = "<leader>o",
+      default_global_keymaps = false,
     })
 
     -- Required for opts.events.reload

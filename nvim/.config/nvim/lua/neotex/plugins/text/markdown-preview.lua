@@ -3,9 +3,6 @@ return {
   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
   ft = { "markdown" },
   build = "sh -c 'cd app && NODE_ENV=production npx --yes yarn install'",
-  keys = {
-    { "<leader>mo", "<cmd>MarkdownPreviewToggle<CR>", ft = "markdown", desc = "open markdown preview" },
-  },
   init = function()
     vim.g.mkdp_browser = "qutebrowser"
 

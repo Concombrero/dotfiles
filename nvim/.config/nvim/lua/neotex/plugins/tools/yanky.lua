@@ -160,24 +160,6 @@ return {
       }):find()
     end
     
-    -- Override the keymaps in the which-key setup to use our custom function
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "VeryLazy",
-      callback = function()
-        -- Update the keymaps when plugins are fully loaded
-        pcall(function()
-          local wk = require("which-key")
-          
-          -- Update the find menu entry after plugins are fully loaded
-          wk.register({
-            f = { 
-              y = { function() _G.YankyTelescopeHistory() end, "yanks" },
-            }
-          }, { prefix = "<leader>" })
-        end)
-      end
-    })
-    
     -- Still try to load the extension as a fallback
     pcall(function()
       require("telescope").load_extension("yank_history")

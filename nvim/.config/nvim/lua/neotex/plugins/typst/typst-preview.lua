@@ -25,13 +25,6 @@ return {
         },
         debug = false,
       })
-
-      -- keymaps
-      vim.keymap.set('n', '<leader>tp', ':TypstPreviewToggle<CR>', { silent = true })
-      vim.keymap.set('n', '<leader>to', ':TypstPreview<CR>', { silent = true })
-      vim.keymap.set('n', '<leader>ts', ':TypstPreviewStop<CR>', { silent = true })
-      vim.keymap.set('n', '<leader>tf', ':TypstPreviewFollowCursorToggle<CR>', { silent = true })
-      vim.keymap.set('n', '<leader>tw', ':TypstWatch<CR>', { silent = true })
     end,
   },
 }

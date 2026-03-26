@@ -1,174 +1,5 @@
---[[ WHICH-KEY MAP REFERENCE (source-aligned)
------------------------------------------------------------
-This reference mirrors mappings defined in the following files:
-- this file: `lua/neotex/plugins/editor/which-key.lua` (`opts.defaults`)
-- `lua/neotex/plugins/editor/formatting.lua` (`<leader>lf` via conform.nvim)
-- `lua/neotex/plugins/text/markdown-preview.lua` (`<leader>mo`)
-- `lua/neotex/plugins/tools/yanky.lua` (`<leader>fy`)
-- `lua/neotex/plugins/tools/opencode.lua` (`<leader>o` plugin config; actions mapped here)
-
-TOP-LEVEL (<leader>)                            | LABEL
------------------------------------------------------------
-<leader>b                                       | build
-<leader>d                                       | delete buffer
-<leader>e                                       | explorer
-<leader>g                                       | lazygit
-<leader>h                                       | create split
-<leader>p                                       | alternate buffer
-<leader>q                                       | quit
-<leader>u                                       | undo
-<leader>w                                       | write
-<leader>x                                       | latex
-<leader>y                                       | yank history
-
-latex (<leader>x)                               | LABEL
------------------------------------------------------------
-<leader>xb                                      | bib export
-<leader>xc                                      | clear vimtex
-<leader>xe                                      | error report
-<leader>xi                                      | index
-<leader>xk                                      | kill aux
-<leader>xm                                      | vimtex menu
-<leader>xv                                      | view
-<leader>xw                                      | word count
-
-copilot (<leader>c)                             | LABEL
------------------------------------------------------------
-<leader>ce                                      | copilot enable
-<leader>cd                                      | copilot disable
-<leader>cs                                      | copilot status
-<leader>cp                                      | copilot panel
-<leader>cn                                      | copilot next
-<leader>cb                                      | copilot prev
-<leader>cl                                      | copilot line
-<leader>cw                                      | copilot word
-<leader>cx                                      | copilot dismiss
-
-explorer (<leader>e)                            | LABEL
------------------------------------------------------------
-<leader>e                                       | explorer
-
-find (<leader>f)                                | LABEL
------------------------------------------------------------
-<leader>fa                                      | all files
-<leader>fb                                      | buffers
-<leader>fc                                      | citations
-<leader>ff                                      | files
-<leader>fg                                      | git history
-<leader>fh                                      | help
-<leader>fk                                      | keymaps
-<leader>fl                                      | last search
-<leader>fp                                      | project grep
-<leader>fq                                      | quickfix
-<leader>fr                                      | registers
-<leader>fs                                      | string
-<leader>ft                                      | todos
-<leader>fw                                      | word
-<leader>fy                                      | yanks (from yanky.lua)
-
-jupyter (<leader>j)                             | LABEL
------------------------------------------------------------
-<leader>ja                                      | run all cells
-<leader>jb                                      | run selected and below
-<leader>jc                                      | connect Neopyter
-<leader>je                                      | run current cell
-<leader>ji                                      | Neopyter status
-<leader>jI                                      | convert ipynb to ju.py
-<leader>jn                                      | run and select next
-<leader>jo                                      | open notebook in browser
-<leader>jr                                      | restart kernel
-<leader>jR                                      | restart and run all
-<leader>js                                      | sync current notebook tab
-<leader>jS                                      | save ipynb with outputs
-<leader>jv                                      | bootstrap .venv (py3.12)
-
-lsp & lint (<leader>l)                          | LABEL
------------------------------------------------------------
-<leader>lB                                      | toggle buffer linting
-<leader>lD                                      | declaration
-<leader>lH                                      | switch source/header (clangd)
-<leader>lL                                      | lint file
-<leader>lR                                      | rename
-<leader>lS                                      | clangd symbol info
-<leader>lb                                      | buffer diagnostics
-<leader>lc                                      | code action
-<leader>ld                                      | definition
-<leader>lf                                      | format buffer
-<leader>lg                                      | toggle global linting
-<leader>lh                                      | help
-<leader>li                                      | implementations
-<leader>lk                                      | stop lsp
-<leader>ll                                      | line diagnostics
-<leader>ln                                      | next diagnostic
-<leader>lp                                      | previous diagnostic
-<leader>lr                                      | references
-<leader>ls                                      | restart lsp
-<leader>lt                                      | start lsp
-<leader>ly                                      | copy diagnostics to clipboard
-
-markdown (<leader>m)                            | LABEL
------------------------------------------------------------
-<leader>ma                                      | toggle all folds
-<leader>mf                                      | toggle fold under cursor
-<leader>mo                                      | open markdown preview (from markdown-preview.lua)
-<leader>ms                                      | submit selection with message
-<leader>mt                                      | toggle folding method
-<leader>mu                                      | open URL under cursor
-
-sessions (<leader>s)                            | LABEL
------------------------------------------------------------
-<leader>sd                                      | delete
-<leader>sl                                      | load
-<leader>ss                                      | save
-
-typst (<leader>t)                               | LABEL
------------------------------------------------------------
-<leader>tf                                      | toggle cursor follow
-<leader>to                                      | preview
-<leader>tp                                      | toggle preview
-<leader>ts                                      | stop preview
-<leader>tw                                      | watch
-
-yank (<leader>y)                                | LABEL
------------------------------------------------------------
-<leader>y                                       | yank history
-
-opencode (<leader>o)
------------------------------------------------------------
-<leader>oa                                      | ask
-<leader>o[                                      | previous diff
-<leader>o]                                      | next diff
-<leader>oI                                      | open input (new session)
-<leader>oR                                      | rename session
-<leader>oT                                      | session timeline
-<leader>oV                                      | configure model variant
-<leader>oc                                      | close diff view
-<leader>od                                      | open diff view
-<leader>og                                      | toggle opencode window
-<leader>oh                                      | select from history
-<leader>oi                                      | open input window
-<leader>oo                                      | open output window
-<leader>op                                      | configure provider
-<leader>oq                                      | close opencode window
-<leader>orA                                     | revert all changes
-<leader>orR                                     | restore all snapshots
-<leader>ora                                     | revert all (last prompt)
-<leader>orr                                     | restore file snapshot
-<leader>orT                                     | revert this change
-<leader>ort                                     | revert this (last prompt)
-<leader>os                                      | select session
-<leader>ot                                      | toggle focus
-<leader>otr                                     | toggle reasoning output
-<leader>ott                                     | toggle tool output
-<leader>ov                                      | paste image from clipboard
-<leader>ox                                      | swap window position
-<leader>oy                                      | add visual selection to context
-<leader>oz                                      | toggle zoom
-
-reserved groups
------------------------------------------------------------
-<leader>L                                       | list (group name only in this file)
-]]
+-- Keep all global `<leader>` mappings in this file so which-key remains the
+-- single source of truth. Avoid defining leader bindings inside plugin specs.
 
 local function opencode_call(method, ...)
   local args = { ... }
@@ -314,7 +145,6 @@ return {
       g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
       p = { "<cmd>b#<CR>", "alternate buffer", mode = "n" },
       q = { "<cmd>wa! | qa!<CR>", "quit" },
-      u = { "<cmd>Telescope undo<CR>", "undo" },
       w = { "<cmd>wa!<CR>", "write" },
       x = {
         name = "latex",
@@ -344,8 +174,10 @@ return {
         k = { "<cmd>Telescope keymaps<CR>", "keymaps" },
         r = { "<cmd>Telescope registers<CR>", "registers" },
         t = { "<cmd>TodoTelescope<CR>", "todos" },
+        u = { "<cmd>Telescope undo<CR>", "undo" },
         s = { "<cmd>Telescope grep_string<CR>", "string" },
         w = { "<cmd>lua SearchWordUnderCursor()<CR>", "word" },
+        y = { open_yank_history, "yanks", mode = "n" },
       },
       g = { "<cmd>lua vim.schedule(function() require('neotex.plugins.tools.snacks.utils').safe_lazygit() end)<cr>", "lazygit" },
       c = {
@@ -471,7 +303,7 @@ return {
         s = { "<cmd>LecticSubmitSelection<CR>", "submit selection with message" },
 
         -- MARKDOWN/PREVIEW
-        -- o = markdown preview (keymap defined in markdown-preview.lua via lazy keys)
+        o = { "<cmd>MarkdownPreviewToggle<CR>", "open markdown preview" },
         u = { "<cmd>lua OpenUrlUnderCursor()<CR>", "open URL under cursor" },
 
         -- FOLDING
@@ -496,8 +328,6 @@ return {
         f = { "<cmd>TypstPreviewFollowCursorToggle<CR>", "toggle cursor follow" },
         w = { "<cmd>TypstWatch<CR>", "watch" },
       },
-      y = { open_yank_history, "yank history", mode = "n" },
-
     },
   },
   config = function(_, opts)
