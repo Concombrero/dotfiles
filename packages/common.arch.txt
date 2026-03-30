@@ -36,6 +36,7 @@ python-pip
 alsa-lib
 
 # Use official Arch packages when available instead of upstream installers.
+# `sesh` is installed separately from the AUR package `sesh-bin` in install/tools.sh.
 neovim
 fzf
 starship

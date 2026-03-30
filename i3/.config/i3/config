@@ -130,7 +130,7 @@ bindsym $mod+w layout tabbed
 # focus the parent container
 bindsym $mod+a focus parent
 
-# tmux session picker (rofi)
+# tmux session picker (sesh + rofi)
 bindsym $mod+t exec --no-startup-id ~/.local/bin/rofi-tmux-sessions
 
 # example tree (shows you can do anything with these binds) : 

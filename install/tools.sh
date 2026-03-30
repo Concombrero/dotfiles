@@ -101,6 +101,8 @@ install_tools() {
         warn "Skipping Arch-managed CLI tools because package installation was disabled."
     fi
 
+    run_step "Sesh install" install_sesh
+
     run_step "Python tool install" install_python_tools
 
     if [ "$1" = true ]; then
@@ -474,6 +476,150 @@ install_gh() {
 
     rm -rf "$tmp_dir"
     log "GitHub CLI installed to ~/.local/opt/gh."
+}
+
+install_sesh() {
+    case "$DISTRO_FAMILY" in
+        debian)
+            install_sesh_binary
+            ;;
+        arch)
+            install_sesh_arch
+            ;;
+        *)
+            warn "Skipping sesh install on unsupported distro family: $DISTRO_FAMILY"
+            ;;
+    esac
+}
+
+install_sesh_binary() {
+    if command -v sesh &>/dev/null; then
+        warn "sesh already installed, skipping."
+        return
+    fi
+
+    info "Installing sesh from official release archive..."
+
+    local arch asset version tmp_dir archive install_dir
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset="sesh_Linux_x86_64.tar.gz"
+            ;;
+        aarch64|arm64)
+            asset="sesh_Linux_arm64.tar.gz"
+            ;;
+        *)
+            error "Unsupported architecture for sesh prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    version="$(github_latest_release_tag joshmedeski/sesh)"
+    if [ -z "$version" ]; then
+        error "Could not determine latest sesh version. Install manually."
+        return 1
+    fi
+
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/$asset"
+    install_dir="$HOME/.local/opt/sesh"
+
+    if ! curl -fsSL "https://github.com/joshmedeski/sesh/releases/download/${version}/${asset}" -o "$archive"; then
+        error "Failed to download sesh archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xzf "$archive" -C "$tmp_dir"; then
+        error "Failed to extract sesh archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -x "$tmp_dir/sesh" ]; then
+        error "sesh archive did not contain the expected binary."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare sesh install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$install_dir"
+    if ! mkdir -p "$install_dir"; then
+        error "Failed to prepare sesh install directory."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! install -m 0755 "$tmp_dir/sesh" "$install_dir/sesh"; then
+        error "Failed to install sesh binary."
+        rm -rf "$tmp_dir" "$install_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/sesh" "$HOME/.local/bin/sesh"; then
+        error "Failed to link sesh into ~/.local/bin."
+        rm -rf "$tmp_dir" "$install_dir"
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/sesh" --version >/dev/null 2>&1; then
+        error "sesh installed but failed smoke test."
+        rm -rf "$tmp_dir" "$install_dir"
+        rm -f "$HOME/.local/bin/sesh"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "sesh installed to ~/.local/opt/sesh."
+}
+
+install_sesh_arch() {
+    if command -v sesh &>/dev/null; then
+        warn "sesh already installed, skipping."
+        return
+    fi
+
+    local cmd tmp_dir pkg_dir
+
+    for cmd in git makepkg; do
+        if ! command -v "$cmd" &>/dev/null; then
+            error "Missing required command for sesh AUR install: $cmd"
+            return 1
+        fi
+    done
+
+    info "Installing sesh from AUR package sesh-bin..."
+
+    tmp_dir="$(mktemp -d)"
+    pkg_dir="$tmp_dir/sesh-bin"
+
+    if ! git clone --depth 1 https://aur.archlinux.org/sesh-bin.git "$pkg_dir"; then
+        error "Failed to clone AUR package sesh-bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! (cd "$pkg_dir" && makepkg -si --noconfirm); then
+        error "Failed to build or install sesh-bin from AUR."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+
+    if ! command -v sesh &>/dev/null; then
+        error "sesh installed from AUR but is not available on PATH."
+        return 1
+    fi
+
+    log "sesh installed from AUR package sesh-bin."
 }
 
 install_typst() {

@@ -1,61 +1,28 @@
 #!/usr/bin/env bash
-# rofi-tmux-sessions — list/create/kill tmux sessions via rofi
+# rofi-tmux-sessions — pick or create tmux sessions via sesh and rofi
 set -uo pipefail
 
 ROFI_THEME="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/tmux-sessions.rasi"
 
-# Launch terminal with tmux command
+# Launch a terminal that connects through sesh
 launch_terminal() {
   local terminal="${TERMINAL:-alacritty}"
-  local cmd="exec ${terminal} -e tmux"
+  local cmd="exec ${terminal} -e sesh connect"
   for arg in "$@"; do
     cmd+=" \"$arg\""
   done
   i3-msg -q "$cmd"
 }
 
-prompt_new_session() {
-  rofi -dmenu -p " tmux" -theme "$ROFI_THEME" \
-    -theme-str 'inputbar { enabled: true; } listview { enabled: false; }'
-}
-
-sessions="$(tmux list-sessions -F '#{session_name}' 2>/dev/null || true)"
-
-if [ -z "$sessions" ]; then
-    name="$(prompt_new_session)"
-    [ -z "$name" ] && exit 0
-    launch_terminal new-session -s "$name"
-    exit 0
-fi
-
 exit_code=0
-selected="$(printf '%s\n' "$sessions" | rofi -dmenu -i -p " tmux" \
+sessions="$(sesh list -d -c -t 2>/dev/null || true)"
+
+selected="$(printf '%s' "$sessions" | rofi -dmenu -i -p " sesh" \
     -theme "$ROFI_THEME" \
-    -kb-custom-1 "Alt+d" \
-    -kb-custom-2 "Alt+n")" || exit_code=$?
+    -theme-str 'inputbar { enabled: true; } entry { placeholder: ""; }')" || exit_code=$?
 
 # Exit code 1 = user cancelled (Escape)
 [ "$exit_code" -eq 1 ] && exit 0
 [ -z "$selected" ] && exit 0
 
-case $exit_code in
-    0)
-        # Attach if session exists, otherwise create it
-        if tmux has-session -t "=$selected" 2>/dev/null; then
-            launch_terminal attach-session -t "=$selected"
-        else
-            launch_terminal new-session -s "$selected"
-        fi
-        ;;
-    10)
-        # Alt+d: kill session, re-launch menu with updated list
-        tmux kill-session -t "=$selected" 2>/dev/null || true
-        exec "$0"
-        ;;
-    11)
-        # Alt+n: prompt for a new session name without showing the search bar in the picker
-        name="$(prompt_new_session)"
-        [ -z "$name" ] && exit 0
-        launch_terminal new-session -s "$name"
-        ;;
-esac
+launch_terminal "$selected"
