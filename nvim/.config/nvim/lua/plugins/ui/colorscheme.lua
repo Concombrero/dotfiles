@@ -6,6 +6,7 @@ return {
   config = function()
     require("catppuccin").setup({
       flavour = "mocha", -- mocha is the darkest variant with purple accents
+      transparent_background = true,
       background = {
         dark = "mocha",
       },
