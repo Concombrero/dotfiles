@@ -3,7 +3,7 @@ configuration{
     combi-modi: "drun,run,window";
     icon-theme: "Oranchelo";
     show-icons: true;
-    terminal: "alacritty";
+    terminal: "kitty";
     combi-hide-mode-prefix: true;
     disable-history: false;
     display-run: "";

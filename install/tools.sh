@@ -106,6 +106,7 @@ install_tools() {
     run_step "Python tool install" install_python_tools
 
     if [ "$1" = true ]; then
+        [ "$DISTRO_FAMILY" = "debian" ] && run_step "Kitty install" install_kitty
         run_step "termfilechooser install" install_termfilechooser
         run_step "Zen Browser install" install_zen
     fi
@@ -476,6 +477,83 @@ install_gh() {
 
     rm -rf "$tmp_dir"
     log "GitHub CLI installed to ~/.local/opt/gh."
+}
+
+install_kitty() {
+    local install_dir app_dir config_dir desktop_file
+    install_dir="$HOME/.local/kitty.app"
+    app_dir="$HOME/.local/share/applications"
+    config_dir="$HOME/.config"
+    desktop_file="$app_dir/kitty.desktop"
+
+    if [ ! -x "$install_dir/bin/kitty" ]; then
+        if command -v kitty &>/dev/null; then
+            warn "Kitty is already installed outside ~/.local/kitty.app; skipping upstream installer."
+            return
+        fi
+
+        if ! command -v curl &>/dev/null; then
+            error "curl is required to install Kitty."
+            return 1
+        fi
+
+        info "Installing Kitty from the official upstream installer..."
+
+        if ! curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n; then
+            error "Failed to install Kitty."
+            return 1
+        fi
+    else
+        info "Refreshing Kitty desktop integration..."
+    fi
+
+    if [ ! -x "$install_dir/bin/kitty" ] || [ ! -x "$install_dir/bin/kitten" ]; then
+        error "Kitty installer completed but expected binaries were not found."
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/bin" "$app_dir" "$config_dir"; then
+        error "Failed to prepare Kitty integration directories."
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/bin/kitty" "$HOME/.local/bin/kitty"; then
+        error "Failed to link Kitty into ~/.local/bin."
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/bin/kitten" "$HOME/.local/bin/kitten"; then
+        error "Failed to link kitten into ~/.local/bin."
+        return 1
+    fi
+
+    if ! cp "$install_dir/share/applications/kitty.desktop" "$desktop_file"; then
+        error "Failed to install kitty.desktop."
+        return 1
+    fi
+
+    if ! sed -i "s|^Exec=kitty|Exec=$install_dir/bin/kitty|" "$desktop_file"; then
+        error "Failed to patch kitty.desktop Exec path."
+        return 1
+    fi
+
+    if ! sed -i "s|^Icon=kitty|Icon=$install_dir/share/icons/hicolor/256x256/apps/kitty.png|" "$desktop_file"; then
+        error "Failed to patch kitty.desktop icon path."
+        return 1
+    fi
+
+    if ! printf 'kitty.desktop\n' > "$config_dir/xdg-terminals.list"; then
+        error "Failed to configure xdg-terminals.list for Kitty."
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/kitty" --version >/dev/null 2>&1; then
+        error "Kitty installed but failed smoke test."
+        rm -f "$HOME/.local/bin/kitty" "$HOME/.local/bin/kitten"
+        return 1
+    fi
+
+    log "Kitty installed to ~/.local/kitty.app."
 }
 
 install_sesh() {

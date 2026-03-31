@@ -69,20 +69,20 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 # start a terminal
-set $terminal alacritty
+set $terminal kitty
 bindsym $mod+Return exec --no-startup-id $terminal
 
 #start zen browser
 bindsym $mod+z exec --no-startup-id ~/.local/bin/zen --from-i3
 
 #start neovim
-bindsym $mod+n exec --no-startup-id $terminal -e nvim
+bindsym $mod+n exec --no-startup-id $terminal nvim
 
 #start lazygit
-bindsym $mod+g exec --no-startup-id $terminal -e lazygit
+bindsym $mod+g exec --no-startup-id $terminal lazygit
 
 #start opencode
-bindsym $mod+o exec --no-startup-id $terminal -e ~/.opencode/bin/opencode --port 
+bindsym $mod+o exec --no-startup-id $terminal ~/.opencode/bin/opencode --port 
 
 # kill focused window
 bindsym $mod+q kill

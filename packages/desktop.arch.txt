@@ -43,7 +43,7 @@ texlive-binextra
 # Other
 vlc
 qutebrowser
-alacritty
+kitty
 fastfetch
 
 # Portal file chooser backend build deps

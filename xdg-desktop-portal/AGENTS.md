@@ -41,7 +41,7 @@ That split is deliberate. It lets the workstation use the terminal-based Yazi ch
 After edits, validate the routing end to end when possible:
 
 - restart relevant user services with `systemctl --user restart xdg-desktop-portal.service xdg-desktop-portal-termfilechooser.service`
-- verify the chooser still opens in `alacritty`/`yazi` for GTK apps such as Zen Browser
+- verify the chooser still opens in `kitty`/`yazi` for GTK apps such as Zen Browser
 - verify non-file-chooser portal behavior still falls back to the expected GTK backend
 - inspect logs with `journalctl --user -u xdg-desktop-portal.service -f` if routing behaves unexpectedly
 

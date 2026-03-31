@@ -29,7 +29,7 @@ The `plugins/` directory contains third-party code, especially Catppuccin and TP
 
 - `fish/.config/fish/config.fish`: updates tmux env for new panes/windows
 - `i3/.config/i3/config`: seeds the user-manager environment that tmux imports
-- `alacritty/.config/alacritty/alacritty.toml`: outer terminal for clipboard/passthrough behavior
+- `kitty/.config/kitty/kitty.conf`: outer terminal for clipboard/passthrough behavior
 - `systemd/.config/systemd/user/tmux.service`: may interact with continuum boot behavior
 
 ## Validation
@@ -40,5 +40,5 @@ After edits, validate with tmux itself:
 - verify no syntax/runtime errors appear
 - test pane/window navigation and AZERTY window selection if touched
 - if env logic changed, verify `DISPLAY`, `DBUS_SESSION_BUS_ADDRESS`, and `I3SOCK` are available in a reattached session
-- if clipboard/passthrough changed, verify copy works from inside tmux in `alacritty`
+- if clipboard/passthrough changed, verify copy works from inside tmux in `kitty`
 - if persistence changed, verify resurrect/continuum still behave sensibly

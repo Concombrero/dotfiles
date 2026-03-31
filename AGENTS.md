@@ -11,7 +11,7 @@ It is organized as package directories that mirror the final paths under `$HOME`
 - Status bar: `polybar`
 - Launcher: `rofi`
 - Notifications: `dunst`
-- Terminal: `alacritty`
+- Terminal: `kitty`
 - Shell: `fish`
 - Prompt: `starship`
 - Editor: `neovim`
@@ -92,7 +92,7 @@ Many configs depend on session environment propagation across X11, systemd user 
 - `tmux/.config/tmux/tmux.conf` updates/propagates GUI/session env so reattached sessions still work with `i3`, clipboard, and portals.
 - `x11/.xprofile` and `fish` both set `GTK_USE_PORTAL=1`.
 - `xdg-desktop-portal/.config/xdg-desktop-portal/portals.conf` routes file chooser requests to `termfilechooser`.
-- `xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh` launches `yazi` in `alacritty` via `fish`.
+- `xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh` launches `yazi` in `kitty` via `fish` or directly, depending on what is available in the service environment.
 
 Be careful when changing shell startup, portal, tmux, i3 startup, or PATH logic: small changes can break file pickers, clipboard behavior, image previews, or GUI app launches from reused sessions.
 
@@ -104,7 +104,7 @@ Be careful when changing shell startup, portal, tmux, i3 startup, or PATH logic:
 - `sddm/`: system-level SDDM theme assets copied into place by the installer
 - `fish/`, `bash/`, `starship/`, `git/`: shell and CLI environment
 - `i3/`, `picom/`, `polybar/`, `rofi/`, `dunst/`, `x11/`, `gtk/`: desktop/X11 stack
-- `alacritty/`, `tmux/`, `lazygit/`, `fastfetch/`, `btop/`: terminal tooling
+- `kitty/`, `tmux/`, `lazygit/`, `fastfetch/`, `btop/`: terminal tooling
 - `nvim/`: Neovim config
 - `yazi/`, `zathura/`, `qutebrowser/`: application configs
 - `xdg-desktop-portal/`, `xdg-desktop-portal-termfilechooser/`: portal routing and terminal file chooser integration
@@ -180,7 +180,7 @@ Some subdirectories also contain upstream/vendor READMEs. Treat those as third-p
 
 ## Practical Defaults For Agents
 
-- Assume Ubuntu/Debian, X11, `i3`, `fish`, `alacritty`, and GNU Stow unless a file clearly targets something else.
+- Assume Ubuntu/Debian, X11, `i3`, `fish`, `kitty`, and GNU Stow unless a file clearly targets something else.
 - Prefer repo-relative config edits over changing live state in `$HOME`.
 - Prefer machine-local override files for identity, secrets, and hardware-specific behavior.
 - When adding automation, keep it idempotent and safe for repeated bootstrap/stow runs.

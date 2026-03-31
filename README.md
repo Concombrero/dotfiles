@@ -25,7 +25,7 @@ Visually, anything that can be is themed with [Catppuccin](https://github.com/ca
     - Lockscreen : `i3lock`
     - File Manager : `yazi` (via CLI)
 - Command Line Interface : 
-  - Terminal emulator : `alacritty`
+  - Terminal emulator : `kitty`
   - Shell : `fish`
   - Prompt : `starship`
   - Enhancements : `tmux`, `lazygit`, `zoxide`, `fzf` and more
@@ -76,7 +76,7 @@ What this does at a high level:
 
 1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
-3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, installs `sesh` from the AUR on Arch, and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `zen-browser`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
+3. **Installs Binaries:** Prefers official Arch packages for tools like `neovim`, `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and `kitty`, installs `sesh` from the AUR on Arch, and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
@@ -134,7 +134,7 @@ Defined in distro-specific package lists:
 - Arch-based: `packages/common.arch.txt` and `packages/desktop.arch.txt`
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
-- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `alacritty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
+- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
 - **Arch desktop extras:** `sddm`
 - **Image helpers:** `imagemagick`, `ueberzugpp`
 
@@ -146,6 +146,7 @@ Defined in distro-specific package lists:
 - `sesh` (GitHub release binary under `~/.local/opt/sesh` on Debian/Ubuntu; AUR package `sesh-bin` via `makepkg` on Arch)
 - `yazi` + `ya` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `lazygit` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `kitty` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zen-browser` (official installer)
@@ -186,7 +187,7 @@ Installed in isolated environments to avoid breaking system Python:
 | `picom` | `~/.config/picom/picom.conf` |
 | `rofi` | `~/.config/rofi/` |
 | `dunst` | `~/.config/dunst/dunstrc` |
-| `alacritty` | `~/.config/alacritty/alacritty.toml` |
+| `kitty` | `~/.config/kitty/kitty.conf` and `~/.config/kitty/themes/` |
 | `nvim` | `~/.config/nvim/` |
 | `yazi` | `~/.config/yazi/` |
 | `zathura` | `~/.config/zathura/` |

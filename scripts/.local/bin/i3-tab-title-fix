@@ -12,6 +12,7 @@ normalize_label() {
   case "$1" in
     zen|Navigator) printf 'Zen Browser' ;;
     Alacritty|alacritty) printf 'Alacritty' ;;
+    Kitty|kitty) printf 'Kitty' ;;
     qutebrowser|Qutebrowser) printf 'Qutebrowser' ;;
     firefox|Firefox) printf 'Firefox' ;;
     *)

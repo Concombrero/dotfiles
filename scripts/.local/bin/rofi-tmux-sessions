@@ -6,8 +6,8 @@ ROFI_THEME="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/tmux-sessions.rasi"
 
 # Launch a terminal that connects through sesh
 launch_terminal() {
-  local terminal="${TERMINAL:-alacritty}"
-  local cmd="exec ${terminal} -e sesh connect"
+  local terminal="${TERMINAL:-kitty}"
+  local cmd="exec ${terminal} sesh connect"
   for arg in "$@"; do
     cmd+=" \"$arg\""
   done

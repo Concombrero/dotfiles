@@ -1,7 +1,7 @@
 # Implementation Report: Yazi as File Picker in Zen Browser
 
 ## Objective
-Configure `yazi` (running in `alacritty`) as the default file picker for GTK applications (specifically Zen Browser) on an Ubuntu system using i3 window manager.
+Configure `yazi` (running in `kitty`) as the default file picker for GTK applications (specifically Zen Browser) on an Ubuntu system using i3 window manager.
 
 ## Architecture
 
@@ -11,7 +11,7 @@ Zen Browser (GTK_USE_PORTAL=1)
   -> xdg-desktop-portal routes via portals.conf
   -> xdg-desktop-portal-termfilechooser (systemd user service)
   -> yazi-wrapper.sh (this config dir)
-  -> alacritty -e fish -l -c "yazi --chooser-file=..."
+  -> kitty fish -l -c "yazi --chooser-file=..."
   -> user selects file, yazi writes path to chooser-file
   -> portal reads the file and returns path to Zen Browser
 ```
@@ -21,7 +21,7 @@ Zen Browser (GTK_USE_PORTAL=1)
 ### User-level (this directory)
 | File | Purpose |
 |------|---------|
-| `yazi-wrapper.sh` | Launches alacritty+fish+yazi with correct env; redirects stdio away from portal |
+| `yazi-wrapper.sh` | Launches kitty+fish+yazi with correct env; redirects stdio away from portal |
 | `config` | Portal config pointing `cmd=` to the wrapper script |
 | `agents.md` | This documentation |
 
@@ -55,9 +55,9 @@ Zen Browser (GTK_USE_PORTAL=1)
 
 **Fix:** The wrapper script now redirects all three stdio streams away from the portal:
 ```sh
-alacritty ... </dev/null >/dev/null 2>&1
+kitty ... </dev/null >/dev/null 2>&1
 ```
-This ensures alacritty gets its own PTY (which it always does as a terminal emulator), and the portal process never sees any escape sequences from yazi.
+This ensures kitty gets its own PTY (which it always does as a terminal emulator), and the portal process never sees any escape sequences from yazi.
 
 ### 2. Environment variables missing from portal context
 **Problem:** The portal service runs under systemd `--user`, which may start before the full desktop session environment is established. Critical variables like `DISPLAY`, `XAUTHORITY`, `COLORTERM`, `XDG_SESSION_TYPE`, and custom `PATH` entries were missing or stale, causing ueberzugpp to fail silently and yazi to fall back to slow/broken preview rendering.
@@ -101,7 +101,7 @@ systemctl --user import-environment && systemctl --user restart xdg-desktop-port
 systemctl --user restart xdg-desktop-portal-termfilechooser.service xdg-desktop-portal.service
 
 # Test file chooser from CLI (simulates what the portal does)
-# This should open alacritty with yazi:
+# This should open kitty with yazi:
 $HOME/.config/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh 0 0 0 "$HOME" /tmp/test-chooser-out
 cat /tmp/test-chooser-out  # should contain the selected file path
 ```

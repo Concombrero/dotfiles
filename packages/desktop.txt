@@ -33,8 +33,9 @@ latexmk
 # Other
 vlc
 qutebrowser
-alacritty
 fastfetch
+
+# Kitty is installed from upstream in install/tools.sh on Debian/Ubuntu.
 
 # Portal file chooser backend build deps
 meson

@@ -13,7 +13,7 @@ Tracked files here:
 ## Purpose
 
 This package makes the terminal file chooser backend usable as the `FileChooser` portal implementation for this repo's desktop session.
-In practice, GTK apps that use XDG portals request `org.freedesktop.impl.portal.FileChooser`, `xdg-desktop-portal` routes that request to `termfilechooser`, and the backend launches `yazi` inside `alacritty` through `yazi-wrapper.sh`.
+In practice, GTK apps that use XDG portals request `org.freedesktop.impl.portal.FileChooser`, `xdg-desktop-portal` routes that request to `termfilechooser`, and the backend launches `yazi` inside `kitty` through `yazi-wrapper.sh`.
 
 The wrapper is not a cosmetic launcher. It is compatibility glue for:
 
@@ -33,7 +33,7 @@ High-level flow:
 - the installed portal backend reads this package's `config`
 - `config` points `cmd=` at `yazi-wrapper.sh`
 - `yazi-wrapper.sh` reconstructs a usable session environment if the service context is sparse
-- `alacritty` launches `yazi` with `--chooser-file` and sometimes `--cwd-file`
+- `kitty` launches `yazi` with `--chooser-file` and sometimes `--cwd-file`
 - `yazi` writes the chosen path back to the chooser file for the portal response
 
 ## Critical Behaviors To Preserve
@@ -51,7 +51,7 @@ These details exist because the portal service may run with stale or incomplete 
 
 - Do not simplify the wrapper unless you have traced the portal invocation model end to end.
 - Do not replace portable environment discovery with hardcoded usernames, displays, runtime dirs, or host-specific terminal commands.
-- Keep the config machine-agnostic; terminal overrides should remain optional via `TERMCMD`, not committed as one-machine defaults.
+- Keep the config machine-agnostic; terminal selection should remain overridable via `TERMCMD`, even though this repo currently defaults it to `kitty`.
 - Treat both X11 and Wayland-related recovery logic as intentional, even though the main workstation target is X11.
 - Do not remove the fish login-shell fallback casually; it helps load shell-configured environment such as PATH and optional CUDA libraries.
 - Keep failure behavior conservative: this code runs inside a user-service-driven file chooser path, so noisy failures degrade UX across browsers and GTK apps.
@@ -62,7 +62,7 @@ These details exist because the portal service may run with stale or incomplete 
 - `i3/.config/i3/config`: imports GUI vars into systemd/D-Bus activation env and restarts portal services on login
 - `fish/.config/fish/config.fish`: exports `GTK_USE_PORTAL=1` and defines shell environment used by the login-shell fallback
 - `x11/.xprofile`: also exports `GTK_USE_PORTAL=1`
-- `alacritty/.config/alacritty/alacritty.toml`: expected terminal emulator for chooser sessions
+- `kitty/.config/kitty/kitty.conf`: expected terminal emulator for chooser sessions
 - `yazi/.config/yazi/`: expected file manager configuration used by the chooser
 
 ## System-Level Assumptions
@@ -86,7 +86,7 @@ After edits, test the real chooser path when possible:
 - inspect logs with `journalctl --user -u xdg-desktop-portal-termfilechooser.service -f`
 - verify `systemctl --user show-environment` contains the expected GUI/session vars
 - test the wrapper directly with `~/.config/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh 0 0 0 "$HOME" /tmp/test-chooser-out`
-- verify a GTK app that uses portals opens `yazi` in `alacritty` and returns the selected path correctly
+- verify a GTK app that uses portals opens `yazi` in `kitty` and returns the selected path correctly
 
 ## Additional Reference
 

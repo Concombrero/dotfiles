@@ -7,7 +7,7 @@ polybar
 picom
 rofi
 dunst
-alacritty
+kitty
 nvim
 yazi
 zathura
