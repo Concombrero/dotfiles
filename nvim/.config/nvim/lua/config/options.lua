@@ -20,7 +20,7 @@ function M.setup()
   
   local options = {
     -- GENERAL
-    timeoutlen = 100,               -- time to wait for a mapped sequence to complete (in milliseconds)
+    timeoutlen = 300,               -- allow prefixed mappings like surround and leader chords to resolve reliably
     updatetime = 200,               -- faster completion (4000ms default)
     swapfile = false,               -- creates a swapfile
     undofile = true,                -- enable persistent undo
