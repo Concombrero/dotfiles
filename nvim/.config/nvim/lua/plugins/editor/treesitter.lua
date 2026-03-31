@@ -101,10 +101,14 @@ return {
   {
     "JoosepAlviste/nvim-ts-context-commentstring",
     lazy = true,
-    event = { "BufReadPost", "BufNewFile" },
     dependencies = { "nvim-treesitter/nvim-treesitter" },
+    init = function()
+      vim.g.loaded_ts_context_commentstring = 1
+    end,
     config = function()
-      require("ts_context_commentstring").setup({})
+      require("ts_context_commentstring").setup({
+        enable_autocmd = false,
+      })
     end,
   },
 }

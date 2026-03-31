@@ -20,6 +20,38 @@ return {
     -- Configure mini.comment
     require('mini.comment').setup({
       options = {
+        -- Resolve comment context only when commenting to avoid background parser races.
+        custom_commentstring = function(ref_position)
+          local ok, ts_context_commentstring = pcall(require, 'ts_context_commentstring')
+          if not ok then
+            return nil
+          end
+
+          local row = ref_position and ref_position[1] or vim.fn.line('.')
+          local col = ref_position and ref_position[2] or vim.fn.col('.')
+          local line = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1] or ''
+          local first_non_whitespace_col = vim.fn.match(line, [[\S]])
+          local location_col = first_non_whitespace_col
+          if location_col < 0 then
+            location_col = math.max(col - 1, 0)
+          end
+
+          local location = {
+            row - 1,
+            location_col,
+          }
+
+          local calculated_ok, commentstring = pcall(
+            ts_context_commentstring.calculate_commentstring,
+            { location = location }
+          )
+
+          if calculated_ok then
+            return commentstring
+          end
+
+          return nil
+        end,
         ignore_blank_line = false,
         start_of_line = false,
         pad_comment_parts = true,
