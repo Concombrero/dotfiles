@@ -6,7 +6,6 @@ github_latest_release_tag() {
 }
 
 install_upstream_tools() {
-    run_step "Neovim install" install_neovim
     run_step "fzf install" install_fzf
     run_step "Starship install" install_starship
     run_step "Zoxide install" install_zoxide
@@ -92,13 +91,14 @@ install_tools() {
     run_step "Clipboard install" install_clipboard
     run_step "Rust toolchain install" install_rust_toolchain
     run_step "tree-sitter CLI install" install_tree_sitter_cli
+    run_step "Neovim install" install_neovim
 
     if [ "$DISTRO_FAMILY" = "debian" ]; then
         install_upstream_tools
     elif [ "$INSTALL_PACKAGES" = true ]; then
-        info "Using pacman packages for Arch-managed CLI tools."
+        info "Using pacman packages for remaining Arch-managed CLI tools."
     else
-        warn "Skipping Arch-managed CLI tools because package installation was disabled."
+        warn "Skipping remaining Arch-managed CLI tools because package installation was disabled."
     fi
 
     run_step "Sesh install" install_sesh
@@ -114,8 +114,14 @@ install_tools() {
 
 sync_neovim_plugins() {
     local config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    local managed_nvim="$HOME/.local/bin/nvim"
+    local nvim_cmd="nvim"
 
-    if ! command -v nvim &>/dev/null; then
+    if [ -x "$managed_nvim" ]; then
+        nvim_cmd="$managed_nvim"
+    fi
+
+    if [ "$nvim_cmd" = "nvim" ] && ! command -v nvim &>/dev/null; then
         warn "Neovim is not installed; skipping plugin sync."
         return 0
     fi
@@ -127,7 +133,7 @@ sync_neovim_plugins() {
 
     info "Syncing Neovim plugins with lazy.nvim..."
 
-    if ! nvim --headless "+Lazy sync" +qa; then
+    if ! "$nvim_cmd" --headless "+Lazy sync" +qa; then
         error "Failed to sync Neovim plugins."
         return 1
     fi
@@ -171,12 +177,39 @@ activate_termfilechooser() {
 }
 
 install_neovim() {
-    if command -v nvim &>/dev/null; then
-        warn "Neovim already installed, skipping."
-        return
+    local latest_tag managed_bin link_bin current_tag
+    managed_bin="$HOME/.local/opt/nvim/bin/nvim"
+    link_bin="$HOME/.local/bin/nvim"
+    latest_tag="$(github_latest_release_tag neovim/neovim)"
+
+    if [ -z "$latest_tag" ]; then
+        error "Failed to determine the latest Neovim release tag."
+        return 1
     fi
 
-    info "Installing Neovim from official release archive..."
+    current_tag=""
+    if [ -x "$managed_bin" ]; then
+        current_tag="$($managed_bin --version 2>/dev/null | awk 'NR==1 { print $2 }')"
+    fi
+
+    if [ "$current_tag" = "$latest_tag" ]; then
+        ensure_local_bin_dir || return 1
+
+        if ! ln -sfn "$managed_bin" "$link_bin"; then
+            error "Failed to link Neovim into ~/.local/bin."
+            return 1
+        fi
+
+        export PATH="$HOME/.local/bin:$PATH"
+        log "Neovim ${latest_tag} already installed at ~/.local/opt/nvim."
+        return 0
+    fi
+
+    if [ -n "$current_tag" ]; then
+        info "Updating Neovim from ${current_tag} to ${latest_tag} using the official release archive..."
+    else
+        info "Installing Neovim ${latest_tag} from the official release archive..."
+    fi
 
     local arch asset
     arch="$(uname -m)"
@@ -200,7 +233,7 @@ install_neovim() {
     extracted_dir="$tmp_dir/${asset%.tar.gz}"
     install_dir="$HOME/.local/opt/nvim"
 
-    if ! curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/${asset}" -o "$archive"; then
+    if ! curl -fsSL "https://github.com/neovim/neovim/releases/download/${latest_tag}/${asset}" -o "$archive"; then
         error "Failed to download Neovim archive."
         rm -rf "$tmp_dir"
         return 1
@@ -226,14 +259,15 @@ install_neovim() {
         return 1
     fi
 
-    if ! ln -sfn "$install_dir/bin/nvim" "$HOME/.local/bin/nvim"; then
+    if ! ln -sfn "$install_dir/bin/nvim" "$link_bin"; then
         error "Failed to link Neovim into ~/.local/bin."
         rm -rf "$tmp_dir"
         return 1
     fi
 
+    export PATH="$HOME/.local/bin:$PATH"
     rm -rf "$tmp_dir"
-    log "Neovim installed to ~/.local/opt/nvim."
+    log "Neovim ${latest_tag} installed to ~/.local/opt/nvim."
 }
 
 install_fzf() {
