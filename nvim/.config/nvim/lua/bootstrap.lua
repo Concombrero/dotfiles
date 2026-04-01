@@ -20,16 +20,6 @@ local function with_error_handling(func, msg)
   return true
 end
 
--- Clean up any tree-sitter tmp directories that might cause conflicts
-local function cleanup_tmp_dirs()
-  return with_error_handling(function()
-    local tmp_dirs = vim.fn.glob(vim.fn.expand("~") .. "/tree-sitter-*-tmp", true, true)
-    for _, dir in ipairs(tmp_dirs) do
-      vim.fn.delete(dir, "rf")
-    end
-  end, "cleanup of temporary tree-sitter directories")
-end
-
 -- Ensure lazy.nvim is installed
 local function ensure_lazy()
   return with_error_handling(function()
@@ -47,27 +37,6 @@ local function ensure_lazy()
     end
     vim.opt.rtp:prepend(lazypath)
   end, "installation of lazy.nvim")
-end
-
--- Validate and fix lockfile if needed
-local function validate_lockfile()
-  return with_error_handling(function()
-    local lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json"
-    if vim.fn.filereadable(lockfile) == 1 then
-      -- Read the file content
-      local content = table.concat(vim.fn.readfile(lockfile), "\n")
-      -- Check if it's valid JSON
-      local success, _ = pcall(vim.fn.json_decode, content)
-      if not success then
-        -- If not valid JSON, create a valid but empty JSON object
-        local valid_json = [[{
-  "_comments": "This is a temporary placeholder lock file that will be replaced when plugins are installed"
-}]]
-        vim.fn.writefile(vim.split(valid_json, "\n"), lockfile)
-        vim.notify("Fixed invalid lazy-lock.json file", vim.log.levels.INFO)
-      end
-    end
-  end, "validation of lazy-lock.json")
 end
 
 -- Initialize lazy.nvim with plugin specs
@@ -122,9 +91,7 @@ end
 -- Main initialization function
 function M.init()
   local steps = {
-    { func = cleanup_tmp_dirs, name = "Cleanup temporary directories" },
     { func = ensure_lazy, name = "Ensure lazy.nvim is installed" },
-    { func = validate_lockfile, name = "Validate lazy-lock.json" },
     { func = setup_lazy, name = "Set up plugins with lazy.nvim" },
     { func = setup_utils, name = "Initialize utility functions" },
   }
