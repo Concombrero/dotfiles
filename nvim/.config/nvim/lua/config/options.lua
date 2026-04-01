@@ -17,6 +17,12 @@ function M.setup()
   vim.g.loaded_netrwSettings = 1  -- Disable netrw settings
   vim.g.loaded_netrwFileHandlers = 1  -- Disable netrw file handlers
   vim.g.loaded_spellfile_plugin = 1  -- Disable spellfile plugin
+
+  -- Disable unused remote providers to avoid extra host checks and health noise.
+  vim.g.loaded_node_provider = 0
+  vim.g.loaded_python3_provider = 0
+  vim.g.loaded_ruby_provider = 0
+  vim.g.loaded_perl_provider = 0
   
   local options = {
     -- GENERAL
