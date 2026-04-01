@@ -7,8 +7,7 @@ This is a Lua-first Neovim configuration focused on:
 - modern editor UX (LSP, linting, formatting, Telescope, sessions)
 - practical AI assistance with OpenCode and Copilot
 
-This file is intentionally concise and points to focused docs in this repo.
-
+To get detailed keymaps help, press leader (space) + f (find) + k (keymaps)
 ## Current Feature Set
 
 - LaTeX: VimTeX workflow (build/view/toc/context/citations)
