@@ -27,11 +27,6 @@ return {
     telescope.setup({
       defaults = {
         path_display = { "truncate" },
-        preview = {
-          treesitter = {
-            disable = { "python", "julia", "haskell", "markdown" },
-          },
-        },
         mappings = {
           i = {
             ["<C-j>"] = actions.move_selection_next,

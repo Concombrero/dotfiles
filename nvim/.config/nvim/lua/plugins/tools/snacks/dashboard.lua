@@ -8,22 +8,15 @@ local function telescope_pick(cmd, opts)
 end
 
 M.preset = {
-  pick = "telescope",
+  pick = telescope_pick,
   keys = {
     { icon = "󰦛 ", key = "s", desc = "Restore Session", action = ":SessionManager load_session" },
-    { icon = "󰥔 ", key = "r", desc = "Recent Files", action = function() telescope_pick("oldfiles") end },
+    { icon = "󰥔 ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
     { icon = "󰙅 ", key = "e", desc = "Explorer", action = ":Yazi toggle" },
-    { icon = "󰈞 ", key = "f", desc = "Find File", action = function() telescope_pick("files") end },
-    { icon = "󰱼 ", key = "g", desc = "Find Text", action = function() telescope_pick("live_grep") end },
+    { icon = "󰈞 ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+    { icon = "󰱼 ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
     { icon = "󰈔 ", key = "n", desc = "New File", action = ":ene | startinsert" },
-    {
-      icon = "󰒓 ",
-      key = "c",
-      desc = "Config",
-      action = function()
-        telescope_pick("files", { cwd = vim.fn.stdpath("config") })
-      end,
-    },
+    { icon = "󰒓 ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
     { icon = "󰋽 ", key = "i", desc = "Info", action = ":execute 'edit ' .. fnameescape('" .. config_readme .. "')" },
     { icon = "󰏗 ", key = "m", desc = "Manage Plugins", action = ":Lazy", enabled = package.loaded.lazy ~= nil },
     { icon = "󰓙 ", key = "h", desc = "Checkhealth", action = ":checkhealth" },

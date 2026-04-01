@@ -20,14 +20,12 @@ local ensure_installed = {
   "cpp",
   "cmake",
   "haskell",
-  "norg",
 }
 
 local highlight_disabled = {
   css = true,
   cls = true,
   latex = true,
-  markdown = true,
   typst = true,
 }
 
@@ -52,21 +50,12 @@ local function enable_buffer_features(bufnr)
     vim.bo[bufnr].syntax = "tex"
   end
 
-  if filetype == "markdown" or language == "markdown" then
-    pcall(vim.treesitter.stop, bufnr)
-    vim.bo[bufnr].syntax = "markdown"
-    return
-  end
-
   if not has_parser(bufnr, language) then
     return
   end
 
   if not highlight_disabled[filetype] and not highlight_disabled[language] then
-    local started = pcall(vim.treesitter.start, bufnr, language)
-    if started and (filetype == "python" or language == "python") then
-      vim.bo[bufnr].syntax = "python"
-    end
+    pcall(vim.treesitter.start, bufnr, language)
   end
 
   if not indent_disabled[filetype] and not indent_disabled[language] then
@@ -77,12 +66,14 @@ end
 return {
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
     lazy = false,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = ensure_installed,
-      })
+      local treesitter = require("nvim-treesitter")
+
+      treesitter.setup()
+      treesitter.install(ensure_installed)
 
       local group = api.nvim_create_augroup("DotfilesTreesitter", { clear = true })
       api.nvim_create_autocmd("FileType", {
