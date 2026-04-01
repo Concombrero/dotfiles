@@ -27,6 +27,7 @@ local highlight_disabled = {
   css = true,
   cls = true,
   latex = true,
+  markdown = true,
   typst = true,
 }
 
@@ -49,6 +50,12 @@ local function enable_buffer_features(bufnr)
 
   if filetype == "tex" or filetype == "latex" or language == "latex" then
     vim.bo[bufnr].syntax = "tex"
+  end
+
+  if filetype == "markdown" or language == "markdown" then
+    pcall(vim.treesitter.stop, bufnr)
+    vim.bo[bufnr].syntax = "markdown"
+    return
   end
 
   if not has_parser(bufnr, language) then

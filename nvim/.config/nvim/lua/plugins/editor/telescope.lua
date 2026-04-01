@@ -29,7 +29,7 @@ return {
         path_display = { "truncate" },
         preview = {
           treesitter = {
-            disable = { "python", "julia", "haskell" },
+            disable = { "python", "julia", "haskell", "markdown" },
           },
         },
         mappings = {

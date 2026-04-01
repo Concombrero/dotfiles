@@ -36,6 +36,9 @@ return {
       animate = { enabled = false },
       scope = {
         enabled = true, -- enable highlighting the current scope
+        filter = function(buf)
+          return not vim.bo[buf].filetype:match("^markdown")
+        end,
         priority = 200,
         char = "│",
         underline = false, -- underline the start of the scope
@@ -80,10 +83,16 @@ return {
     },
     notify = { enabled = true },
     profiler = { enabled = false },
-    quickfile = { enabled = true },
+    quickfile = {
+      enabled = true,
+      exclude = { "latex", "markdown" },
+    },
     rename = { enabled = true },
     scope = {
       enabled = true,
+      filter = function(buf)
+        return not vim.bo[buf].filetype:match("^markdown")
+      end,
       keys = {
         textobject = {
           ii = {
