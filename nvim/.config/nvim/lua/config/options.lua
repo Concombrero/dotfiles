@@ -71,7 +71,7 @@ function M.setup()
     backspace = "indent,eol,start", -- allow backspace on indent, end of line or insert mode start position
 
     -- EDIT
-    spell = true,                   -- turns on spellchecker
+    spell = false,                  -- disable built-in spellchecker
     spelllang = { 'en_us' },        -- sets spelling dictionary
     clipboard = "unnamedplus",      -- allows neovim to access the system clipboard
     mouse = "a",                    -- allow the mouse to be used in neovim
