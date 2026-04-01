@@ -24,6 +24,7 @@ npm
 base-devel
 cmake
 pkgconf
+clang
 # Use rustup to provision the current stable toolchain; tree-sitter CLI is
 # installed via cargo in install/tools.sh because Arch's package can lag the
 # version required by nvim-treesitter's `main` branch.

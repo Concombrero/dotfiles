@@ -54,6 +54,44 @@ install_rust_toolchain() {
     log "Rust toolchain ready."
 }
 
+libclang_is_available() {
+    local candidate
+
+    for candidate in "${LIBCLANG_PATH:-}" /usr/lib /usr/lib64 /usr/lib/llvm*/lib; do
+        [ -n "$candidate" ] || continue
+        [ -d "$candidate" ] || continue
+
+        if compgen -G "$candidate/libclang.so*" >/dev/null || compgen -G "$candidate/libclang-*.so*" >/dev/null; then
+            export LIBCLANG_PATH="$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+ensure_tree_sitter_build_deps() {
+    if libclang_is_available; then
+        return 0
+    fi
+
+    if [ "$INSTALL_PACKAGES" = true ]; then
+        info "Installing clang for tree-sitter CLI build support..."
+
+        if ! install_pkg clang; then
+            error "Failed to install clang, which provides libclang for tree-sitter CLI builds."
+            return 1
+        fi
+
+        if libclang_is_available; then
+            return 0
+        fi
+    fi
+
+    error "tree-sitter CLI build requires libclang. Install clang and rerun the installer."
+    return 1
+}
+
 install_tree_sitter_cli() {
     if command -v tree-sitter &>/dev/null; then
         warn "tree-sitter CLI already installed, skipping."
@@ -67,6 +105,10 @@ install_tree_sitter_cli() {
             error "Rust toolchain is required to install tree-sitter CLI."
             return 1
         fi
+    fi
+
+    if ! ensure_tree_sitter_build_deps; then
+        return 1
     fi
 
     info "Installing tree-sitter CLI via cargo..."
