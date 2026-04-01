@@ -5,7 +5,6 @@ return {
     'chomosuke/typst-preview.nvim',
     lazy = true,
     ft = "typst",
-    version = '1.*',
     config = function()
       local mason_tinymist = vim.fn.executable('tinymist') == 1 and 'tinymist' or nil
 

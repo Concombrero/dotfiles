@@ -44,17 +44,6 @@ local function has_parser(bufnr, language)
   return pcall(vim.treesitter.get_parser, bufnr, language)
 end
 
-local function sync_parsers()
-  if vim.fn.executable("tree-sitter") ~= 1 then
-    vim.notify_once("Skipping nvim-treesitter install/update: tree-sitter CLI not found", vim.log.levels.WARN)
-    return
-  end
-
-  local treesitter = require("nvim-treesitter")
-  treesitter.install(ensure_installed, { summary = true }):wait(300000)
-  treesitter.update(nil, { summary = true }):wait(300000)
-end
-
 local function enable_buffer_features(bufnr)
   local filetype, language = get_language(bufnr)
 
@@ -81,11 +70,12 @@ end
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = "main",
     lazy = false,
-    build = sync_parsers,
+    build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter").setup()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = ensure_installed,
+      })
 
       local group = api.nvim_create_augroup("DotfilesTreesitter", { clear = true })
       api.nvim_create_autocmd("FileType", {

@@ -85,6 +85,9 @@ local function setup_lazy()
         { import = "plugins" },    -- main plugins directory
         { import = "plugins.lsp" }, -- lsp plugins directory
       }, {
+        defaults = {
+          version = "*",
+        },
         install = {
           colorscheme = { "catppuccin" },
         },
@@ -126,6 +129,9 @@ local function setup_lazy()
         -- { import = "plugins.LuaSnip"},
         { import = "plugins.typst"},
       }, {
+        defaults = {
+          version = "*",
+        },
         install = {
           colorscheme = { "catppuccin" },
         },

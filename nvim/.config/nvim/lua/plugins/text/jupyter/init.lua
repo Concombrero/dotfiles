@@ -5,7 +5,6 @@ return {
   -- Lazy-loading on file open can miss the first read and show raw JSON.
   {
     "GCBallesteros/jupytext.nvim",
-    version = "*",
     lazy = false,
     config = function()
       local function resolve_jupytext_command()
@@ -76,7 +75,6 @@ return {
   -- Neopyter for live JupyterLab sync and execution from Neovim
   {
     "SUSTech-data/neopyter",
-    version = "*",
     cmd = { "Neopyter" },
     event = { "BufReadPost *.ju.*", "BufNewFile *.ju.*" },
     dependencies = {

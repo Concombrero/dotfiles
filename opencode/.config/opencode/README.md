@@ -25,7 +25,7 @@ The config reads this file via:
 If you use the `google-vertex` provider, ensure your environment exports:
 
 - `GOOGLE_CLOUD_PROJECT` (and optionally `GOOGLE_VERTEX_PROJECT`)
-- `GOOGLE_APPLICATION_CREDENTIALS`
+`GOOGLE_APPLICATION_CREDENTIALS`
 - `GOOGLE_VERTEX_LOCATION` (and `VERTEX_LOCATION` for compatibility)
 
 In this repo, keep these in a machine-local shell override (for example

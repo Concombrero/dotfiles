@@ -38,7 +38,7 @@ return {
         end,
       },
     })
-    vim.cmd.colorscheme("catppuccin-nvim")
+    require("catppuccin").load("mocha")
   end,
 }
 

@@ -33,7 +33,7 @@ local function create_floating_window(title)
   local win = vim.api.nvim_open_win(buf, true, opts)
   
   -- Set buffer options
-  vim.api.nvim_buf_set_option(buf, "modifiable", true)
+  vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
   
   -- Add keymap to close window
   vim.api.nvim_buf_set_keymap(buf, "n", "q", "", {
@@ -209,7 +209,7 @@ function M.analyze_startup()
       
       -- Update buffer with results
       vim.api.nvim_buf_set_lines(buf, 0, -1, false, result_lines)
-      vim.api.nvim_buf_set_option(buf, "modifiable", false)
+      vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
       
       -- Clean up temp file in case window is closed another way
       vim.api.nvim_create_autocmd("BufWipeout", {
@@ -235,7 +235,7 @@ function M.profile_plugins()
   vim.defer_fn(function()
     local profile, err = get_plugin_profile_data()
     if not profile then
-      vim.api.nvim_buf_set_option(buf, "modifiable", true)
+      vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
       vim.api.nvim_buf_set_lines(buf, 0, -1, false, {
         "Failed to analyze plugin load times",
         "",
@@ -243,7 +243,7 @@ function M.profile_plugins()
         "",
         "Press 'q' to close this window",
       })
-      vim.api.nvim_buf_set_option(buf, "modifiable", false)
+      vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
       return
     end
 
@@ -320,9 +320,9 @@ function M.profile_plugins()
     table.insert(result_lines, "Press 'q' to close this window")
     
     -- Update buffer with results
-    vim.api.nvim_buf_set_option(buf, "modifiable", true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, result_lines)
-    vim.api.nvim_buf_set_option(buf, "modifiable", false)
+    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
   end, 500) -- Short delay to ensure window is ready
 end
 
@@ -564,12 +564,12 @@ function M.generate_report()
     table.insert(result_lines, "Press 'q' to close this window")
     
     -- Update buffer with results
-    vim.api.nvim_buf_set_option(buf, "modifiable", true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, result_lines)
-    vim.api.nvim_buf_set_option(buf, "modifiable", false)
+    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
     
     -- Make the buffer shareable (allows copying text)
-    vim.api.nvim_buf_set_option(buf, "buftype", "")
+    vim.api.nvim_set_option_value("buftype", "", { buf = buf })
   end, 100)
 end
 
@@ -795,12 +795,12 @@ function M.suggest_lazy_loading()
     table.insert(result_lines, "Press 'q' to close this window")
     
     -- Update buffer with results
-    vim.api.nvim_buf_set_option(buf, "modifiable", true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, result_lines)
-    vim.api.nvim_buf_set_option(buf, "modifiable", false)
+    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
     
     -- Set buffer to markdown for syntax highlighting
-    vim.api.nvim_buf_set_option(buf, "filetype", "markdown")
+    vim.api.nvim_set_option_value("filetype", "markdown", { buf = buf })
   end, 100)
 end
 

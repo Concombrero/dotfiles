@@ -1,7 +1,6 @@
 -- Minimal mini.nvim configuration
 return {
   'echasnovski/mini.nvim',
-  version = false,
   event = { "VeryLazy" },
   dependencies = {
     "hrsh7th/nvim-cmp",
