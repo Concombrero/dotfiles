@@ -99,9 +99,6 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 > [!NOTE]
 > The desktop install writes `~/.fehbg` and uses it from i3 so the wallpaper persists across logins. The SDDM theme also generates a blurred background from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when ImageMagick is available.
 
-> [!NOTE]
-> On Debian/Ubuntu, `ueberzugpp` is installed from the upstream openSUSE Build Service apt repository recommended by the project README.
-
 > [!IMPORTANT]
 > The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
 
@@ -136,7 +133,7 @@ Defined in distro-specific package lists:
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
 - **Arch desktop extras:** `sddm`
-- **Image helpers:** `imagemagick`, `ueberzugpp`
+- **Image helpers:** `imagemagick`
 
 ### External Tools/Binaries
 - `neovim` (official prebuilt archive on Debian/Ubuntu and Arch-based systems)

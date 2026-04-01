@@ -51,7 +51,7 @@ Zen Browser (GTK_USE_PORTAL=1)
 ## Root Causes Found and Fixed
 
 ### 1. Portal stdio capture (PRIMARY cause of image preview bugs)
-**Problem:** The portal binary spawned the wrapper script as a child process, inheriting its stdout/stderr. Yazi and ueberzugpp emit Kitty graphics protocol escape sequences and DEC private mode codes for image rendering. The portal's internal VTE parser received these sequences and attempted to parse them, producing thousands of `[PARSE ERROR] Unsupported screen mode: 2026 (private)` and `Malformed GraphicsCommand control block` errors. This created a feedback loop that slowed down yazi's image rendering significantly.
+**Problem:** The portal binary spawned the wrapper script as a child process, inheriting its stdout/stderr. Yazi and its image preview adapters emit Kitty graphics protocol escape sequences and DEC private mode codes for image rendering. The portal's internal VTE parser received these sequences and attempted to parse them, producing thousands of `[PARSE ERROR] Unsupported screen mode: 2026 (private)` and `Malformed GraphicsCommand control block` errors. This created a feedback loop that slowed down yazi's image rendering significantly.
 
 **Fix:** The wrapper script now redirects all three stdio streams away from the portal:
 ```sh
@@ -60,7 +60,7 @@ kitty ... </dev/null >/dev/null 2>&1
 This ensures kitty gets its own PTY (which it always does as a terminal emulator), and the portal process never sees any escape sequences from yazi.
 
 ### 2. Environment variables missing from portal context
-**Problem:** The portal service runs under systemd `--user`, which may start before the full desktop session environment is established. Critical variables like `DISPLAY`, `XAUTHORITY`, `COLORTERM`, `XDG_SESSION_TYPE`, and custom `PATH` entries were missing or stale, causing ueberzugpp to fail silently and yazi to fall back to slow/broken preview rendering.
+**Problem:** The portal service runs under systemd `--user`, which may start before the full desktop session environment is established. Critical variables like `DISPLAY`, `XAUTHORITY`, `COLORTERM`, `XDG_SESSION_TYPE`, and custom `PATH` entries were missing or stale, causing Yazi preview helpers to fail silently and image rendering to fall back to slow/broken behavior.
 
 **Fix (persistent):**
 - i3 config imports the full environment into systemd on every login, then restarts the portal to pick it up

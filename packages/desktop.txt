@@ -19,7 +19,6 @@ xdg-desktop-portal-gtk
 
 # Image/Graphics
 imagemagick
-ueberzugpp
 feh
 sxiv
 flameshot
