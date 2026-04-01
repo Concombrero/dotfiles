@@ -41,8 +41,8 @@ local function open_yank_history()
     lazy.load({ plugins = { "yanky.nvim" } })
   end
 
-  if type(_G.YankyTelescopeHistory) == "function" then
-    _G.YankyTelescopeHistory()
+  if vim.fn.exists(":YankyHistory") == 2 then
+    vim.cmd("YankyHistory")
     return
   end
 
@@ -53,6 +53,33 @@ local function open_yank_history()
   end
 
   vim.notify("Yank history is unavailable", vim.log.levels.WARN)
+end
+
+local function get_visual_selection()
+  local mode = vim.fn.mode()
+  if mode ~= "v" and mode ~= "V" and mode ~= "\22" then
+    return nil
+  end
+
+  local lines = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), {
+    type = mode,
+    exclusive = vim.o.selection == "exclusive",
+  })
+
+  local selection = table.concat(lines, " "):gsub("%s+", " ")
+  selection = vim.trim(selection)
+
+  if selection == "" then
+    return nil
+  end
+
+  return selection
+end
+
+local function live_grep_word_or_selection()
+  require("telescope.builtin").live_grep({
+    default_text = get_visual_selection() or vim.fn.expand("<cword>"),
+  })
 end
 
 return {
@@ -178,13 +205,12 @@ return {
           { "<leader>fh", "<cmd>Telescope help_tags<CR>", desc = "help" },
           { "<leader>fk", "<cmd>Telescope keymaps<CR>", desc = "keymaps" },
           { "<leader>fl", "<cmd>Telescope resume<CR>", desc = "last search" },
-          { "<leader>fp", "<cmd>Telescope live_grep theme=ivy<CR>", desc = "project grep" },
+          { "<leader>fp", "<cmd>Telescope live_grep <CR>", desc = "project grep" },
           { "<leader>fq", "<cmd>Telescope quickfix<CR>", desc = "quickfix" },
           { "<leader>fr", "<cmd>Telescope registers<CR>", desc = "registers" },
-          { "<leader>fs", "<cmd>Telescope grep_string<CR>", desc = "string" },
+          { "<leader>fs", live_grep_word_or_selection, desc = "word/selection" },
           { "<leader>ft", "<cmd>TodoTelescope<CR>", desc = "todos" },
           { "<leader>fu", "<cmd>Telescope undo<CR>", desc = "undo" },
-          { "<leader>fw", "<cmd>lua SearchWordUnderCursor()<CR>", desc = "word" },
           { "<leader>fy", open_yank_history, desc = "yanks", mode = "n" },
         },
 
@@ -221,14 +247,7 @@ return {
           },
           {
             "<leader>lL",
-            function()
-              if _G.lint_try_lint then
-                _G.lint_try_lint()
-                return
-              end
-
-              require("lint").try_lint()
-            end,
+            "<cmd>LintCurrent<CR>",
             desc = "lint file",
           },
           { "<leader>lR", "<cmd>lua vim.lsp.buf.rename()<CR>", desc = "rename" },
@@ -254,18 +273,18 @@ return {
           { "<leader>lr", "<cmd>Telescope lsp_references<CR>", desc = "references" },
           { "<leader>ls", "<cmd>lsp restart<CR>", desc = "restart lsp" },
           { "<leader>lt", "<cmd>lsp enable<CR>", desc = "start lsp" },
-          { "<leader>ly", "<cmd>lua CopyDiagnosticsToClipboard()<CR>", desc = "copy diagnostics to clipboard" },
+          { "<leader>ly", function() require("util.diagnostics").copy_diagnostics_to_clipboard() end, desc = "copy diagnostics to clipboard" },
         },
 
         {
           "<leader>m",
           group = "markdown",
-          { "<leader>ma", "<cmd>lua ToggleAllFolds()<CR>", desc = "toggle all folds" },
+          { "<leader>ma", function() require("util.fold").toggle_all_folds() end, desc = "toggle all folds" },
           { "<leader>mf", "za", desc = "toggle fold under cursor" },
           { "<leader>mo", "<cmd>MarkdownPreviewToggle<CR>", desc = "open markdown preview" },
           { "<leader>ms", "<cmd>LecticSubmitSelection<CR>", desc = "submit selection with message" },
-          { "<leader>mt", "<cmd>lua ToggleFoldingMethod()<CR>", desc = "toggle folding method" },
-          { "<leader>mu", "<cmd>lua OpenUrlUnderCursor()<CR>", desc = "open URL under cursor" },
+          { "<leader>mt", function() require("util.fold").toggle_folding_method() end, desc = "toggle folding method" },
+          { "<leader>mu", function() require("util.url").open_url_under_cursor() end, desc = "open URL under cursor" },
         },
 
         {
