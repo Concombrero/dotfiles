@@ -73,86 +73,39 @@ end
 -- Initialize lazy.nvim with plugin specs
 local function setup_lazy()
   return with_error_handling(function()
-    -- Try to load the new plugin system first
-    local ok, plugins = pcall(require, "plugins")
-    
-    -- If the new plugin system fails, fall back to the old import-based method
-    if not ok then
-      vim.notify("Using legacy plugin import system", vim.log.levels.DEBUG)
-      
-      require("lazy").setup({
-        -- Legacy imports
-        { import = "plugins" },    -- main plugins directory
-        { import = "plugins.lsp" }, -- lsp plugins directory
-      }, {
-        defaults = {
-          version = "*",
-        },
-        install = {
-          colorscheme = { "catppuccin" },
-        },
-        checker = {
-          enabled = true,
-          notify = false,
-        },
-        change_detection = {
-          notify = false,
-        },
-        performance = {
-          reset_packpath = true,
-          rtp = {
-            reset = true,
-          },
-        },
-        rocks = {
-          enabled = false,  -- Disable luarocks support completely
-        },
-      })
-    else
-      -- New plugin system - organize specs by category
-      
-      -- Set up with direct plugin specs AND the lsp imports
-      -- This ensures backward compatibility during the transition
-      require("lazy").setup({
-        -- Direct plugin specs
-        plugins,
-        
-        -- Legacy LSP import for backward compatibility
-        { import = "plugins.lsp" },
-        
-        -- Phase 2 imports
-        { import = "plugins.editor" },  -- editor enhancement plugins
-        { import = "plugins.tools" },   -- tool integration plugins
-        { import = "plugins.text" },    -- text format-specific plugins
-        { import = "plugins.ui" },      -- UI enhancement plugins
+    require("plugins")
 
-        -- { import = "plugins.LuaSnip"},
-        { import = "plugins.typst"},
-      }, {
-        defaults = {
-          version = "*",
+    require("lazy").setup({
+      { import = "plugins.lsp" },
+      { import = "plugins.editor" },
+      { import = "plugins.tools" },
+      { import = "plugins.text" },
+      { import = "plugins.ui" },
+      { import = "plugins.typst" },
+    }, {
+      defaults = {
+        version = "*",
+      },
+      install = {
+        colorscheme = { "catppuccin" },
+      },
+      checker = {
+        enabled = true,
+        notify = false,
+      },
+      change_detection = {
+        notify = false,
+      },
+      performance = {
+        reset_packpath = true,
+        rtp = {
+          reset = true,
         },
-        install = {
-          colorscheme = { "catppuccin" },
-        },
-        checker = {
-          enabled = true,
-          notify = false,
-        },
-        change_detection = {
-          notify = false,
-        },
-        performance = {
-          reset_packpath = true,
-          rtp = {
-            reset = true,
-          },
-        },
-        rocks = {
-          enabled = false,  -- Disable luarocks support completely
-        },
-      })
-    end
+      },
+      rocks = {
+        enabled = false,
+      },
+    })
   end, "setup of lazy.nvim plugins")
 end
 

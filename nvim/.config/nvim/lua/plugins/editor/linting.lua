@@ -184,9 +184,8 @@ return {
         "--no-max-line-length",
       }
     end
-    
-    -- Helper function to run linters
-    _G.lint_try_lint = function()
+
+    local function try_lint_current()
       local filetype = vim.bo.filetype
 
       if filetype == "python" then
@@ -218,6 +217,10 @@ return {
       lint.try_lint()
     end
 
+    vim.api.nvim_create_user_command("LintCurrent", try_lint_current, {
+      desc = "Run linting for the current buffer",
+    })
+
     -- Set up autocommands for running linters
     vim.api.nvim_create_autocmd({ "BufWritePost", "BufEnter" }, {
       callback = function()
@@ -247,7 +250,7 @@ return {
         -- Check if the current buffer's filetype should be auto-linted
         local filetype = vim.bo.filetype
         if vim.tbl_contains(auto_lint_filetypes, filetype) then
-          _G.lint_try_lint()
+          try_lint_current()
         end
       end,
     })

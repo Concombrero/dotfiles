@@ -23,13 +23,17 @@ function M.setup()
   -- Setup terminal keymaps
   api.nvim_create_autocmd({ "TermOpen" }, {
     pattern = { "term://*" }, -- use term://*toggleterm#* for only ToggleTerm
-    command = "lua set_terminal_keymaps()",
+    callback = function()
+      require("config.keymaps").set_terminal_keymaps()
+    end,
   })
 
   -- Setup markdown keymaps
   api.nvim_create_autocmd({ "BufEnter", "BufReadPre", "BufNewFile" }, {
     pattern = { "*.md" },
-    command = "lua set_markdown_keymaps()",
+    callback = function()
+      require("config.keymaps").set_markdown_keymaps()
+    end,
   })
 
   return true

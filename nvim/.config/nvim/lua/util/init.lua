@@ -145,15 +145,6 @@ function M.setup()
     end
   end
   
-  -- Set up backward compatibility for core.functions
-  if not _G.LoadFoldingState and submodules.fold then
-    _G.LoadFoldingState = submodules.fold.load_folding_state
-  end
-  
-  if not _G.SetupUrlMappings and submodules.url then
-    _G.SetupUrlMappings = submodules.url.setup_url_mappings
-  end
-
   register_optimization_commands()
   
   return true

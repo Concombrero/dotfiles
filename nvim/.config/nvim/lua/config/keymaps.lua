@@ -109,7 +109,7 @@ function M.setup()
   ----------------------------------------
 
   -- Terminal mappings setup function triggered by an auto-command
-  function _G.set_terminal_keymaps()
+  function M.set_terminal_keymaps()
     -- Set the terminal window as fixed
     vim.wo.winfixbuf = true
 
@@ -139,7 +139,7 @@ function M.setup()
   end
 
   -- Markdown mappings setup function triggered by an auto-command
-  function _G.set_markdown_keymaps()
+  function M.set_markdown_keymaps()
     -- Tab settings for markdown
     vim.opt.tabstop = 2
     vim.opt.shiftwidth = 2
@@ -214,29 +214,13 @@ function M.setup()
   map("n", "<A-l>", ":vertical resize +2<CR>", {}, "Increase width")
 
   -- Buffer navigation using utils.buffer module
-  local buffer_utils_loaded = false
-
-  -- Try to use the new utils.buffer module first
   local ok, buffer_utils = pcall(require, "util.buffer")
   if ok and buffer_utils and buffer_utils.goto_buffer then
-    buffer_utils_loaded = true
-
-    -- Use the new functions with the same keybindings
     map("n", "<TAB>", function() buffer_utils.goto_buffer(1, 1) end, {}, "Next buffer")
     map("n", "<S-TAB>", function() buffer_utils.goto_buffer(1, -1) end, {}, "Previous buffer")
-  end
-
-  -- If we couldn't load the buffer utils, use fallbacks
-  if not buffer_utils_loaded then
-    -- Try using the global function if it exists
-    if _G.GotoBuffer then
-      map("n", "<TAB>", function() _G.GotoBuffer(1, 1) end, {}, "Next buffer")
-      map("n", "<S-TAB>", function() _G.GotoBuffer(1, -1) end, {}, "Previous buffer")
-    else
-      -- Ultimate fallback
-      map("n", "<TAB>", ":bnext<CR>", {}, "Next buffer")
-      map("n", "<S-TAB>", ":bprevious<CR>", {}, "Previous buffer")
-    end
+  else
+    map("n", "<TAB>", ":bnext<CR>", {}, "Next buffer")
+    map("n", "<S-TAB>", ":bprevious<CR>", {}, "Previous buffer")
   end
 
   -- Line manipulation

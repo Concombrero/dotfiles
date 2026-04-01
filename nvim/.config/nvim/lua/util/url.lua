@@ -292,15 +292,6 @@ end
 
 -- Set up global URL-related utilities
 function M.setup()
-  -- Setup global function aliases for backward compatibility
-  _G.OpenUrlAtMouse = function()
-    return M.open_url_at_mouse()
-  end
-  
-  _G.OpenUrlUnderCursor = function()
-    return M.open_url_under_cursor()
-  end
-  
   -- Set up URL mappings
   M.setup_url_mappings()
   

@@ -87,8 +87,7 @@ return {
       deduplicate = true,
     })
 
-    -- Create a custom yank_history function that doesn't rely on the extension
-    _G.YankyTelescopeHistory = function()
+    local function open_yank_history_picker()
       local tele_status, telescope = pcall(require, "telescope")
       if not tele_status then
         vim.notify("Telescope not available", vim.log.levels.ERROR)
@@ -159,6 +158,10 @@ return {
         end,
       }):find()
     end
+
+    vim.api.nvim_create_user_command("YankyHistory", open_yank_history_picker, {
+      desc = "Browse yank history",
+    })
     
     -- Still try to load the extension as a fallback
     pcall(function()

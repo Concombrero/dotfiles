@@ -94,7 +94,7 @@ function M.toggle_folding_method()
     if vim.bo.filetype == "markdown" then
       new_method = "expr"
       vim.wo.foldmethod = "expr"
-      vim.wo.foldexpr = "v:lua.MarkdownFoldLevel()"
+      vim.wo.foldexpr = "v:lua.require'util.fold'.markdown_fold_level()"
       vim.notify("Folding enabled (expr with markdown support)", vim.log.levels.INFO)
     else
       -- For other filetypes, use indent folding which is generally useful
@@ -164,7 +164,7 @@ function M.load_folding_state()
       -- Apply the saved state
       if state == "expr" and vim.bo.filetype == "markdown" then
         vim.wo.foldmethod = "expr"
-        vim.wo.foldexpr = "v:lua.MarkdownFoldLevel()"
+        vim.wo.foldexpr = "v:lua.require'util.fold'.markdown_fold_level()"
       elseif state == "indent" then
         vim.wo.foldmethod = "indent"
       else
@@ -188,19 +188,6 @@ end
 
 -- Set up global fold-related utilities
 function M.setup()
-  -- Set up global function aliases for backward compatibility
-  _G.ToggleAllFolds = function()
-    M.toggle_all_folds()
-  end
-  
-  _G.MarkdownFoldLevel = function()
-    return M.markdown_fold_level()
-  end
-  
-  _G.ToggleFoldingMethod = function()
-    M.toggle_folding_method()
-  end
-  
   return true
 end
 

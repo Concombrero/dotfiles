@@ -95,12 +95,6 @@ function M.display_messages()
   vim.cmd('copen')
 end
 
--- Find all instances of a word in a project with telescope
-function M.search_word_under_cursor()
-  local word = vim.fn.expand('<cword>')
-  require('telescope.builtin').live_grep({ default_text = word })
-end
-
 -- Reload neovim config
 function M.reload_config()
   for name, _ in pairs(package.loaded) do
@@ -189,20 +183,7 @@ function M.setup()
   vim.api.nvim_create_user_command('BufSaveAll', function()
     M.save_all_buffers()
   end, {})
-  
-  -- Set up global function aliases for backward compatibility
-  _G.GotoBuffer = function(count, direction)
-    M.goto_buffer(count, direction)
-  end
-  
-  _G.DisplayMessages = function()
-    M.display_messages()
-  end
-  
-  _G.SearchWordUnderCursor = function()
-    M.search_word_under_cursor()
-  end
-  
+
   return true
 end
 

@@ -185,16 +185,7 @@ function M.setup()
   vim.api.nvim_create_user_command('SelectionInfo', function()
     M.show_selection_info()
   end, { range = true })
-  
-  -- Global function aliases for backward compatibility
-  _G.ToggleLineNumbers = function()
-    M.toggle_line_numbers()
-  end
-  
-  _G.TrimWhitespace = function()
-    M.trim_whitespace()
-  end
-  
+
   return true
 end
 

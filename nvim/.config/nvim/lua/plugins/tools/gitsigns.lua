@@ -86,14 +86,8 @@ return {
         vim.api.nvim_set_hl(0, "GitSignsChange", { fg = change_color, bg = "NONE" })
         vim.api.nvim_set_hl(0, "GitSignsDelete", { fg = delete_color, bg = "NONE" })
         
-        -- Make the colors available as global variables for other plugins to use
-        _G.GitColors = _G.GitColors or {}
-        _G.GitColors.add = add_color
-        _G.GitColors.change = change_color
-        _G.GitColors.delete = delete_color
       end,
       group = vim.api.nvim_create_augroup("GitSignsHighlight", { clear = true }),
     })
   end
 }
-

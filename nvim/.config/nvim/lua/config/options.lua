@@ -128,15 +128,9 @@ function M.setup()
   vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
     pattern = {"*"},
     callback = function()
-      -- Try to use the new util module first
       local ok, fold_utils = pcall(require, "util.fold")
       if ok and fold_utils and fold_utils.load_folding_state then
         fold_utils.load_folding_state()
-      else
-        -- Fall back to global function if available
-        if _G.LoadFoldingState then
-          _G.LoadFoldingState()
-        end
       end
     end
   })
@@ -145,15 +139,9 @@ function M.setup()
   vim.api.nvim_create_autocmd("VimEnter", {
     callback = function()
       vim.defer_fn(function()
-        -- Try to use the new util module first
         local ok, url_utils = pcall(require, "util.url")
         if ok and url_utils and url_utils.setup_url_mappings then
           url_utils.setup_url_mappings()
-        else
-          -- Fall back to global function if available
-          if _G.SetupUrlMappings then
-            _G.SetupUrlMappings()
-          end
         end
       end, 200)
     end,

@@ -136,15 +136,5 @@ return {
     -- Configure highlighting
     vim.api.nvim_set_hl(0, 'MiniCursorword', { link = 'Pmenu' })
 
-    -- Toggle function
-    _G.LocalHighlightToggle = function()
-      if vim.b.minicursorword_disable then
-        vim.b.minicursorword_disable = false
-        vim.notify("Word highlighting enabled", vim.log.levels.INFO)
-      else
-        vim.b.minicursorword_disable = true
-        vim.notify("Word highlighting disabled", vim.log.levels.INFO)
-      end
-    end
   end,
 }

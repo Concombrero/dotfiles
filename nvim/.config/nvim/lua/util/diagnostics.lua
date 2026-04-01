@@ -117,11 +117,6 @@ end
 
 -- Setup function for diagnostic utilities
 function M.setup()
-  -- Setup global function for backward compatibility
-  _G.CopyDiagnosticsToClipboard = function()
-    M.copy_diagnostics_to_clipboard()
-  end
-  
   return true
 end
 
