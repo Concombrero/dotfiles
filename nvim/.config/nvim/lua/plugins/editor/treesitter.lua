@@ -20,13 +20,13 @@ local ensure_installed = {
   "cpp",
   "cmake",
   "haskell",
+  "typst",
 }
 
 local highlight_disabled = {
   css = true,
   cls = true,
   latex = true,
-  typst = true,
 }
 
 local indent_disabled = {
