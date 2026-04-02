@@ -1,0 +1,1039 @@
+#!/usr/bin/env bash
+
+set -u
+
+show_help() {
+    cat <<'EOF'
+Usage: update-managed-packages [OPTIONS]
+
+Update distro packages plus the non-package-manager tools installed by this
+dotfiles repo.
+
+Options:
+  --system-only, --apt-only      Only update distro-managed packages
+  --non-system-only, --non-apt-only
+                                 Only update non-package-manager tools
+  --with-fonts                   Refresh Nerd Fonts installed by the repo
+  -h, --help                     Show this help text
+EOF
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+    esac
+done
+
+SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_REPO_DIR=$(cd "$(dirname "$SCRIPT_PATH")/../../.." && pwd)
+
+source "$SCRIPT_REPO_DIR/install/bootstrap.sh"
+source "$SCRIPT_REPO_DIR/install/ppas.sh"
+source "$SCRIPT_REPO_DIR/install/tools.sh"
+
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.opencode/bin:$PATH"
+
+UPDATE_SYSTEM=true
+UPDATE_NON_SYSTEM=true
+UPDATE_FONTS=false
+INSTALL_PACKAGES=true
+
+NVIM_INSTALL_DIR="$HOME/.local/opt/nvim"
+GH_INSTALL_DIR="$HOME/.local/opt/gh"
+CLIPBOARD_INSTALL_DIR="$HOME/.local/opt/clipboard"
+SESH_INSTALL_DIR="$HOME/.local/opt/sesh"
+KITTY_INSTALL_DIR="$HOME/.local/kitty.app"
+TPM_INSTALL_DIR="$HOME/.tmux/plugins/tpm"
+FONT_DIR="$HOME/.local/share/fonts"
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --system-only|--apt-only)
+            UPDATE_NON_SYSTEM=false
+            ;;
+        --non-system-only|--non-apt-only)
+            UPDATE_SYSTEM=false
+            ;;
+        --with-fonts)
+            UPDATE_FONTS=true
+            ;;
+        *)
+            die "Unknown option: $1"
+            ;;
+    esac
+    shift
+done
+
+INSTALL_PACKAGES=$UPDATE_SYSTEM
+
+resolve_cmd_path() {
+    local cmd=$1
+    local path
+
+    path=$(command -v "$cmd" 2>/dev/null || true)
+    [ -n "$path" ] || return 1
+
+    readlink -f "$path" 2>/dev/null || printf '%s\n' "$path"
+}
+
+path_matches_prefix() {
+    local path=$1
+    local prefix=$2
+
+    case "$path" in
+        "$prefix"|"$prefix"/*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+cmd_is_managed() {
+    local cmd=$1
+    shift
+    local path
+    local prefix
+
+    path=$(resolve_cmd_path "$cmd") || return 1
+
+    for prefix in "$@"; do
+        path_matches_prefix "$path" "$prefix" && return 0
+    done
+
+    return 1
+}
+
+cmd_matches_prefixes() {
+    local cmd=$1
+    shift
+    local raw_path resolved_path prefix
+
+    raw_path=$(command -v "$cmd" 2>/dev/null || true)
+    [ -n "$raw_path" ] || return 1
+
+    resolved_path=$(resolve_cmd_path "$cmd") || return 1
+
+    for prefix in "$@"; do
+        path_matches_prefix "$raw_path" "$prefix" && return 0
+        path_matches_prefix "$resolved_path" "$prefix" && return 0
+    done
+
+    return 1
+}
+
+system_package_is_installed() {
+    local package=$1
+    local status
+
+    case "$DISTRO_FAMILY" in
+        debian)
+            status=$(dpkg-query -W -f='${db:Status-Status}\n' "$package" 2>/dev/null || true)
+            [ "$status" = installed ]
+            ;;
+        arch)
+            pacman -Q "$package" >/dev/null 2>&1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+any_system_package_installed() {
+    local package
+
+    for package in "$@"; do
+        [ -n "$package" ] || continue
+        system_package_is_installed "$package" && return 0
+    done
+
+    return 1
+}
+
+install_file_with_optional_sudo() {
+    local source_path=$1
+    local destination_path=$2
+    local mode=${3:-0755}
+
+    if install -m "$mode" "$source_path" "$destination_path" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    sudo install -m "$mode" "$source_path" "$destination_path"
+}
+
+replace_install_dir() {
+    local source_dir=$1
+    local install_dir=$2
+    local backup_dir="${install_dir}.backup.$$"
+
+    rm -rf "$backup_dir"
+
+    if [ -e "$install_dir" ] || [ -L "$install_dir" ]; then
+        if ! mv "$install_dir" "$backup_dir"; then
+            error "Failed to back up existing install at $install_dir."
+            rm -rf "$backup_dir"
+            return 1
+        fi
+    fi
+
+    if mv "$source_dir" "$install_dir"; then
+        rm -rf "$backup_dir"
+        return 0
+    fi
+
+    error "Failed to place files under $install_dir."
+
+    if [ -e "$backup_dir" ] || [ -L "$backup_dir" ]; then
+        mv "$backup_dir" "$install_dir" >/dev/null 2>&1 || true
+    fi
+
+    return 1
+}
+
+find_managed_zen_binary() {
+    local candidate
+
+    for candidate in \
+        "$HOME/.local/opt/zen/zen" \
+        "$HOME/.tarball-installations/zen/zen"
+    do
+        if [ -x "$candidate" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+download_file() {
+    local url=$1
+    local destination=$2
+
+    curl -fsSL "$url" -o "$destination"
+}
+
+install_from_tarball() {
+    local url=$1
+    local tar_flag=$2
+    local extracted_dir_name=$3
+    local install_dir=$4
+    local binary_relative_path=$5
+    local link_path=$6
+    local tmp_dir archive extracted_dir
+
+    tmp_dir=$(mktemp -d)
+    archive="$tmp_dir/archive"
+    extracted_dir="$tmp_dir/$extracted_dir_name"
+
+    if ! download_file "$url" "$archive"; then
+        error "Failed to download archive: $url"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar "$tar_flag" "$archive" -C "$tmp_dir"; then
+        error "Failed to extract archive: $url"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare local install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -x "$extracted_dir/$binary_relative_path" ]; then
+        error "Extracted archive did not contain expected binary: $binary_relative_path"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! "$extracted_dir/$binary_relative_path" --version >/dev/null 2>&1; then
+        error "Extracted binary failed smoke test: $binary_relative_path"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! replace_install_dir "$extracted_dir" "$install_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/$binary_relative_path" "$link_path"; then
+        error "Failed to link $link_path."
+        rm -rf "$tmp_dir" "$install_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    return 0
+}
+
+update_system_packages() {
+    ensure_supported_distro
+
+    case "$DISTRO_FAMILY" in
+        debian)
+            info "Refreshing apt package metadata..."
+            sudo apt-get update || return 1
+
+            info "Upgrading installed apt packages..."
+            sudo apt-get upgrade -y --with-new-pkgs || return 1
+            ;;
+        arch)
+            info "Synchronizing pacman packages and upgrading the system..."
+            sudo pacman -Syu --noconfirm || return 1
+            ;;
+    esac
+}
+
+update_tpm() {
+    if [ ! -d "$TPM_INSTALL_DIR/.git" ]; then
+        info "Skipping TPM: $TPM_INSTALL_DIR is not a git clone."
+        return 0
+    fi
+
+    info "Updating tmux plugin manager (TPM)..."
+    git -C "$TPM_INSTALL_DIR" pull --ff-only || return 1
+    log "TPM updated."
+}
+
+update_rust_toolchain() {
+    if ! cmd_is_managed rustup "$HOME/.cargo" "$HOME/.local/bin/rustup"; then
+        info "Skipping Rust toolchain: rustup is not managed by this repo."
+        return 0
+    fi
+
+    info "Updating rustup and the stable Rust toolchain..."
+
+    rustup self update || return 1
+    rustup update stable || return 1
+    rustup default stable >/dev/null 2>&1 || return 1
+
+    link_cargo_binary rustup || return 1
+    link_cargo_binary cargo || return 1
+    link_cargo_binary rustc || return 1
+
+    log "Rust toolchain updated."
+}
+
+update_tree_sitter_cli() {
+    if ! cmd_is_managed tree-sitter "$HOME/.cargo" "$HOME/.local/bin/tree-sitter"; then
+        info "Skipping tree-sitter CLI: binary is not managed by this repo."
+        return 0
+    fi
+
+    if ! command -v cargo >/dev/null 2>&1; then
+        error "cargo is required to update tree-sitter CLI."
+        return 1
+    fi
+
+    if ! ensure_tree_sitter_build_deps; then
+        return 1
+    fi
+
+    info "Updating tree-sitter CLI via cargo..."
+    cargo install --locked --force tree-sitter-cli || return 1
+    link_cargo_binary tree-sitter || return 1
+    tree-sitter --version >/dev/null 2>&1 || return 1
+    log "tree-sitter CLI updated."
+}
+
+update_neovim_managed() {
+    if [ ! -x "$NVIM_INSTALL_DIR/bin/nvim" ] && ! cmd_is_managed nvim "$NVIM_INSTALL_DIR"; then
+        info "Skipping Neovim: $NVIM_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    install_neovim
+}
+
+update_fzf() {
+    if any_system_package_installed fzf; then
+        info "Skipping fzf: system package manager handles it."
+        return 0
+    fi
+
+    if [ ! -d "$HOME/.fzf/.git" ]; then
+        info "Skipping fzf: ~/.fzf is not a managed git clone."
+        return 0
+    fi
+
+    info "Updating fzf..."
+    git -C "$HOME/.fzf" pull --ff-only || return 1
+    "$HOME/.fzf/install" --bin || return 1
+    log "fzf updated."
+}
+
+update_starship() {
+    if any_system_package_installed starship; then
+        info "Skipping Starship: system package manager handles it."
+        return 0
+    fi
+
+    if ! cmd_is_managed starship /usr/local/bin/starship "$HOME/.local/bin/starship"; then
+        info "Skipping Starship: binary is not managed by the upstream installer."
+        return 0
+    fi
+
+    info "Updating Starship..."
+    curl -sS https://starship.rs/install.sh | sh -s -- -y || return 1
+    starship --version >/dev/null 2>&1 || return 1
+    log "Starship updated."
+}
+
+update_zoxide() {
+    if any_system_package_installed zoxide; then
+        info "Skipping Zoxide: system package manager handles it."
+        return 0
+    fi
+
+    if ! cmd_is_managed zoxide "$HOME/.local/bin/zoxide" /usr/local/bin/zoxide; then
+        info "Skipping Zoxide: binary is not managed by the upstream installer."
+        return 0
+    fi
+
+    info "Updating Zoxide..."
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh || return 1
+    zoxide --version >/dev/null 2>&1 || return 1
+    log "Zoxide updated."
+}
+
+update_yazi() {
+    local version arch asset url tmp_dir matches extracted_dir yazi_path ya_path
+
+    if any_system_package_installed yazi; then
+        info "Skipping Yazi: system package manager handles it."
+        return 0
+    fi
+
+    if ! command -v yazi >/dev/null 2>&1; then
+        info "Skipping Yazi: binary is not installed."
+        return 0
+    fi
+
+    if ! cmd_matches_prefixes yazi /usr/local/bin "$HOME/.local"; then
+        info "Skipping Yazi: executable is not in a supported user-managed location."
+        return 0
+    fi
+
+    version=$(github_latest_release_tag sxyazi/yazi)
+    [ -n "$version" ] || {
+        error "Could not determine the latest Yazi version."
+        return 1
+    }
+
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset="yazi-x86_64-unknown-linux-musl.zip"
+            ;;
+        aarch64|arm64)
+            asset="yazi-aarch64-unknown-linux-musl.zip"
+            ;;
+        *)
+            error "Unsupported architecture for Yazi prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    url="https://github.com/sxyazi/yazi/releases/download/${version}/${asset}"
+    tmp_dir=$(mktemp -d)
+    yazi_path=$(resolve_cmd_path yazi) || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    ya_path="$(dirname "$yazi_path")/ya"
+
+    if ! download_file "$url" "$tmp_dir/yazi.zip"; then
+        error "Failed to download Yazi archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! unzip -q "$tmp_dir/yazi.zip" -d "$tmp_dir"; then
+        error "Failed to extract Yazi archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    matches=("$tmp_dir"/yazi-*)
+    extracted_dir=${matches[0]}
+    if [ ! -d "$extracted_dir" ]; then
+        error "Yazi archive did not contain the expected directory."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    info "Updating Yazi to ${version}..."
+    install_file_with_optional_sudo "$extracted_dir/yazi" "$yazi_path" 0755 || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+    install_file_with_optional_sudo "$extracted_dir/ya" "$ya_path" 0755 || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    rm -rf "$tmp_dir"
+    yazi --version >/dev/null 2>&1 || return 1
+    log "Yazi updated to ${version}."
+}
+
+update_lazygit() {
+    local version arch asset url tmp_dir
+
+    if any_system_package_installed lazygit; then
+        info "Skipping Lazygit: system package manager handles it."
+        return 0
+    fi
+
+    if ! cmd_is_managed lazygit /usr/local/bin/lazygit; then
+        info "Skipping Lazygit: /usr/local/bin/lazygit is not managed by this repo."
+        return 0
+    fi
+
+    version=$(github_latest_release_tag jesseduffield/lazygit)
+    version=${version#v}
+    [ -n "$version" ] || {
+        error "Could not determine the latest Lazygit version."
+        return 1
+    }
+
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset="lazygit_${version}_linux_x86_64.tar.gz"
+            ;;
+        aarch64|arm64)
+            asset="lazygit_${version}_linux_arm64.tar.gz"
+            ;;
+        *)
+            error "Unsupported architecture for Lazygit archive: $arch"
+            return 1
+            ;;
+    esac
+
+    url="https://github.com/jesseduffield/lazygit/releases/download/v${version}/${asset}"
+    tmp_dir=$(mktemp -d)
+
+    if ! download_file "$url" "$tmp_dir/lazygit.tar.gz"; then
+        error "Failed to download Lazygit archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xzf "$tmp_dir/lazygit.tar.gz" -C "$tmp_dir"; then
+        error "Failed to extract Lazygit archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    info "Updating Lazygit to v${version}..."
+    sudo install -m 0755 "$tmp_dir/lazygit" /usr/local/bin/lazygit || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    rm -rf "$tmp_dir"
+    lazygit --version >/dev/null 2>&1 || return 1
+    log "Lazygit updated to v${version}."
+}
+
+update_gh_managed() {
+    local version version_no_v arch asset_arch asset url extracted_dir_name
+
+    if any_system_package_installed github-cli gh; then
+        info "Skipping GitHub CLI: system package manager handles it."
+        return 0
+    fi
+
+    if [ ! -x "$GH_INSTALL_DIR/bin/gh" ] && ! cmd_is_managed gh "$GH_INSTALL_DIR"; then
+        info "Skipping GitHub CLI: $GH_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    version=$(github_latest_release_tag cli/cli)
+    [ -n "$version" ] || {
+        error "Could not determine the latest GitHub CLI version."
+        return 1
+    }
+
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset_arch="amd64"
+            ;;
+        aarch64|arm64)
+            asset_arch="arm64"
+            ;;
+        *)
+            error "Unsupported architecture for GitHub CLI archive: $arch"
+            return 1
+            ;;
+    esac
+
+    version_no_v=${version#v}
+    asset="gh_${version_no_v}_linux_${asset_arch}.tar.gz"
+    extracted_dir_name="gh_${version_no_v}_linux_${asset_arch}"
+    url="https://github.com/cli/cli/releases/download/${version}/${asset}"
+
+    info "Updating GitHub CLI to ${version}..."
+    install_from_tarball \
+        "$url" \
+        -xzf \
+        "$extracted_dir_name" \
+        "$GH_INSTALL_DIR" \
+        "bin/gh" \
+        "$HOME/.local/bin/gh" || return 1
+
+    log "GitHub CLI updated to ${version}."
+}
+
+update_typst_managed() {
+    if any_system_package_installed typst; then
+        info "Skipping Typst: system package manager handles it."
+        return 0
+    fi
+
+    if ! command -v typst >/dev/null 2>&1; then
+        info "Skipping Typst: binary is not installed."
+        return 0
+    fi
+
+    if ! cmd_matches_prefixes typst "$HOME"; then
+        info "Skipping Typst: executable is not in a supported user-managed location."
+        return 0
+    fi
+
+    info "Updating Typst with the built-in updater..."
+    typst update || return 1
+    typst --version >/dev/null 2>&1 || return 1
+    log "Typst updated."
+}
+
+update_clipboard_managed() {
+    local version arch asset url tmp_dir
+
+    if any_system_package_installed clipboard; then
+        info "Skipping Clipboard: system package manager handles it."
+        return 0
+    fi
+
+    if [ ! -x "$CLIPBOARD_INSTALL_DIR/bin/cb" ] && ! cmd_is_managed cb "$CLIPBOARD_INSTALL_DIR"; then
+        info "Skipping Clipboard: $CLIPBOARD_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    version=$(github_latest_release_tag Slackadays/Clipboard)
+    [ -n "$version" ] || {
+        error "Could not determine the latest Clipboard version."
+        return 1
+    }
+
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset="clipboard-linux-amd64.zip"
+            ;;
+        aarch64|arm64)
+            asset="clipboard-linux-arm64.zip"
+            ;;
+        *)
+            error "Unsupported architecture for Clipboard archive: $arch"
+            return 1
+            ;;
+    esac
+
+    url="https://github.com/Slackadays/Clipboard/releases/download/${version}/${asset}"
+    tmp_dir=$(mktemp -d)
+
+    if ! download_file "$url" "$tmp_dir/clipboard.zip"; then
+        error "Failed to download Clipboard archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    mkdir -p "$tmp_dir/clipboard" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    if ! unzip -q "$tmp_dir/clipboard.zip" -d "$tmp_dir/clipboard"; then
+        error "Failed to extract Clipboard archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare local install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! replace_install_dir "$tmp_dir/clipboard" "$CLIPBOARD_INSTALL_DIR"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$CLIPBOARD_INSTALL_DIR/bin/cb" "$HOME/.local/bin/cb"; then
+        error "Failed to link Clipboard into ~/.local/bin."
+        rm -rf "$tmp_dir" "$CLIPBOARD_INSTALL_DIR"
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/cb" --help >/dev/null 2>&1; then
+        error "Clipboard failed smoke test after update."
+        rm -rf "$tmp_dir" "$CLIPBOARD_INSTALL_DIR"
+        rm -f "$HOME/.local/bin/cb"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "Clipboard updated to ${version}."
+}
+
+update_sesh_binary() {
+    local version arch asset url tmp_dir
+
+    if [ ! -x "$SESH_INSTALL_DIR/sesh" ] && ! cmd_is_managed sesh "$SESH_INSTALL_DIR"; then
+        info "Skipping sesh: $SESH_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    version=$(github_latest_release_tag joshmedeski/sesh)
+    [ -n "$version" ] || {
+        error "Could not determine the latest sesh version."
+        return 1
+    }
+
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset="sesh_Linux_x86_64.tar.gz"
+            ;;
+        aarch64|arm64)
+            asset="sesh_Linux_arm64.tar.gz"
+            ;;
+        *)
+            error "Unsupported architecture for sesh archive: $arch"
+            return 1
+            ;;
+    esac
+
+    url="https://github.com/joshmedeski/sesh/releases/download/${version}/${asset}"
+    tmp_dir=$(mktemp -d)
+
+    if ! download_file "$url" "$tmp_dir/sesh.tar.gz"; then
+        error "Failed to download sesh archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xzf "$tmp_dir/sesh.tar.gz" -C "$tmp_dir"; then
+        error "Failed to extract sesh archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -x "$tmp_dir/sesh" ]; then
+        error "sesh archive did not contain the expected binary."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin" "$SESH_INSTALL_DIR"; then
+        error "Failed to prepare sesh install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! install -m 0755 "$tmp_dir/sesh" "$SESH_INSTALL_DIR/sesh"; then
+        error "Failed to install sesh binary."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$SESH_INSTALL_DIR/sesh" "$HOME/.local/bin/sesh"; then
+        error "Failed to link sesh into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/sesh" --version >/dev/null 2>&1; then
+        error "sesh failed smoke test after update."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "sesh updated to ${version}."
+}
+
+update_sesh_arch() {
+    local cmd tmp_dir pkg_dir
+
+    if ! command -v sesh >/dev/null 2>&1; then
+        info "Skipping sesh: binary is not installed."
+        return 0
+    fi
+
+    for cmd in git makepkg; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            error "Missing required command for sesh AUR update: $cmd"
+            return 1
+        fi
+    done
+
+    info "Updating sesh from the AUR package sesh-bin..."
+    tmp_dir=$(mktemp -d)
+    pkg_dir="$tmp_dir/sesh-bin"
+
+    if ! git clone --depth 1 https://aur.archlinux.org/sesh-bin.git "$pkg_dir"; then
+        error "Failed to clone the sesh-bin AUR package."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! (cd "$pkg_dir" && makepkg -si --noconfirm); then
+        error "Failed to build or install sesh-bin from AUR."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    sesh --version >/dev/null 2>&1 || return 1
+    log "sesh updated from AUR package sesh-bin."
+}
+
+update_sesh_managed() {
+    case "$DISTRO_FAMILY" in
+        arch)
+            update_sesh_arch
+            ;;
+        *)
+            update_sesh_binary
+            ;;
+    esac
+}
+
+update_python_tools_managed() {
+    local tool
+    local tools=(ipython jupytext black isort pylint)
+
+    if ! command -v pipx >/dev/null 2>&1; then
+        info "Skipping pipx tools: pipx is not installed."
+        return 0
+    fi
+
+    info "Updating repo-managed pipx tools..."
+
+    for tool in "${tools[@]}"; do
+        if ! pipx list | grep -Eq "^[[:space:]]*package ${tool} "; then
+            info "Skipping pipx tool not currently installed: $tool"
+            continue
+        fi
+
+        pipx upgrade "$tool" || return 1
+    done
+
+    log "Repo-managed pipx tools updated."
+}
+
+update_kitty_managed() {
+    if any_system_package_installed kitty; then
+        info "Skipping Kitty: system package manager handles it."
+        return 0
+    fi
+
+    if [ ! -x "$KITTY_INSTALL_DIR/bin/kitty" ] && ! cmd_is_managed kitty "$KITTY_INSTALL_DIR"; then
+        info "Skipping Kitty: $KITTY_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    info "Updating Kitty from the official upstream installer..."
+    curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n || return 1
+    install_kitty || return 1
+    log "Kitty updated."
+}
+
+update_zen_managed() {
+    local zen_binary install_dir parent_dir arch asset url tmp_dir
+
+    zen_binary=$(find_managed_zen_binary) || {
+        info "Skipping Zen Browser: managed tarball install is not present."
+        return 0
+    }
+
+    install_dir=$(dirname "$zen_binary")
+    parent_dir=$(dirname "$install_dir")
+
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset="zen.linux-x86_64.tar.xz"
+            ;;
+        aarch64|arm64)
+            asset="zen.linux-aarch64.tar.xz"
+            ;;
+        *)
+            error "Unsupported architecture for Zen Browser archive: $arch"
+            return 1
+            ;;
+    esac
+
+    url="https://github.com/zen-browser/desktop/releases/latest/download/${asset}"
+    tmp_dir=$(mktemp -d)
+
+    if ! download_file "$url" "$tmp_dir/zen.tar.xz"; then
+        error "Failed to download Zen Browser archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xJf "$tmp_dir/zen.tar.xz" -C "$tmp_dir"; then
+        error "Failed to extract Zen Browser archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -x "$tmp_dir/zen/zen" ]; then
+        error "Zen Browser archive did not contain the expected launcher."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    info "Updating Zen Browser..."
+    mkdir -p "$parent_dir" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    if ! replace_install_dir "$tmp_dir/zen" "$install_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    "$install_dir/zen" --version >/dev/null 2>&1 || return 1
+    log "Zen Browser updated."
+}
+
+update_opencode_managed() {
+    if any_system_package_installed opencode; then
+        info "Skipping OpenCode: system package manager handles it."
+        return 0
+    fi
+
+    if ! cmd_is_managed opencode "$HOME/.opencode" "$HOME/.local/bin/opencode"; then
+        info "Skipping OpenCode: binary is not managed by the upstream installer."
+        return 0
+    fi
+
+    info "Updating OpenCode..."
+    opencode upgrade || return 1
+    log "OpenCode updated."
+}
+
+update_nerd_fonts() {
+    local version font tmp_dir
+    local fonts=(JetBrainsMono RobotoMono NerdFontsSymbolsOnly)
+
+    if [ ! -d "$FONT_DIR" ]; then
+        info "Skipping Nerd Fonts: $FONT_DIR does not exist."
+        return 0
+    fi
+
+    version=$(github_latest_release_tag ryanoasis/nerd-fonts)
+    [ -n "$version" ] || {
+        error "Could not determine the latest Nerd Fonts release."
+        return 1
+    }
+
+    info "Updating Nerd Fonts to ${version}..."
+
+    for font in "${fonts[@]}"; do
+        tmp_dir=$(mktemp -d)
+
+        if ! download_file "https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${font}.zip" "$tmp_dir/${font}.zip"; then
+            error "Failed to download Nerd Font archive for ${font}."
+            rm -rf "$tmp_dir"
+            return 1
+        fi
+
+        if ! unzip -qo "$tmp_dir/${font}.zip" -d "$FONT_DIR" -x "LICENSE*" "README*"; then
+            error "Failed to extract Nerd Font archive for ${font}."
+            rm -rf "$tmp_dir"
+            return 1
+        fi
+
+        rm -rf "$tmp_dir"
+    done
+
+    if command -v fc-cache >/dev/null 2>&1; then
+        fc-cache -f "$FONT_DIR" >/dev/null 2>&1 || return 1
+    fi
+
+    log "Nerd Fonts updated to ${version}."
+}
+
+print_update_summary() {
+    echo ""
+
+    if [ "$STEP_HAD_FAILURES" = true ]; then
+        warn "Package update completed with partial success."
+        warn "Failed steps: ${STEP_FAILED_LABELS[*]}"
+        return 1
+    fi
+
+    log "Package update completed successfully."
+    return 0
+}
+
+main() {
+    info "Repo directory: $SCRIPT_REPO_DIR"
+
+    if [ "$UPDATE_SYSTEM" = true ]; then
+        [ "$DISTRO" = ubuntu ] && run_step "Ubuntu PPA refresh" add_ppas
+        run_step "system package update" update_system_packages
+    else
+        info "Skipping distro-managed packages by request."
+    fi
+
+    if [ "$UPDATE_NON_SYSTEM" = true ]; then
+        run_step "TPM update" update_tpm
+        run_step "Rust toolchain update" update_rust_toolchain
+        run_step "tree-sitter CLI update" update_tree_sitter_cli
+        run_step "Neovim update" update_neovim_managed
+        run_step "fzf update" update_fzf
+        run_step "Starship update" update_starship
+        run_step "Zoxide update" update_zoxide
+        run_step "Yazi update" update_yazi
+        run_step "Lazygit update" update_lazygit
+        run_step "GitHub CLI update" update_gh_managed
+        run_step "Typst update" update_typst_managed
+        run_step "Clipboard update" update_clipboard_managed
+        run_step "sesh update" update_sesh_managed
+        run_step "pipx tools update" update_python_tools_managed
+        run_step "Kitty update" update_kitty_managed
+        run_step "Zen Browser update" update_zen_managed
+        run_step "OpenCode update" update_opencode_managed
+        [ "$UPDATE_FONTS" = true ] && run_step "Nerd Fonts update" update_nerd_fonts
+        run_step "Neovim plugin sync" sync_neovim_plugins
+    else
+        info "Skipping non-package-manager tools by request."
+    fi
+
+    print_update_summary
+}
+
+main "$@"
