@@ -64,6 +64,7 @@ local todo_comments_module = safe_require("plugins.tools.todo-comments")
 local yanky_module = safe_require("plugins.tools.yanky")
 local copilot_module = safe_require("plugins.tools.copilot")
 local opencode_module = safe_require("plugins.tools.opencode")
+local kitty_scrollback_module = safe_require("plugins.tools.kitty_scrollback")
 
 -- Create array of valid plugin specs
 local plugins = {}
@@ -84,7 +85,7 @@ add_if_valid(todo_comments_module)
 add_if_valid(yanky_module)
 add_if_valid(copilot_module)
 add_if_valid(opencode_module)
+add_if_valid(kitty_scrollback_module)
 
 -- Return only valid plugin specs
 return plugins
-
