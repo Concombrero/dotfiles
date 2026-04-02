@@ -399,13 +399,28 @@ install_yazi() {
     fi
 
     info "Installing Yazi..."
-    local YAZI_VERSION
+    local YAZI_VERSION arch asset YAZI_URL
     YAZI_VERSION=$(github_latest_release_tag sxyazi/yazi)
     if [ -z "$YAZI_VERSION" ]; then
         error "Could not determine latest Yazi version. Install manually."
         return 1
     fi
-    local YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.zip"
+
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset="yazi-x86_64-unknown-linux-musl.zip"
+            ;;
+        aarch64|arm64)
+            asset="yazi-aarch64-unknown-linux-musl.zip"
+            ;;
+        *)
+            error "Unsupported architecture for Yazi prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/${asset}"
     local TMP_DIR
     TMP_DIR=$(mktemp -d)
 
