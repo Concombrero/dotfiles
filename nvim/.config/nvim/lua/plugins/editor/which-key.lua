@@ -155,7 +155,6 @@ return {
       -- Disabled by default for Telescope
       disable = {
         bt = { "help", "quickfix", "terminal", "prompt" }, -- for example
-        ft = { "NvimTree" }                                -- add your explorer's filetype here
       }
     },
     spec = {
@@ -170,9 +169,9 @@ return {
         { "<leader>b", build_current_buffer, desc = "build", mode = "n" },
         { "<leader>d", "<cmd>update! | lua Snacks.bufdelete()<CR>", desc = "delete buffer" },
         { "<leader>e", "<cmd>Yazi<CR>", desc = "explorer" },
-        { "<leader>g", "<cmd>lua vim.schedule(function() require('plugins.tools.snacks.utils').safe_lazygit() end)<cr>", desc = "lazygit" },
-        { "<leader>h", "<cmd>vert sb<CR>", desc = "create split" },
-        { "<leader>p", "<cmd>b#<CR>", desc = "alternate buffer", mode = "n" },
+        { "<leader>g", "<cmd>lua vim.schedule(function() require('plugins.tools.snacks.utils').safe_lazygit() end)<cr>", desc = "git" },
+        { "<leader>h", "<cmd>vert sb<CR>", desc = "horizontal split" },
+        { "<leader>a", "<cmd>b#<CR>", desc = "alternate buffer", mode = "n" },
         { "<leader>q", "<cmd>wa! | qa!<CR>", desc = "quit" },
         { "<leader>w", "<cmd>wa!<CR>", desc = "write" },
 
