@@ -1,12 +1,11 @@
 -- Keep all global `<leader>` mappings in this file so which-key remains the
 -- single source of truth. Avoid defining leader bindings inside plugin specs.
 
-local function opencode_call(method, ...)
-  local args = { ... }
+local function opencode_call(method)
 
   return function()
     require("lazy").load({ plugins = { "opencode.nvim" } })
-    require("opencode.api")[method](table.unpack(args))
+    require("opencode.api")[method]()
   end
 end
 
