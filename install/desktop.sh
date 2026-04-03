@@ -1,5 +1,144 @@
 #!/usr/bin/env bash
 
+GTK_THEME_NAME="catppuccin-mocha-mauve-standard+default"
+GTK_THEME_CURSOR_NAME="DMZ-White"
+GTK_THEME_CURSOR_SIZE=16
+GTK_THEME_FONT_NAME="JetBrainsMono Nerd Font 10"
+
+gtk_theme_is_installed() {
+    local candidate
+
+    for candidate in \
+        "$HOME/.local/share/themes/$GTK_THEME_NAME" \
+        "$HOME/.themes/$GTK_THEME_NAME" \
+        "/usr/local/share/themes/$GTK_THEME_NAME" \
+        "/usr/share/themes/$GTK_THEME_NAME"
+    do
+        [ -d "$candidate" ] && return 0
+    done
+
+    return 1
+}
+
+install_catppuccin_gtk_theme() {
+    local latest_tag tmp_dir archive extract_dir theme_dir install_dir
+
+    if gtk_theme_is_installed; then
+        log "Catppuccin GTK theme is already available."
+        return 0
+    fi
+
+    if [ "$DISTRO_FAMILY" != debian ]; then
+        warn "Catppuccin GTK theme was not found after package installation."
+        return 1
+    fi
+
+    latest_tag="$(github_latest_release_tag catppuccin/gtk)"
+    if [ -z "$latest_tag" ]; then
+        error "Failed to determine the latest Catppuccin GTK release tag."
+        return 1
+    fi
+
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/${GTK_THEME_NAME}.zip"
+    extract_dir="$tmp_dir/extracted"
+    theme_dir="$extract_dir/$GTK_THEME_NAME"
+    install_dir="$HOME/.local/share/themes/$GTK_THEME_NAME"
+
+    if ! mkdir -p "$extract_dir" "$HOME/.local/share/themes"; then
+        error "Failed to prepare Catppuccin GTK theme directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! curl -fsSL "https://github.com/catppuccin/gtk/releases/download/${latest_tag}/${GTK_THEME_NAME}.zip" -o "$archive"; then
+        error "Failed to download the Catppuccin GTK theme archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! unzip -q "$archive" -d "$extract_dir"; then
+        error "Failed to extract the Catppuccin GTK theme archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -f "$theme_dir/index.theme" ]; then
+        error "Catppuccin GTK theme archive did not contain the expected theme directory."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! replace_path "$theme_dir" "$install_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "Catppuccin GTK theme installed to ~/.local/share/themes/$GTK_THEME_NAME."
+}
+
+run_gsettings() {
+    local -a cmd=(gsettings "$@")
+
+    if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && has_cmd dbus-launch; then
+        cmd=(dbus-launch gsettings "$@")
+    fi
+
+    "${cmd[@]}"
+}
+
+configure_gtk_appearance() {
+    local had_failure=false
+    local file
+    local gtk_files=(
+        "$HOME/.gtkrc-2.0"
+        "$HOME/.config/gtk-3.0/settings.ini"
+        "$HOME/.config/gtk-4.0/settings.ini"
+    )
+
+    for file in "${gtk_files[@]}"; do
+        if [ ! -e "$file" ] && [ ! -L "$file" ]; then
+            warn "GTK appearance config missing after stow: $file"
+            had_failure=true
+        fi
+    done
+
+    if ! gtk_theme_is_installed; then
+        warn "GTK theme $GTK_THEME_NAME is not installed in a standard theme directory."
+        had_failure=true
+    fi
+
+    if ! has_cmd gsettings; then
+        warn "gsettings not found; skipping GNOME appearance configuration."
+        had_failure=true
+    else
+        run_gsettings set org.gnome.desktop.interface color-scheme prefer-dark || {
+            warn "Failed to set GNOME color-scheme to prefer-dark."
+            had_failure=true
+        }
+        run_gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME_NAME" || {
+            warn "Failed to set the GNOME GTK theme to $GTK_THEME_NAME."
+            had_failure=true
+        }
+        run_gsettings set org.gnome.desktop.interface cursor-theme "$GTK_THEME_CURSOR_NAME" || {
+            warn "Failed to set the GNOME cursor theme to $GTK_THEME_CURSOR_NAME."
+            had_failure=true
+        }
+        run_gsettings set org.gnome.desktop.interface cursor-size "$GTK_THEME_CURSOR_SIZE" || {
+            warn "Failed to set the GNOME cursor size to $GTK_THEME_CURSOR_SIZE."
+            had_failure=true
+        }
+        run_gsettings set org.gnome.desktop.interface font-name "$GTK_THEME_FONT_NAME" || {
+            warn "Failed to set the GNOME interface font to $GTK_THEME_FONT_NAME."
+            had_failure=true
+        }
+    fi
+
+    [ "$had_failure" = false ] || return 1
+    log "GTK and GNOME appearance configured."
+}
+
 install_fonts() {
     info "Installing Fonts..."
     local FONT_DIR="/usr/local/share/fonts/nerd-fonts"
@@ -336,6 +475,8 @@ install_desktop_extras() {
 
     [ "$fonts_enabled" = true ] && run_step "font installation" install_fonts
     [ "$DISTRO_FAMILY" = arch ] && run_step "SDDM theme install" install_sddm_theme
+    run_step "Catppuccin GTK theme install" install_catppuccin_gtk_theme
+    run_step "GTK appearance configuration" configure_gtk_appearance
     run_step "wallpaper setup" set_wallpaper
     run_step "MIME configuration" configure_mime
 }

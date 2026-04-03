@@ -138,7 +138,8 @@ Defined in distro-specific package lists:
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
-- **Arch desktop extras:** `sddm`, `lxappearance`, `adw-gtk-theme`, `localsend`
+- **Arch desktop extras:** `sddm`, `dconf`, `lxappearance`, `nwg-look`, `adw-gtk-theme`, `gnome-themes-extra`, `localsend`
+- **Arch AUR packages (via existing `paru`/`yay`, bootstrapping `yay-bin` only when needed):** `clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`
 - **Image helpers:** `imagemagick`
 
 ### External Tools/Binaries
@@ -146,15 +147,17 @@ Defined in distro-specific package lists:
 - `fzf` (git clone to `~/.fzf` on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `starship` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zoxide` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `sesh` (GitHub release binary under `~/.local/opt/sesh` on Debian/Ubuntu; AUR package `sesh-bin` via `makepkg` on Arch)
+- `sesh` (GitHub release binary under `~/.local/opt/sesh` on Debian/Ubuntu; AUR package `sesh-bin` via an AUR helper on Arch)
+- `clipboard` (official release archive under `~/.local/opt/clipboard` on Debian/Ubuntu; AUR package `clipboard` via an AUR helper on Arch)
 - `yazi` + `ya` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `lazygit` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `kitty` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `localsend` (official LocalSend release archive under `~/.local/opt/localsend` on Debian/Ubuntu; Arch-family package `localsend` on `pacman` systems)
 - `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `zen-browser` (official installer)
-- `xdg-desktop-portal-termfilechooser` (built from upstream source on desktop installs)
+- `zen-browser` (official installer on Debian/Ubuntu; AUR package `zen-browser-bin` via an AUR helper on Arch)
+- `xdg-desktop-portal-termfilechooser` (built from upstream source on Debian/Ubuntu desktop installs; AUR package via an AUR helper on Arch)
+- `Catppuccin GTK theme` (official release archive in `~/.local/share/themes` on Debian/Ubuntu; AUR package `catppuccin-gtk-theme-mocha` via an AUR helper on Arch)
 
 ### Arch login manager theme
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`

@@ -2,3 +2,5 @@
 
 # Desktop applications and themes not shipped in the official Arch repositories.
 catppuccin-gtk-theme-mocha
+xdg-desktop-portal-termfilechooser
+zen-browser-bin

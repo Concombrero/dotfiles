@@ -1,8 +1,12 @@
 #!/usr/bin/env sh
 set -eu
 
+zen_browser_cmd=$(command -v zen-browser 2>/dev/null || true)
+
 for candidate in \
     "${ZEN_BIN:-}" \
+    "${ZEN_BROWSER_BIN:-}" \
+    "$zen_browser_cmd" \
     "$HOME/.local/opt/zen/zen" \
     "$HOME/.tarball-installations/zen/zen"
 do
@@ -11,5 +15,5 @@ do
     fi
 done
 
-printf '%s\n' "zen: binary not found at ~/.local/opt/zen/zen or ~/.tarball-installations/zen/zen" >&2
+printf '%s\n' "zen: binary not found at zen-browser, ~/.local/opt/zen/zen, or ~/.tarball-installations/zen/zen" >&2
 exit 127

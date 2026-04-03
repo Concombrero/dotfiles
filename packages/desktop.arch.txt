@@ -26,8 +26,11 @@ network-manager-applet
 libpulse
 xdg-desktop-portal
 xdg-desktop-portal-gtk
+dconf
 lxappearance
+nwg-look
 adw-gtk-theme
+gnome-themes-extra
 localsend
 
 # Image/Graphics
@@ -47,11 +50,3 @@ vlc
 qutebrowser
 kitty
 fastfetch
-
-# Portal file chooser backend build deps
-meson
-ninja
-libinih
-# Arch ships the headers needed by termfilechooser in the main `systemd` package.
-systemd
-scdoc

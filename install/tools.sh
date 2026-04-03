@@ -130,28 +130,27 @@ install_tree_sitter_cli() {
 
 install_tools() {
     run_step "TPM install" install_tpm
-    run_step "Clipboard install" install_clipboard
+    [ "$DISTRO_FAMILY" = "debian" ] && run_step "Clipboard install" install_clipboard
     run_step "Rust toolchain install" install_rust_toolchain
     run_step "tree-sitter CLI install" install_tree_sitter_cli
     run_step "Neovim install" install_neovim
 
     if [ "$DISTRO_FAMILY" = "debian" ]; then
         install_upstream_tools
+        run_step "Sesh install" install_sesh_binary
     elif [ "$INSTALL_PACKAGES" = true ]; then
-        info "Using pacman packages for remaining Arch-managed CLI tools."
+        info "Using pacman and an AUR helper for remaining Arch-managed CLI tools."
     else
         warn "Skipping remaining Arch-managed CLI tools because package installation was disabled."
     fi
-
-    run_step "Sesh install" install_sesh
 
     run_step "Python tool install" install_python_tools
 
     if [ "$1" = true ]; then
         [ "$DISTRO_FAMILY" = "debian" ] && run_step "Kitty install" install_kitty
         [ "$DISTRO_FAMILY" = "debian" ] && run_step "LocalSend install" install_localsend
-        run_step "termfilechooser install" install_termfilechooser
-        run_step "Zen Browser install" install_zen
+        [ "$DISTRO_FAMILY" = "debian" ] && run_step "termfilechooser install" install_termfilechooser
+        [ "$DISTRO_FAMILY" = "debian" ] && run_step "Zen Browser install" install_zen
     fi
 }
 
@@ -710,20 +709,6 @@ install_kitty() {
     log "Kitty installed to ~/.local/kitty.app."
 }
 
-install_sesh() {
-    case "$DISTRO_FAMILY" in
-        debian)
-            install_sesh_binary
-            ;;
-        arch)
-            install_sesh_arch
-            ;;
-        *)
-            warn "Skipping sesh install on unsupported distro family: $DISTRO_FAMILY"
-            ;;
-    esac
-}
-
 install_sesh_binary() {
     if command -v sesh &>/dev/null; then
         warn "sesh already installed, skipping."
@@ -810,48 +795,6 @@ install_sesh_binary() {
 
     rm -rf "$tmp_dir"
     log "sesh installed to ~/.local/opt/sesh."
-}
-
-install_sesh_arch() {
-    if command -v sesh &>/dev/null; then
-        warn "sesh already installed, skipping."
-        return
-    fi
-
-    local cmd tmp_dir pkg_dir
-
-    for cmd in git makepkg; do
-        if ! command -v "$cmd" &>/dev/null; then
-            error "Missing required command for sesh AUR install: $cmd"
-            return 1
-        fi
-    done
-
-    info "Installing sesh from AUR package sesh-bin..."
-
-    tmp_dir="$(mktemp -d)"
-    pkg_dir="$tmp_dir/sesh-bin"
-
-    if ! git clone --depth 1 https://aur.archlinux.org/sesh-bin.git "$pkg_dir"; then
-        error "Failed to clone AUR package sesh-bin."
-        rm -rf "$tmp_dir"
-        return 1
-    fi
-
-    if ! (cd "$pkg_dir" && makepkg -si --noconfirm); then
-        error "Failed to build or install sesh-bin from AUR."
-        rm -rf "$tmp_dir"
-        return 1
-    fi
-
-    rm -rf "$tmp_dir"
-
-    if ! command -v sesh &>/dev/null; then
-        error "sesh installed from AUR but is not available on PATH."
-        return 1
-    fi
-
-    log "sesh installed from AUR package sesh-bin."
 }
 
 install_typst() {
@@ -1027,14 +970,8 @@ install_termfilechooser() {
     src_dir="$tmp_dir/xdg-desktop-portal-termfilechooser"
     build_dir="$src_dir/build"
 
-    if ! git clone --depth 1 https://github.com/boydaihungst/xdg-desktop-portal-termfilechooser.git "$src_dir"; then
+    if ! git clone --depth 1 https://github.com/hunkyburrito/xdg-desktop-portal-termfilechooser.git "$src_dir"; then
         error "Failed to clone xdg-desktop-portal-termfilechooser."
-        rm -rf "$tmp_dir"
-        return 1
-    fi
-
-    if ! bash "$src_dir/remove_legacy_file.sh"; then
-        error "Failed to remove legacy xdg-desktop-portal-termfilechooser files."
         rm -rf "$tmp_dir"
         return 1
     fi

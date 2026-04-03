@@ -16,6 +16,8 @@ network-manager-gnome
 pulseaudio-utils
 xdg-desktop-portal
 xdg-desktop-portal-gtk
+lxappearance
+gnome-themes-extra
 
 # Image/Graphics
 imagemagick

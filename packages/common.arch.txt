@@ -37,8 +37,8 @@ python-pip
 alsa-lib
 
 # Use official Arch packages when available instead of upstream installers.
-# `neovim` is installed from the upstream release archive in install/tools.sh.
-# `sesh` is installed separately from the AUR package `sesh-bin` in install/tools.sh.
+# AUR packages live in packages/*.aur.arch.txt and are installed via paru/yay.
+# `neovim` is still installed from the upstream release archive in install/tools.sh.
 fzf
 starship
 zoxide

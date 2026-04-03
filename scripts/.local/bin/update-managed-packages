@@ -290,8 +290,16 @@ update_system_packages() {
             sudo apt-get upgrade -y --with-new-pkgs || return 1
             ;;
         arch)
-            info "Synchronizing pacman packages and upgrading the system..."
-            sudo pacman -Syu --noconfirm || return 1
+            if command -v paru >/dev/null 2>&1; then
+                info "Synchronizing pacman and AUR packages with paru..."
+                paru -Syu --noconfirm --answerdiff None --answerclean None || return 1
+            elif command -v yay >/dev/null 2>&1; then
+                info "Synchronizing pacman and AUR packages with yay..."
+                yay -Syu --noconfirm --answerdiff None --answerclean None || return 1
+            else
+                info "Synchronizing pacman packages and upgrading the system..."
+                sudo pacman -Syu --noconfirm || return 1
+            fi
             ;;
     esac
 }

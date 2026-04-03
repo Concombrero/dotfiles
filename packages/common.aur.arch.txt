@@ -1,0 +1,5 @@
+# AUR packages used on Arch when they track the current upstream release.
+
+# CLI tools not shipped in the official Arch repositories.
+clipboard
+sesh-bin
