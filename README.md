@@ -81,7 +81,7 @@ What this does at a high level:
 
 1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
-3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, and `kitty`, installs `sesh` from the AUR on Arch, and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
+3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, `kitty`, and `localsend`, installs `sesh` from the AUR on Arch, and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, `localsend`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
@@ -139,7 +139,7 @@ Defined in distro-specific package lists:
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
-- **Arch desktop extras:** `sddm`
+- **Arch desktop extras:** `sddm`, `lxappearance`, `adw-gtk-theme`, `localsend`
 - **Image helpers:** `imagemagick`
 
 ### External Tools/Binaries
@@ -151,6 +151,7 @@ Defined in distro-specific package lists:
 - `yazi` + `ya` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `lazygit` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `kitty` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `localsend` (official LocalSend release archive under `~/.local/opt/localsend` on Debian/Ubuntu; Arch-family package `localsend` on `pacman` systems)
 - `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zen-browser` (official installer)

@@ -149,6 +149,7 @@ install_tools() {
 
     if [ "$1" = true ]; then
         [ "$DISTRO_FAMILY" = "debian" ] && run_step "Kitty install" install_kitty
+        [ "$DISTRO_FAMILY" = "debian" ] && run_step "LocalSend install" install_localsend
         run_step "termfilechooser install" install_termfilechooser
         run_step "Zen Browser install" install_zen
     fi
@@ -1078,6 +1079,113 @@ install_zen() {
     fi
 
     log "Zen Browser installed."
+}
+
+install_localsend() {
+    local install_dir link_path current_tag latest_tag version_no_v arch asset url tmp_dir bundle_dir archive
+    install_dir="$HOME/.local/opt/localsend"
+    link_path="$HOME/.local/bin/localsend"
+    latest_tag="$(github_latest_release_tag localsend/localsend)"
+
+    if [ -z "$latest_tag" ]; then
+        error "Failed to determine the latest LocalSend release tag."
+        return 1
+    fi
+
+    if [ ! -x "$install_dir/localsend_app" ] && { [ -x "$link_path" ] || command -v localsend &>/dev/null; }; then
+        warn "LocalSend is already installed outside ~/.local/opt/localsend; skipping upstream archive install."
+        return 0
+    fi
+
+    current_tag=""
+    if [ -f "$install_dir/.repo-version" ]; then
+        current_tag="$(cat "$install_dir/.repo-version" 2>/dev/null || true)"
+    fi
+
+    if [ "$current_tag" = "$latest_tag" ] && [ -x "$install_dir/localsend_app" ]; then
+        ensure_local_bin_dir || return 1
+
+        if ! ln -sfn "$install_dir/localsend_app" "$link_path"; then
+            error "Failed to link LocalSend into ~/.local/bin."
+            return 1
+        fi
+
+        log "LocalSend ${latest_tag} already installed at ~/.local/opt/localsend."
+        return 0
+    fi
+
+    version_no_v=${latest_tag#v}
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset="LocalSend-${version_no_v}-linux-x86-64.tar.gz"
+            ;;
+        aarch64|arm64)
+            asset="LocalSend-${version_no_v}-linux-arm-64.tar.gz"
+            ;;
+        *)
+            error "Unsupported architecture for LocalSend archive: $arch"
+            return 1
+            ;;
+    esac
+
+    url="https://github.com/localsend/localsend/releases/download/${latest_tag}/${asset}"
+    tmp_dir="$(mktemp -d)"
+    bundle_dir="$tmp_dir/localsend"
+    archive="$tmp_dir/localsend.tar.gz"
+
+    if ! mkdir -p "$bundle_dir"; then
+        error "Failed to prepare temporary LocalSend extraction directory."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! curl -fsSL "$url" -o "$archive"; then
+        error "Failed to download LocalSend archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xzf "$archive" -C "$bundle_dir"; then
+        error "Failed to extract LocalSend archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -x "$bundle_dir/localsend_app" ]; then
+        error "LocalSend archive did not contain the expected launcher."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare LocalSend install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! replace_install_dir "$bundle_dir" "$install_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    printf '%s\n' "$latest_tag" > "$install_dir/.repo-version" || warn "Failed to write LocalSend version marker."
+
+    if ! ln -sfn "$install_dir/localsend_app" "$link_path"; then
+        error "Failed to link LocalSend into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+
+    if [ ! -x "$link_path" ]; then
+        error "LocalSend installed but is not available at ~/.local/bin/localsend."
+        return 1
+    fi
+
+    log "LocalSend ${latest_tag} installed to ~/.local/opt/localsend."
 }
 
 install_opencode() {

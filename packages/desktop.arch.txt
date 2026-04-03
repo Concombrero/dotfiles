@@ -26,6 +26,9 @@ network-manager-applet
 libpulse
 xdg-desktop-portal
 xdg-desktop-portal-gtk
+lxappearance
+adw-gtk-theme
+localsend
 
 # Image/Graphics
 imagemagick

@@ -46,6 +46,7 @@ GH_INSTALL_DIR="$HOME/.local/opt/gh"
 CLIPBOARD_INSTALL_DIR="$HOME/.local/opt/clipboard"
 SESH_INSTALL_DIR="$HOME/.local/opt/sesh"
 KITTY_INSTALL_DIR="$HOME/.local/kitty.app"
+LOCALSEND_INSTALL_DIR="$HOME/.local/opt/localsend"
 TPM_INSTALL_DIR="$HOME/.tmux/plugins/tpm"
 FONT_DIR="/usr/local/share/fonts/nerd-fonts"
 
@@ -866,6 +867,20 @@ update_kitty_managed() {
     log "Kitty updated."
 }
 
+update_localsend_managed() {
+    if any_system_package_installed localsend; then
+        info "Skipping LocalSend: system package manager handles it."
+        return 0
+    fi
+
+    if [ ! -x "$LOCALSEND_INSTALL_DIR/localsend_app" ] && ! cmd_is_managed localsend "$LOCALSEND_INSTALL_DIR" "$HOME/.local/bin/localsend"; then
+        info "Skipping LocalSend: $LOCALSEND_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    install_localsend
+}
+
 update_zen_managed() {
     local zen_binary install_dir parent_dir arch asset url tmp_dir
 
@@ -1031,6 +1046,7 @@ main() {
         run_step "sesh update" update_sesh_managed
         run_step "pipx tools update" update_python_tools_managed
         run_step "Kitty update" update_kitty_managed
+        run_step "LocalSend update" update_localsend_managed
         run_step "Zen Browser update" update_zen_managed
         run_step "OpenCode update" update_opencode_managed
         [ "$UPDATE_FONTS" = true ] && run_step "Nerd Fonts update" update_nerd_fonts
