@@ -183,6 +183,7 @@ Installed in isolated environments to avoid breaking system Python:
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/chrome/`
 - stowed to `~/.config/zen/chrome/`
+- includes Catppuccin Zen Browser Mocha + Mauve upstream assets
 - after Zen creates a profile, move that `chrome/` directory into `~/.zen/<profile>/`
 
 ## Stow Packages Applied by Installer
