@@ -101,6 +101,11 @@ print_post_install_notes() {
         info "Arch desktop installs provision the SDDM login stack and enable sddm.service."
     fi
 
+    if [ "$INSTALL_DESKTOP" = true ]; then
+        info "Zen UI CSS is staged at ~/.config/zen/chrome/."
+        info "After launching Zen once, move that chrome directory into your active profile under ~/.zen/<profile>/chrome/."
+    fi
+
     info "Please log out and log back in for all changes to take effect."
 }
 
