@@ -83,7 +83,7 @@ What this does at a high level:
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using distro-specific package lists plus Arch AUR package lists through an existing `paru`/`yay` helper when available.
 3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, `kitty`, and `localsend`, installs current AUR-tracked packages through an AUR helper on Arch/CachyOS (`clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`), and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, `localsend`, etc.).
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Adds fonts (optional), installs and applies the Catppuccin GTK theme, sets GNOME/GTK dark mode defaults (`prefer-dark`, Catppuccin Mocha Mauve, JetBrainsMono Nerd Font 10), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
+5. **Configures System:** Adds fonts (optional), installs and applies the Catppuccin GTK theme, installs a DMZ cursor theme package, sets GNOME/GTK dark mode defaults (`prefer-dark`, Catppuccin Mocha Mauve, JetBrainsMono Nerd Font 10, `DMZ-White` cursor), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 7. **Stages Zen UI CSS:** Stows a tracked `~/.config/zen/chrome/` directory so it can be moved into a Zen profile after first launch.
 
@@ -139,7 +139,7 @@ Defined in distro-specific package lists:
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
-- **Arch desktop extras:** `sddm`, `dconf`, `lxappearance`, `nwg-look`, `adw-gtk-theme`, `gnome-themes-extra`, `localsend`
+- **Arch desktop extras:** `sddm`, `dconf`, `lxappearance`, `xcursor-vanilla-dmz`, `nwg-look`, `adw-gtk-theme`, `gnome-themes-extra`, `localsend`
 - **Arch AUR packages (via existing `paru`/`yay`, bootstrapping `yay-bin` only when needed):** `clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`
 - **Image helpers:** `imagemagick`
 
@@ -188,6 +188,7 @@ Installed in isolated environments to avoid breaking system Python:
 - GTK theme: `catppuccin-mocha-mauve-standard+default`
 - GTK font: `JetBrainsMono Nerd Font 10`
 - cursor theme: `DMZ-White` at size `16`
+- Ubuntu installs `dmz-cursor-theme`; Arch installs `xcursor-vanilla-dmz` and the installer aliases it to `DMZ-White` for cross-distro GTK compatibility
 
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/chrome/`

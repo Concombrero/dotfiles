@@ -17,6 +17,7 @@ pulseaudio-utils
 xdg-desktop-portal
 xdg-desktop-portal-gtk
 lxappearance
+dmz-cursor-theme
 gnome-themes-extra
 
 # Image/Graphics

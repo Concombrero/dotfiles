@@ -146,12 +146,14 @@ install_tools() {
 
     run_step "Python tool install" install_python_tools
 
-    if [ "$1" = true ]; then
-        [ "$DISTRO_FAMILY" = "debian" ] && run_step "Kitty install" install_kitty
-        [ "$DISTRO_FAMILY" = "debian" ] && run_step "LocalSend install" install_localsend
-        [ "$DISTRO_FAMILY" = "debian" ] && run_step "termfilechooser install" install_termfilechooser
-        [ "$DISTRO_FAMILY" = "debian" ] && run_step "Zen Browser install" install_zen
+    if [ "$1" = true ] && [ "$DISTRO_FAMILY" = "debian" ]; then
+        run_step "Kitty install" install_kitty
+        run_step "LocalSend install" install_localsend
+        run_step "termfilechooser install" install_termfilechooser
+        run_step "Zen Browser install" install_zen
     fi
+
+    return 0
 }
 
 sync_neovim_plugins() {

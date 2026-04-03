@@ -28,6 +28,7 @@ xdg-desktop-portal
 xdg-desktop-portal-gtk
 dconf
 lxappearance
+xcursor-vanilla-dmz
 nwg-look
 adw-gtk-theme
 gnome-themes-extra

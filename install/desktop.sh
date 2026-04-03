@@ -5,6 +5,65 @@ GTK_THEME_CURSOR_NAME="DMZ-White"
 GTK_THEME_CURSOR_SIZE=16
 GTK_THEME_FONT_NAME="JetBrainsMono Nerd Font 10"
 
+cursor_theme_is_installed() {
+    local theme_name=$1
+    local candidate
+
+    for candidate in \
+        "$HOME/.icons/$theme_name" \
+        "$HOME/.local/share/icons/$theme_name" \
+        "$HOME/.local/share/themes/$theme_name" \
+        "/usr/local/share/icons/$theme_name" \
+        "/usr/share/icons/$theme_name"
+    do
+        [ -d "$candidate" ] && return 0
+    done
+
+    return 1
+}
+
+ensure_dmz_cursor_theme_name() {
+    local alias_path fallback_name fallback_path
+    local fallbacks=(Vanilla-DMZ Vanilla-DMZ-AA)
+
+    if cursor_theme_is_installed "$GTK_THEME_CURSOR_NAME"; then
+        return 0
+    fi
+
+    for fallback_name in "${fallbacks[@]}"; do
+        for fallback_path in \
+            "$HOME/.icons/$fallback_name" \
+            "$HOME/.local/share/icons/$fallback_name" \
+            "/usr/local/share/icons/$fallback_name" \
+            "/usr/share/icons/$fallback_name"
+        do
+            [ -d "$fallback_path" ] || continue
+
+            alias_path="$HOME/.icons/$GTK_THEME_CURSOR_NAME"
+            if [ -e "$alias_path" ] && [ ! -L "$alias_path" ]; then
+                error "Cannot create cursor alias at $alias_path because a non-symlink path already exists."
+                return 1
+            fi
+
+            if ! mkdir -p "$HOME/.icons"; then
+                error "Failed to prepare ~/.icons for the cursor alias."
+                return 1
+            fi
+
+            ln -sfn "$fallback_path" "$alias_path" || {
+                error "Failed to alias $GTK_THEME_CURSOR_NAME to $fallback_name."
+                return 1
+            }
+
+            log "Aliased $GTK_THEME_CURSOR_NAME to $fallback_name for GTK cursor compatibility."
+            return 0
+        done
+    done
+
+    error "Cursor theme $GTK_THEME_CURSOR_NAME was not found after package installation."
+    return 1
+}
+
 gtk_theme_is_installed() {
     local candidate
 
@@ -93,6 +152,7 @@ configure_gtk_appearance() {
     local file
     local gtk_files=(
         "$HOME/.gtkrc-2.0"
+        "$HOME/.icons/default/index.theme"
         "$HOME/.config/gtk-3.0/settings.ini"
         "$HOME/.config/gtk-4.0/settings.ini"
     )
@@ -106,6 +166,11 @@ configure_gtk_appearance() {
 
     if ! gtk_theme_is_installed; then
         warn "GTK theme $GTK_THEME_NAME is not installed in a standard theme directory."
+        had_failure=true
+    fi
+
+    if ! cursor_theme_is_installed "$GTK_THEME_CURSOR_NAME"; then
+        warn "Cursor theme $GTK_THEME_CURSOR_NAME is not installed in a standard icon directory."
         had_failure=true
     fi
 
@@ -476,6 +541,7 @@ install_desktop_extras() {
     [ "$fonts_enabled" = true ] && run_step "font installation" install_fonts
     [ "$DISTRO_FAMILY" = arch ] && run_step "SDDM theme install" install_sddm_theme
     run_step "Catppuccin GTK theme install" install_catppuccin_gtk_theme
+    run_step "DMZ cursor theme compatibility" ensure_dmz_cursor_theme_name
     run_step "GTK appearance configuration" configure_gtk_appearance
     run_step "wallpaper setup" set_wallpaper
     run_step "MIME configuration" configure_mime
