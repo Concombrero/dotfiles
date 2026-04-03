@@ -1,0 +1,51 @@
+#!/usr/bin/env sh
+set -eu
+
+config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
+profile_root=${ZEN_PROFILE_ROOT:-"$HOME/.zen"}
+source_css=${ZEN_USER_CHROME_SOURCE:-"$config_home/zen/userChrome.css"}
+
+resolve_default_profile() {
+    local profile
+
+    if [ -f "$profile_root/installs.ini" ]; then
+        profile=$(awk -F= '$1 == "Default" { print $2; exit }' "$profile_root/installs.ini")
+        if [ -n "$profile" ]; then
+            printf '%s\n' "$profile"
+            return 0
+        fi
+    fi
+
+    [ -f "$profile_root/profiles.ini" ] || return 1
+
+    awk -F= '
+        /^\[/ { path = ""; is_default = 0; next }
+        $1 == "Path" { path = $2; if (is_default && path != "") { print path; exit } }
+        $1 == "Default" && $2 == "1" { is_default = 1; if (path != "") { print path; exit } }
+    ' "$profile_root/profiles.ini"
+}
+
+main() {
+    local profile_rel profile_dir chrome_dir target_css
+
+    [ -f "$source_css" ] || return 0
+
+    profile_rel=$(resolve_default_profile 2>/dev/null || true)
+    [ -n "$profile_rel" ] || return 0
+
+    profile_dir="$profile_root/$profile_rel"
+    [ -d "$profile_dir" ] || return 0
+
+    chrome_dir="$profile_dir/chrome"
+    target_css="$chrome_dir/userChrome.css"
+
+    mkdir -p "$chrome_dir"
+
+    if [ -f "$target_css" ] && cmp -s "$source_css" "$target_css"; then
+        return 0
+    fi
+
+    install -m 0644 "$source_css" "$target_css"
+}
+
+main "$@"

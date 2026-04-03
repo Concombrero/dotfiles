@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
+if command -v zen-sync-profile-css >/dev/null 2>&1; then
+    zen-sync-profile-css || true
+fi
+
 for candidate in \
     "${ZEN_BIN:-}" \
     "$HOME/.local/opt/zen/zen" \

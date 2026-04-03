@@ -331,6 +331,13 @@ configure_mime() {
     fi
 }
 
+sync_zen_profile_css() {
+    local helper="$HOME/.local/bin/zen-sync-profile-css"
+
+    [ -x "$helper" ] || return 0
+    "$helper"
+}
+
 install_desktop_extras() {
     local fonts_enabled=$1
 
@@ -338,4 +345,5 @@ install_desktop_extras() {
     [ "$DISTRO_FAMILY" = arch ] && run_step "SDDM theme install" install_sddm_theme
     run_step "wallpaper setup" set_wallpaper
     run_step "MIME configuration" configure_mime
+    run_step "Zen profile CSS sync" sync_zen_profile_css
 }

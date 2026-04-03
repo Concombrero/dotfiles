@@ -80,6 +80,7 @@ What this does at a high level:
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
+7. **Syncs Zen UI CSS:** Keeps the tracked `~/.config/zen/userChrome.css` copied into Zen's active default profile when that profile exists.
 
 Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/install.log`)
 
@@ -172,6 +173,11 @@ Installed in isolated environments to avoid breaking system Python:
 - `Font Awesome`
 - installed system-wide under `/usr/local/share/fonts/nerd-fonts`
 
+### Zen Browser CSS
+- source of truth: `zen/.config/zen/userChrome.css`
+- stowed to `~/.config/zen/userChrome.css`
+- synced into the active default Zen profile's `chrome/userChrome.css` by the installer and `~/.local/bin/zen`
+
 ## Stow Packages Applied by Installer
 
 | Package | Target |
@@ -204,6 +210,7 @@ Installed in isolated environments to avoid breaking system Python:
 | `opencode` | `~/.config/opencode/opencode.json` |
 | `x11` | `~/.xprofile` |
 | `gtk` | `~/.config/gtk-3.0/` and `~/.config/gtk-4.0/` |
+| `zen` | `~/.config/zen/userChrome.css` |
 
 > [!NOTE]
 > Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply the repo aggressively after a distro installer or another tool has recreated config files under `$HOME`.
