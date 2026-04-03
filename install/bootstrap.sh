@@ -240,9 +240,18 @@ install_single_aur_package() {
 
     info "Installing Arch AUR package: $package"
 
-    if "$AUR_HELPER_CMD" -S --needed --noconfirm --answerdiff None --answerclean None "$package"; then
-        return 0
-    fi
+    case "$AUR_HELPER_CMD" in
+        yay)
+            if "$AUR_HELPER_CMD" -S --needed --noconfirm --answerdiff None --answerclean None "$package"; then
+                return 0
+            fi
+            ;;
+        *)
+            if "$AUR_HELPER_CMD" -S --needed --noconfirm "$package"; then
+                return 0
+            fi
+            ;;
+    esac
 
     warn "Skipping Arch AUR package '$package' after $AUR_HELPER_CMD failed."
     return 1

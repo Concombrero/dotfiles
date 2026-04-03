@@ -264,7 +264,14 @@ update_system_packages() {
             AUR_HELPER_CMD="$(current_aur_helper 2>/dev/null || true)"
             if [ -n "$AUR_HELPER_CMD" ]; then
                 info "Synchronizing pacman and AUR packages with $AUR_HELPER_CMD..."
-                "$AUR_HELPER_CMD" -Syu --noconfirm --answerdiff None --answerclean None || return 1
+                case "$AUR_HELPER_CMD" in
+                    yay)
+                        "$AUR_HELPER_CMD" -Syu --noconfirm --answerdiff None --answerclean None || return 1
+                        ;;
+                    *)
+                        "$AUR_HELPER_CMD" -Syu --noconfirm || return 1
+                        ;;
+                esac
             else
                 info "Synchronizing pacman packages and upgrading the system..."
                 sudo pacman -Syu --noconfirm || return 1
