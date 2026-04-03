@@ -34,13 +34,13 @@ export XDG_DATA_HOME="$HOME/.local/share"
 # !! Contents within this block are managed by juliaup !!
 
 case ":$PATH:" in
-    *:/home/tag/.juliaup/bin:*)
+    *:"$HOME/.juliaup/bin":*)
         ;;
 
     *)
-        export PATH=/home/tag/.juliaup/bin${PATH:+:${PATH}}
+        export PATH="$HOME/.juliaup/bin"${PATH:+:${PATH}}
         ;;
 esac
 
 # <<< juliaup initialize <<<
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
