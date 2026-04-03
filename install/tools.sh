@@ -180,7 +180,14 @@ sync_neovim_plugins() {
         return 1
     fi
 
-    log "Neovim plugins synced."
+    info "Updating Mason registries..."
+
+    if ! "$nvim_cmd" --headless "+MasonUpdate" +qa; then
+        error "Failed to update Mason registries."
+        return 1
+    fi
+
+    log "Neovim plugins synced and Mason registries updated."
 }
 
 termfilechooser_is_installed() {
