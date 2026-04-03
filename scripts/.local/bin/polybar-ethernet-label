@@ -1,0 +1,51 @@
+#!/usr/bin/env sh
+set -eu
+
+iface=""
+gateway=""
+name=""
+
+if command -v nmcli >/dev/null 2>&1; then
+    iface="$(nmcli -t -f DEVICE,TYPE,STATE device status 2>/dev/null | awk -F: '$2 == "ethernet" && $3 == "connected" { print $1; exit }')"
+fi
+
+if [ -z "$iface" ] && command -v ip >/dev/null 2>&1; then
+    iface="$(ip route show default 2>/dev/null | awk '{ print $5; exit }')"
+fi
+
+[ -n "$iface" ] || exit 0
+[ -d "/sys/class/net/$iface" ] || exit 0
+[ ! -d "/sys/class/net/$iface/wireless" ] || exit 0
+
+if command -v nmcli >/dev/null 2>&1; then
+    gateway="$(nmcli -g IP4.GATEWAY device show "$iface" 2>/dev/null | awk 'NF { print; exit }')"
+fi
+
+if [ -z "$gateway" ] && command -v ip >/dev/null 2>&1; then
+    gateway="$(ip route show default dev "$iface" 2>/dev/null | awk '/default/ { print $3; exit }')"
+fi
+
+if [ -n "$gateway" ] && command -v getent >/dev/null 2>&1; then
+    name="$(getent hosts "$gateway" 2>/dev/null | awk 'NF >= 2 { print $2; exit }')"
+fi
+
+if [ -z "$name" ] && [ -n "$gateway" ] && command -v resolvectl >/dev/null 2>&1; then
+    name="$(resolvectl query "$gateway" 2>/dev/null | awk -F': ' 'NR == 1 { print $2 }' | awk '{ print $1; exit }')"
+fi
+
+if [ -n "$name" ]; then
+    name="${name%.}"
+    name="${name%%.*}"
+    name="$(printf '%s\n' "$name" | awk '{ print tolower($0) }')"
+fi
+
+if [ -z "$name" ] && command -v nmcli >/dev/null 2>&1; then
+    name="$(nmcli -g GENERAL.CONNECTION device show "$iface" 2>/dev/null | awk 'NF { print; exit }')"
+    [ "$name" = "--" ] && name=""
+fi
+
+if [ -n "$name" ]; then
+    printf '%s\n' "$name"
+else
+    printf 'LAN\n'
+fi
