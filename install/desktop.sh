@@ -206,11 +206,13 @@ configure_gtk_appearance() {
 
 install_fonts() {
     info "Installing Fonts..."
-    local FONT_DIR="/usr/local/share/fonts/nerd-fonts"
+    local FONT_ROOT="/usr/local/share/fonts"
+    local FONT_DIR="$FONT_ROOT/nerd-fonts"
+    local FONT_AWESOME_DIR="$FONT_ROOT/fontawesome"
     local had_failure=false
 
-    if ! sudo install -d -m 0755 "$FONT_DIR"; then
-        error "Failed to create font directory at $FONT_DIR"
+    if ! sudo install -d -m 0755 "$FONT_DIR" "$FONT_AWESOME_DIR"; then
+        error "Failed to create font directories under $FONT_ROOT"
         return 1
     fi
 
@@ -244,12 +246,57 @@ install_fonts() {
         log "Font $font installed."
     done
 
+    if ls "$FONT_AWESOME_DIR"/*.otf >/dev/null 2>&1; then
+        warn "Font Awesome already present, skipping."
+    else
+        info "Downloading Font Awesome..."
+        local TMP_DIR FONT_AWESOME_VERSION FONT_AWESOME_ARCHIVE FONT_AWESOME_EXTRACT_DIR FONT_AWESOME_SOURCE_DIR
+        TMP_DIR=$(mktemp -d)
+        FONT_AWESOME_VERSION="7.2.0"
+        FONT_AWESOME_ARCHIVE="$TMP_DIR/fontawesome.zip"
+        FONT_AWESOME_EXTRACT_DIR="$TMP_DIR/extracted"
+        FONT_AWESOME_SOURCE_DIR="$FONT_AWESOME_EXTRACT_DIR/fontawesome-free-${FONT_AWESOME_VERSION}-desktop/otfs"
+
+        if ! curl -fsSL "https://github.com/FortAwesome/Font-Awesome/releases/download/${FONT_AWESOME_VERSION}/fontawesome-free-${FONT_AWESOME_VERSION}-desktop.zip" -o "$FONT_AWESOME_ARCHIVE"; then
+            warn "Failed to download Font Awesome."
+            had_failure=true
+            rm -rf "$TMP_DIR"
+        else
+            mkdir -p "$FONT_AWESOME_EXTRACT_DIR"
+            if ! unzip -q "$FONT_AWESOME_ARCHIVE" -d "$FONT_AWESOME_EXTRACT_DIR"; then
+                warn "Failed to extract Font Awesome."
+                had_failure=true
+                rm -rf "$TMP_DIR"
+            elif ! ls "$FONT_AWESOME_SOURCE_DIR"/*.otf >/dev/null 2>&1; then
+                warn "Font Awesome archive did not contain the expected OTF files."
+                had_failure=true
+                rm -rf "$TMP_DIR"
+            elif ! sudo install -m 0644 "$FONT_AWESOME_SOURCE_DIR"/*.otf "$FONT_AWESOME_DIR/"; then
+                warn "Failed to install Font Awesome OTF files."
+                had_failure=true
+                rm -rf "$TMP_DIR"
+            else
+                rm -rf "$TMP_DIR"
+                log "Font Awesome installed."
+            fi
+        fi
+    fi
+
     # Update cache
     if command -v fc-cache &>/dev/null; then
-        if sudo fc-cache -fv "$FONT_DIR"; then
+        if sudo fc-cache -fv "$FONT_ROOT"; then
             log "Font cache rebuilt."
         else
             warn "Failed to rebuild font cache."
+            had_failure=true
+        fi
+    fi
+
+    if command -v fc-list &>/dev/null; then
+        if fc-list | grep -qi "Font Awesome"; then
+            log "Font Awesome is available to fontconfig."
+        else
+            warn "Font Awesome was not found in the fontconfig database."
             had_failure=true
         fi
     fi

@@ -13,7 +13,7 @@ Options:
   --system-only, --apt-only      Only update distro-managed packages
   --non-system-only, --non-apt-only
                                  Only update non-package-manager tools
-  --with-fonts                   Refresh Nerd Fonts installed by the repo
+  --with-fonts                   Refresh repo-managed fonts
   -h, --help                     Show this help text
 EOF
 }
@@ -48,7 +48,9 @@ SESH_INSTALL_DIR="$HOME/.local/opt/sesh"
 KITTY_INSTALL_DIR="$HOME/.local/kitty.app"
 LOCALSEND_INSTALL_DIR="$HOME/.local/opt/localsend"
 TPM_INSTALL_DIR="$HOME/.tmux/plugins/tpm"
-FONT_DIR="/usr/local/share/fonts/nerd-fonts"
+FONT_ROOT="/usr/local/share/fonts"
+FONT_DIR="$FONT_ROOT/nerd-fonts"
+FONT_AWESOME_DIR="$FONT_ROOT/fontawesome"
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -958,6 +960,69 @@ update_nerd_fonts() {
     log "Nerd Fonts updated to ${version}."
 }
 
+update_font_awesome() {
+    local version tmp_dir source_dir archive_dir
+
+    version=$(github_latest_release_tag FortAwesome/Font-Awesome)
+    [ -n "$version" ] || {
+        error "Could not determine the latest Font Awesome release."
+        return 1
+    }
+
+    info "Updating Font Awesome to ${version}..."
+    tmp_dir=$(mktemp -d)
+    archive_dir="$tmp_dir/extracted"
+    source_dir="$archive_dir/fontawesome-free-${version}-desktop/otfs"
+
+    if ! download_file "https://github.com/FortAwesome/Font-Awesome/releases/download/${version}/fontawesome-free-${version}-desktop.zip" "$tmp_dir/fontawesome.zip"; then
+        error "Failed to download Font Awesome archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    mkdir -p "$archive_dir" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    if ! unzip -q "$tmp_dir/fontawesome.zip" -d "$archive_dir"; then
+        error "Failed to extract Font Awesome archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ls "$source_dir"/*.otf >/dev/null 2>&1; then
+        error "Font Awesome archive did not contain the expected OTF files."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! sudo install -d -m 0755 "$FONT_AWESOME_DIR"; then
+        error "Failed to create font directory at ${FONT_AWESOME_DIR}."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! sudo install -m 0644 "$source_dir"/*.otf "$FONT_AWESOME_DIR/"; then
+        error "Failed to install Font Awesome OTF files."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+
+    if command -v fc-cache >/dev/null 2>&1; then
+        sudo fc-cache -f "$FONT_ROOT" >/dev/null 2>&1 || return 1
+    fi
+
+    if command -v fc-list >/dev/null 2>&1 && ! fc-list | grep -qi "Font Awesome"; then
+        error "Font Awesome was not found in the fontconfig database after install."
+        return 1
+    fi
+
+    log "Font Awesome updated to ${version}."
+}
+
 print_update_summary() {
     echo ""
 
@@ -1001,6 +1066,7 @@ main() {
         run_step "Zen Browser update" update_zen_managed
         run_step "OpenCode update" update_opencode_managed
         [ "$UPDATE_FONTS" = true ] && run_step "Nerd Fonts update" update_nerd_fonts
+        [ "$UPDATE_FONTS" = true ] && run_step "Font Awesome update" update_font_awesome
         run_step "Neovim plugin sync" sync_neovim_plugins
     else
         info "Skipping non-package-manager tools by request."

@@ -181,7 +181,7 @@ Installed in isolated environments to avoid breaking system Python:
 - `RobotoMono Nerd Font`
 - `NerdFontsSymbolsOnly`
 - `Font Awesome`
-- installed system-wide under `/usr/local/share/fonts/nerd-fonts`
+- installed system-wide under `/usr/local/share/fonts/`
 
 ### GTK / GNOME Appearance
 - GNOME color scheme: `prefer-dark`
