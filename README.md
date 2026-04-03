@@ -59,6 +59,11 @@ cd ~/dotfiles
 ./install.sh
 ```
 
+> [!WARNING]
+> Do not run `./install.sh` with `sudo` or as `root`.
+> The installer performs user-scoped setup under `$HOME` and runs commands that must execute in the real user session.
+> Run it as your normal user account with sudo access; the script will call `sudo` itself only for the system-level steps that need it.
+
 **Headless install:**
 If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc.), run:
 
