@@ -168,35 +168,6 @@ install_file_with_optional_sudo() {
     sudo install -m "$mode" "$source_path" "$destination_path"
 }
 
-replace_install_dir() {
-    local source_dir=$1
-    local install_dir=$2
-    local backup_dir="${install_dir}.backup.$$"
-
-    rm -rf "$backup_dir"
-
-    if [ -e "$install_dir" ] || [ -L "$install_dir" ]; then
-        if ! mv "$install_dir" "$backup_dir"; then
-            error "Failed to back up existing install at $install_dir."
-            rm -rf "$backup_dir"
-            return 1
-        fi
-    fi
-
-    if mv "$source_dir" "$install_dir"; then
-        rm -rf "$backup_dir"
-        return 0
-    fi
-
-    error "Failed to place files under $install_dir."
-
-    if [ -e "$backup_dir" ] || [ -L "$backup_dir" ]; then
-        mv "$backup_dir" "$install_dir" >/dev/null 2>&1 || true
-    fi
-
-    return 1
-}
-
 find_managed_zen_binary() {
     local candidate
 
@@ -263,7 +234,7 @@ install_from_tarball() {
         return 1
     fi
 
-    if ! replace_install_dir "$extracted_dir" "$install_dir"; then
+    if ! replace_path "$extracted_dir" "$install_dir"; then
         rm -rf "$tmp_dir"
         return 1
     fi
@@ -290,12 +261,10 @@ update_system_packages() {
             sudo apt-get upgrade -y --with-new-pkgs || return 1
             ;;
         arch)
-            if command -v paru >/dev/null 2>&1; then
-                info "Synchronizing pacman and AUR packages with paru..."
-                paru -Syu --noconfirm --answerdiff None --answerclean None || return 1
-            elif command -v yay >/dev/null 2>&1; then
-                info "Synchronizing pacman and AUR packages with yay..."
-                yay -Syu --noconfirm --answerdiff None --answerclean None || return 1
+            AUR_HELPER_CMD="$(current_aur_helper 2>/dev/null || true)"
+            if [ -n "$AUR_HELPER_CMD" ]; then
+                info "Synchronizing pacman and AUR packages with $AUR_HELPER_CMD..."
+                "$AUR_HELPER_CMD" -Syu --noconfirm --answerdiff None --answerclean None || return 1
             else
                 info "Synchronizing pacman packages and upgrading the system..."
                 sudo pacman -Syu --noconfirm || return 1
@@ -689,7 +658,7 @@ update_clipboard_managed() {
         return 1
     fi
 
-    if ! replace_install_dir "$tmp_dir/clipboard" "$CLIPBOARD_INSTALL_DIR"; then
+    if ! replace_path "$tmp_dir/clipboard" "$CLIPBOARD_INSTALL_DIR"; then
         rm -rf "$tmp_dir"
         return 1
     fi
@@ -788,51 +757,13 @@ update_sesh_binary() {
     log "sesh updated to ${version}."
 }
 
-update_sesh_arch() {
-    local cmd tmp_dir pkg_dir
-
-    if ! command -v sesh >/dev/null 2>&1; then
-        info "Skipping sesh: binary is not installed."
+update_sesh_managed() {
+    if any_system_package_installed sesh-bin sesh; then
+        info "Skipping sesh: system package manager handles it."
         return 0
     fi
 
-    for cmd in git makepkg; do
-        if ! command -v "$cmd" >/dev/null 2>&1; then
-            error "Missing required command for sesh AUR update: $cmd"
-            return 1
-        fi
-    done
-
-    info "Updating sesh from the AUR package sesh-bin..."
-    tmp_dir=$(mktemp -d)
-    pkg_dir="$tmp_dir/sesh-bin"
-
-    if ! git clone --depth 1 https://aur.archlinux.org/sesh-bin.git "$pkg_dir"; then
-        error "Failed to clone the sesh-bin AUR package."
-        rm -rf "$tmp_dir"
-        return 1
-    fi
-
-    if ! (cd "$pkg_dir" && makepkg -si --noconfirm); then
-        error "Failed to build or install sesh-bin from AUR."
-        rm -rf "$tmp_dir"
-        return 1
-    fi
-
-    rm -rf "$tmp_dir"
-    sesh --version >/dev/null 2>&1 || return 1
-    log "sesh updated from AUR package sesh-bin."
-}
-
-update_sesh_managed() {
-    case "$DISTRO_FAMILY" in
-        arch)
-            update_sesh_arch
-            ;;
-        *)
-            update_sesh_binary
-            ;;
-    esac
+    update_sesh_binary
 }
 
 update_python_tools_managed() {
@@ -892,6 +823,11 @@ update_localsend_managed() {
 update_zen_managed() {
     local zen_binary install_dir parent_dir arch asset url tmp_dir
 
+    if any_system_package_installed zen-browser-bin zen-browser; then
+        info "Skipping Zen Browser: system package manager handles it."
+        return 0
+    fi
+
     zen_binary=$(find_managed_zen_binary) || {
         info "Skipping Zen Browser: managed tarball install is not present."
         return 0
@@ -941,7 +877,7 @@ update_zen_managed() {
         return 1
     }
 
-    if ! replace_install_dir "$tmp_dir/zen" "$install_dir"; then
+    if ! replace_path "$tmp_dir/zen" "$install_dir"; then
         rm -rf "$tmp_dir"
         return 1
     fi

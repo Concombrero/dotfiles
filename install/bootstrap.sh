@@ -8,7 +8,6 @@ export NC='\033[0m'
 
 PACKAGE_DB_READY=false
 PACMAN_FULL_UPGRADE_DONE=false
-AUR_HELPER_READY=false
 AUR_HELPER_CMD=""
 PACKAGE_INSTALL_HAD_FAILURES=false
 PACKAGE_INSTALL_FAILED=()
@@ -186,17 +185,11 @@ ensure_aur_helper() {
     [ "$DISTRO_FAMILY" = arch ] || return 0
 
     if [ -n "$AUR_HELPER_CMD" ] && has_cmd "$AUR_HELPER_CMD"; then
-        AUR_HELPER_READY=true
         return 0
     fi
 
     AUR_HELPER_CMD="$(current_aur_helper 2>/dev/null || true)"
     if [ -n "$AUR_HELPER_CMD" ]; then
-        AUR_HELPER_READY=true
-        return 0
-    fi
-
-    if [ "$AUR_HELPER_READY" = true ]; then
         return 0
     fi
 
@@ -236,7 +229,6 @@ ensure_aur_helper() {
     fi
 
     AUR_HELPER_CMD="yay"
-    AUR_HELPER_READY=true
     log "$AUR_HELPER_CMD is ready."
 }
 
@@ -244,6 +236,7 @@ install_single_aur_package() {
     local package=$1
 
     [ "$DISTRO_FAMILY" = arch ] || return 1
+    [ -n "$AUR_HELPER_CMD" ] || return 1
 
     info "Installing Arch AUR package: $package"
 

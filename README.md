@@ -80,10 +80,10 @@ If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc
 What this does at a high level:
 
 1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
-2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using Arch-specific package lists when running on `pacman`.
-3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, `kitty`, and `localsend`, installs `sesh` from the AUR on Arch, and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, `localsend`, etc.). The desktop profile also builds `xdg-desktop-portal-termfilechooser` from upstream source.
+2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using distro-specific package lists plus Arch AUR package lists through an existing `paru`/`yay` helper when available.
+3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, `kitty`, and `localsend`, installs current AUR-tracked packages through an AUR helper on Arch/CachyOS (`clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`), and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, `localsend`, etc.).
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Adds fonts (optional), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
+5. **Configures System:** Adds fonts (optional), installs and applies the Catppuccin GTK theme, sets GNOME/GTK dark mode defaults (`prefer-dark`, Catppuccin Mocha Mauve, JetBrainsMono Nerd Font 10), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
 7. **Stages Zen UI CSS:** Stows a tracked `~/.config/zen/chrome/` directory so it can be moved into a Zen profile after first launch.
 
@@ -97,7 +97,7 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 3. Launch Zen once so it creates `~/.zen/<profile>/`, then move `~/.config/zen/chrome/` into that profile directory.
 
 > [!NOTE]
-> `install.sh` now runs headless `:Lazy sync` and `:Mason` automatically after stowing the Neovim config, so plugins and Mason registry metadata are ready on first launch.
+> `install.sh` now runs headless `:Lazy sync` and `:MasonUpdate` automatically after stowing the Neovim config, so plugins and Mason registry metadata are ready on first launch.
 
 > [!NOTE]
 > On Arch/CachyOS, the desktop install enables `sddm.service` automatically, replacing an existing `display-manager.service` symlink when a distro default like LightDM is already enabled, and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme. NetworkManager, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
@@ -130,11 +130,12 @@ Example:
 
 ## What `install.sh` Provisions
 
-### Packages (via System Package Manager)
+### Packages
 Defined in distro-specific package lists:
 
 - Debian/Ubuntu: `packages/common.txt` and `packages/desktop.txt`
 - Arch-based: `packages/common.arch.txt` and `packages/desktop.arch.txt`
+- Arch AUR: `packages/common.aur.arch.txt` and `packages/desktop.aur.arch.txt`
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
 - **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
@@ -181,6 +182,12 @@ Installed in isolated environments to avoid breaking system Python:
 - `NerdFontsSymbolsOnly`
 - `Font Awesome`
 - installed system-wide under `/usr/local/share/fonts/nerd-fonts`
+
+### GTK / GNOME Appearance
+- GNOME color scheme: `prefer-dark`
+- GTK theme: `catppuccin-mocha-mauve-standard+default`
+- GTK font: `JetBrainsMono Nerd Font 10`
+- cursor theme: `DMZ-White` at size `16`
 
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/chrome/`

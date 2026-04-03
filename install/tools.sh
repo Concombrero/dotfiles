@@ -182,8 +182,8 @@ sync_neovim_plugins() {
 
     info "Updating Mason registries..."
 
-    if ! "$nvim_cmd" --headless "+Mason" +qa; then
-        error "Failed to install Mason registries."
+    if ! "$nvim_cmd" --headless "+MasonUpdate" +qa; then
+        error "Failed to update Mason registries."
         return 1
     fi
 
@@ -1102,7 +1102,7 @@ install_localsend() {
         return 1
     fi
 
-    if ! replace_install_dir "$bundle_dir" "$install_dir"; then
+    if ! replace_path "$bundle_dir" "$install_dir"; then
         rm -rf "$tmp_dir"
         return 1
     fi
