@@ -1,0 +1,5 @@
+gtk-application-prefer-dark-theme=1
+gtk-cursor-theme-name="DMZ-White"
+gtk-cursor-theme-size=16
+gtk-font-name="JetBrainsMono Nerd Font 10"
+gtk-theme-name="catppuccin-mocha-mauve-standard+default"

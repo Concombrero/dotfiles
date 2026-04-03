@@ -1,0 +1,4 @@
+# AUR packages used on Arch when they track the current upstream release.
+
+# Desktop applications and themes not shipped in the official Arch repositories.
+catppuccin-gtk-theme-mocha
