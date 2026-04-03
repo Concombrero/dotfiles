@@ -33,6 +33,14 @@ local indent_disabled = {
   latex = true,
 }
 
+local function enable_syntax_fallback(bufnr, filetype, language)
+  local syntax = filetype ~= "" and filetype or language
+
+  if syntax ~= "" then
+    vim.bo[bufnr].syntax = syntax
+  end
+end
+
 local function get_language(bufnr)
   local filetype = vim.bo[bufnr].filetype
   local ok, language = pcall(vim.treesitter.language.get_lang, filetype)
@@ -43,19 +51,30 @@ local function has_parser(bufnr, language)
   return pcall(vim.treesitter.get_parser, bufnr, language)
 end
 
+local function has_highlight_query(language)
+  local ok, query = pcall(vim.treesitter.query.get, language, "highlights")
+  return ok and query ~= nil
+end
+
 local function enable_buffer_features(bufnr)
   local filetype, language = get_language(bufnr)
 
   if filetype == "tex" or filetype == "latex" or language == "latex" then
-    vim.bo[bufnr].syntax = "tex"
+    enable_syntax_fallback(bufnr, "tex", language)
+  end
+
+  local highlight_enabled = not highlight_disabled[filetype] and not highlight_disabled[language]
+
+  if not highlight_enabled then
+    enable_syntax_fallback(bufnr, filetype, language)
+  elseif not has_parser(bufnr, language) or not has_highlight_query(language) then
+    enable_syntax_fallback(bufnr, filetype, language)
+  elseif not pcall(vim.treesitter.start, bufnr, language) then
+    enable_syntax_fallback(bufnr, filetype, language)
   end
 
   if not has_parser(bufnr, language) then
     return
-  end
-
-  if not highlight_disabled[filetype] and not highlight_disabled[language] then
-    pcall(vim.treesitter.start, bufnr, language)
   end
 
   if not indent_disabled[filetype] and not indent_disabled[language] then
