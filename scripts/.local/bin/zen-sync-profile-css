@@ -3,7 +3,8 @@ set -eu
 
 config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 profile_root=${ZEN_PROFILE_ROOT:-"$HOME/.zen"}
-source_css=${ZEN_USER_CHROME_SOURCE:-"$config_home/zen/userChrome.css"}
+source_chrome_css=${ZEN_USER_CHROME_SOURCE:-"$config_home/zen/userChrome.css"}
+source_content_css=${ZEN_USER_CONTENT_SOURCE:-"$config_home/zen/userContent.css"}
 
 resolve_default_profile() {
     local profile
@@ -26,9 +27,7 @@ resolve_default_profile() {
 }
 
 main() {
-    local profile_rel profile_dir chrome_dir target_css
-
-    [ -f "$source_css" ] || return 0
+    local profile_rel profile_dir chrome_dir
 
     profile_rel=$(resolve_default_profile 2>/dev/null || true)
     [ -n "$profile_rel" ] || return 0
@@ -37,15 +36,19 @@ main() {
     [ -d "$profile_dir" ] || return 0
 
     chrome_dir="$profile_dir/chrome"
-    target_css="$chrome_dir/userChrome.css"
-
     mkdir -p "$chrome_dir"
 
-    if [ -f "$target_css" ] && cmp -s "$source_css" "$target_css"; then
-        return 0
+    if [ -f "$source_chrome_css" ]; then
+        if [ ! -f "$chrome_dir/userChrome.css" ] || ! cmp -s "$source_chrome_css" "$chrome_dir/userChrome.css"; then
+            install -m 0644 "$source_chrome_css" "$chrome_dir/userChrome.css"
+        fi
     fi
 
-    install -m 0644 "$source_css" "$target_css"
+    if [ -f "$source_content_css" ]; then
+        if [ ! -f "$chrome_dir/userContent.css" ] || ! cmp -s "$source_content_css" "$chrome_dir/userContent.css"; then
+            install -m 0644 "$source_content_css" "$chrome_dir/userContent.css"
+        fi
+    fi
 }
 
 main "$@"

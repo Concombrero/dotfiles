@@ -175,8 +175,9 @@ Installed in isolated environments to avoid breaking system Python:
 
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/userChrome.css`
-- stowed to `~/.config/zen/userChrome.css`
-- synced into the active default Zen profile's `chrome/userChrome.css` by the installer and `~/.local/bin/zen`
+- source of truth: `zen/.config/zen/userContent.css`
+- stowed to `~/.config/zen/userChrome.css` and `~/.config/zen/userContent.css`
+- synced into the active default Zen profile's `chrome/userChrome.css` and `chrome/userContent.css` by the installer and `~/.local/bin/zen`
 
 ## Stow Packages Applied by Installer
 
@@ -210,7 +211,7 @@ Installed in isolated environments to avoid breaking system Python:
 | `opencode` | `~/.config/opencode/opencode.json` |
 | `x11` | `~/.xprofile` |
 | `gtk` | `~/.config/gtk-3.0/` and `~/.config/gtk-4.0/` |
-| `zen` | `~/.config/zen/userChrome.css` |
+| `zen` | `~/.config/zen/userChrome.css` and `~/.config/zen/userContent.css` |
 
 > [!NOTE]
 > Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply the repo aggressively after a distro installer or another tool has recreated config files under `$HOME`.
