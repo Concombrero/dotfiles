@@ -6,6 +6,7 @@ github_latest_release_tag() {
 }
 
 install_upstream_tools() {
+    run_step "7-Zip install" install_7zip
     run_step "fzf install" install_fzf
     run_step "Starship install" install_starship
     run_step "Zoxide install" install_zoxide
@@ -14,6 +15,103 @@ install_upstream_tools() {
     run_step "GitHub CLI install" install_gh
     run_step "OpenCode install" install_opencode
     run_step "Typst install" install_typst
+}
+
+install_7zip() {
+    local version version_digits arch asset tmp_dir archive extract_dir install_dir
+
+    version="$(github_latest_release_tag ip7z/7zip)"
+    if [ -z "$version" ]; then
+        error "Could not determine latest 7-Zip version. Install manually."
+        return 1
+    fi
+
+    version_digits=${version//./}
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            asset="7z${version_digits}-linux-x64.tar.xz"
+            ;;
+        aarch64|arm64)
+            asset="7z${version_digits}-linux-arm64.tar.xz"
+            ;;
+        armv7l|armv6l|arm)
+            asset="7z${version_digits}-linux-arm.tar.xz"
+            ;;
+        i686|i386)
+            asset="7z${version_digits}-linux-x86.tar.xz"
+            ;;
+        *)
+            error "Unsupported architecture for 7-Zip prebuilt archive: $arch"
+            return 1
+            ;;
+    esac
+
+    install_dir="$HOME/.local/opt/7zip"
+
+    if [ -x "$install_dir/7zz" ]; then
+        ensure_local_bin_dir || return 1
+        ln -sfn "$install_dir/7zz" "$HOME/.local/bin/7zz" || return 1
+        ln -sfn "$install_dir/7zz" "$HOME/.local/bin/7z" || return 1
+        log "7-Zip ${version} already installed at ~/.local/opt/7zip."
+        return 0
+    fi
+
+    info "Installing 7-Zip ${version} from the official release archive..."
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/$asset"
+    extract_dir="$tmp_dir/extracted"
+
+    if ! curl -fsSL "https://github.com/ip7z/7zip/releases/download/${version}/${asset}" -o "$archive"; then
+        error "Failed to download 7-Zip archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! mkdir -p "$extract_dir" "$HOME/.local/opt" "$HOME/.local/bin"; then
+        error "Failed to prepare 7-Zip install directories."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xJf "$archive" -C "$extract_dir"; then
+        error "Failed to extract 7-Zip archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -x "$extract_dir/7zz" ]; then
+        error "7-Zip archive did not contain the expected 7zz binary."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! replace_path "$extract_dir" "$install_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/7zz" "$HOME/.local/bin/7zz"; then
+        error "Failed to link 7zz into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$install_dir/7zz" "$HOME/.local/bin/7z"; then
+        error "Failed to link 7z into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/7zz" --help >/dev/null 2>&1; then
+        error "7-Zip installed but failed smoke test."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "7-Zip ${version} installed to ~/.local/opt/7zip."
 }
 
 ensure_local_bin_dir() {

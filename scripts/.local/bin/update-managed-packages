@@ -43,6 +43,7 @@ INSTALL_PACKAGES=true
 
 NVIM_INSTALL_DIR="$HOME/.local/opt/nvim"
 GH_INSTALL_DIR="$HOME/.local/opt/gh"
+SEVENZIP_INSTALL_DIR="$HOME/.local/opt/7zip"
 CLIPBOARD_INSTALL_DIR="$HOME/.local/opt/clipboard"
 SESH_INSTALL_DIR="$HOME/.local/opt/sesh"
 KITTY_INSTALL_DIR="$HOME/.local/kitty.app"
@@ -358,6 +359,100 @@ update_fzf() {
     git -C "$HOME/.fzf" pull --ff-only || return 1
     "$HOME/.fzf/install" --bin || return 1
     log "fzf updated."
+}
+
+update_7zip_managed() {
+    local version version_digits arch asset url tmp_dir extract_dir
+
+    if [ "$DISTRO_FAMILY" = arch ] && any_system_package_installed 7zip; then
+        info "Skipping 7-Zip: system package manager handles it."
+        return 0
+    fi
+
+    if [ ! -x "$SEVENZIP_INSTALL_DIR/7zz" ] && ! cmd_is_managed 7zz "$SEVENZIP_INSTALL_DIR"; then
+        info "Skipping 7-Zip: $SEVENZIP_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    version=$(github_latest_release_tag ip7z/7zip)
+    [ -n "$version" ] || {
+        error "Could not determine the latest 7-Zip version."
+        return 1
+    }
+
+    version_digits=${version//./}
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)
+            asset="7z${version_digits}-linux-x64.tar.xz"
+            ;;
+        aarch64|arm64)
+            asset="7z${version_digits}-linux-arm64.tar.xz"
+            ;;
+        armv7l|armv6l|arm)
+            asset="7z${version_digits}-linux-arm.tar.xz"
+            ;;
+        i686|i386)
+            asset="7z${version_digits}-linux-x86.tar.xz"
+            ;;
+        *)
+            error "Unsupported architecture for 7-Zip archive: $arch"
+            return 1
+            ;;
+    esac
+
+    url="https://github.com/ip7z/7zip/releases/download/${version}/${asset}"
+    tmp_dir=$(mktemp -d)
+    extract_dir="$tmp_dir/extracted"
+
+    if ! download_file "$url" "$tmp_dir/7zip.tar.xz"; then
+        error "Failed to download 7-Zip archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    mkdir -p "$extract_dir" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    if ! tar -xJf "$tmp_dir/7zip.tar.xz" -C "$extract_dir"; then
+        error "Failed to extract 7-Zip archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -x "$extract_dir/7zz" ]; then
+        error "7-Zip archive did not contain the expected 7zz binary."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! replace_path "$extract_dir" "$SEVENZIP_INSTALL_DIR"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$SEVENZIP_INSTALL_DIR/7zz" "$HOME/.local/bin/7zz"; then
+        error "Failed to link 7zz into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! ln -sfn "$SEVENZIP_INSTALL_DIR/7zz" "$HOME/.local/bin/7z"; then
+        error "Failed to link 7z into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! "$HOME/.local/bin/7zz" --help >/dev/null 2>&1; then
+        error "7-Zip failed smoke test after update."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "7-Zip updated to ${version}."
 }
 
 update_starship() {
@@ -1051,6 +1146,7 @@ main() {
         run_step "Rust toolchain update" update_rust_toolchain
         run_step "tree-sitter CLI update" update_tree_sitter_cli
         run_step "Neovim update" update_neovim_managed
+        run_step "7-Zip update" update_7zip_managed
         run_step "fzf update" update_fzf
         run_step "Starship update" update_starship
         run_step "Zoxide update" update_zoxide

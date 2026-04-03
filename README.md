@@ -145,6 +145,7 @@ Defined in distro-specific package lists:
 
 ### External Tools/Binaries
 - `neovim` (official prebuilt archive on Debian/Ubuntu and Arch-based systems)
+- `7zip` (official upstream release archive under `~/.local/opt/7zip` on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `fzf` (git clone to `~/.fzf` on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `starship` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `zoxide` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
