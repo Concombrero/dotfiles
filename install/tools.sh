@@ -183,8 +183,8 @@ sync_neovim_plugins() {
 
     info "Updating Mason registries..."
 
-    if ! "$nvim_cmd" --headless "+MasonUpdate" +qa; then
-        error "Failed to update Mason registries."
+    if ! "$nvim_cmd" --headless "+Mason" +qa; then
+        error "Failed to install Mason registries."
         return 1
     fi
 
