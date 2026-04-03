@@ -170,6 +170,7 @@ Installed in isolated environments to avoid breaking system Python:
 - `RobotoMono Nerd Font`
 - `NerdFontsSymbolsOnly`
 - `Font Awesome`
+- installed system-wide under `/usr/local/share/fonts/nerd-fonts`
 
 ## Stow Packages Applied by Installer
 

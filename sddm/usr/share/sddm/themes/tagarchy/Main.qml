@@ -18,6 +18,7 @@ Rectangle {
     property int passwordFontSize: Math.round(root.height * 0.02)
     property int errorFontSize: Math.round(root.height * 0.018)
     property int errorHeight: Math.round(root.height * 0.03)
+    property string fontFamily: "JetBrainsMono Nerd Font"
 
     Image {
         id: backgroundImage
@@ -67,7 +68,7 @@ Rectangle {
             Text {
                 text: "\uf007"
                 color: "#ffffff"
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: root.fontFamily
                 font.pixelSize: root.lockSize
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -85,7 +86,7 @@ Rectangle {
                     anchors.fill: parent
                     anchors.margins: root.fieldPadding
                     verticalAlignment: TextInput.AlignVCenter
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: root.fontFamily
                     font.pixelSize: root.usernameFontSize
                     color: "#ffffff"
                     text: root.currentUser
@@ -107,7 +108,7 @@ Rectangle {
             Text {
                 text: "\uf023"
                 color: "#ffffff"
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: root.fontFamily
                 font.pixelSize: root.lockSize
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -126,7 +127,7 @@ Rectangle {
                     anchors.margins: root.fieldPadding
                     verticalAlignment: TextInput.AlignVCenter
                     echoMode: TextInput.Password
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: root.fontFamily
                     font.pixelSize: root.passwordFontSize
                     font.letterSpacing: root.height * 0.004
                     passwordCharacter: "\u2022"
@@ -153,7 +154,7 @@ Rectangle {
         text: ""
         height: root.errorHeight
         color: "#f7768e"
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: root.fontFamily
         font.pixelSize: root.errorFontSize
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

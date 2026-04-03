@@ -5,7 +5,11 @@ package_list_file() {
     local distro_specific="$DOTFILES_DIR/packages/${base_name}.${DISTRO_FAMILY}.txt"
     local default_file="$DOTFILES_DIR/packages/${base_name}.txt"
 
-    [ -f "$distro_specific" ] && printf '%s\n' "$distro_specific" || printf '%s\n' "$default_file"
+    if [ -f "$distro_specific" ]; then
+        printf '%s\n' "$distro_specific"
+    else
+        printf '%s\n' "$default_file"
+    fi
 }
 
 read_package_list() {

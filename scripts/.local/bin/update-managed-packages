@@ -47,7 +47,7 @@ CLIPBOARD_INSTALL_DIR="$HOME/.local/opt/clipboard"
 SESH_INSTALL_DIR="$HOME/.local/opt/sesh"
 KITTY_INSTALL_DIR="$HOME/.local/kitty.app"
 TPM_INSTALL_DIR="$HOME/.tmux/plugins/tpm"
-FONT_DIR="$HOME/.local/share/fonts"
+FONT_DIR="/usr/local/share/fonts/nerd-fonts"
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -970,7 +970,13 @@ update_nerd_fonts() {
             return 1
         fi
 
-        if ! unzip -qo "$tmp_dir/${font}.zip" -d "$FONT_DIR" -x "LICENSE*" "README*"; then
+        if ! sudo install -d -m 0755 "$FONT_DIR"; then
+            error "Failed to create font directory at ${FONT_DIR}."
+            rm -rf "$tmp_dir"
+            return 1
+        fi
+
+        if ! sudo unzip -qo "$tmp_dir/${font}.zip" -d "$FONT_DIR" -x "LICENSE*" "README*"; then
             error "Failed to extract Nerd Font archive for ${font}."
             rm -rf "$tmp_dir"
             return 1
@@ -980,7 +986,7 @@ update_nerd_fonts() {
     done
 
     if command -v fc-cache >/dev/null 2>&1; then
-        fc-cache -f "$FONT_DIR" >/dev/null 2>&1 || return 1
+        sudo fc-cache -f "$FONT_DIR" >/dev/null 2>&1 || return 1
     fi
 
     log "Nerd Fonts updated to ${version}."

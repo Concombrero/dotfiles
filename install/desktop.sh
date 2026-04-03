@@ -2,10 +2,10 @@
 
 install_fonts() {
     info "Installing Fonts..."
-    local FONT_DIR="$HOME/.local/share/fonts"
+    local FONT_DIR="/usr/local/share/fonts/nerd-fonts"
     local had_failure=false
 
-    if ! mkdir -p "$FONT_DIR"; then
+    if ! sudo install -d -m 0755 "$FONT_DIR"; then
         error "Failed to create font directory at $FONT_DIR"
         return 1
     fi
@@ -29,7 +29,7 @@ install_fonts() {
             continue
         fi
 
-        if ! unzip -qo "$TMP_DIR/$font.zip" -d "$FONT_DIR" -x "LICENSE*" "README*"; then
+        if ! sudo unzip -qo "$TMP_DIR/$font.zip" -d "$FONT_DIR" -x "LICENSE*" "README*"; then
             warn "Failed to extract font $font."
             had_failure=true
             rm -rf "$TMP_DIR"
@@ -42,7 +42,7 @@ install_fonts() {
 
     # Update cache
     if command -v fc-cache &>/dev/null; then
-        if fc-cache -fv; then
+        if sudo fc-cache -fv "$FONT_DIR"; then
             log "Font cache rebuilt."
         else
             warn "Failed to rebuild font cache."
