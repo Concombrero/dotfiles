@@ -184,9 +184,64 @@ sync_neovim_plugins() {
 }
 
 termfilechooser_is_installed() {
-    [ -x /usr/libexec/xdg-desktop-portal-termfilechooser ] || [ -x /usr/lib/xdg-desktop-portal-termfilechooser ] || return 1
-    [ -f /usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.termfilechooser.service ] || return 1
-    [ -f /usr/share/xdg-desktop-portal/portals/termfilechooser.portal ] || return 1
+    local binary_path="" dbus_service="" portal_file="" dbus_exec="" dbus_systemd_service="" systemd_unit="" candidate
+
+    # Treat stale portal metadata as not installed, otherwise xdg-desktop-portal silently falls back to gtk.
+    for candidate in \
+        /usr/libexec/xdg-desktop-portal-termfilechooser \
+        /usr/lib/xdg-desktop-portal-termfilechooser \
+        /usr/local/libexec/xdg-desktop-portal-termfilechooser \
+        /usr/local/lib/xdg-desktop-portal-termfilechooser
+    do
+        if [ -x "$candidate" ]; then
+            binary_path="$candidate"
+            break
+        fi
+    done
+
+    for candidate in \
+        /usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.termfilechooser.service \
+        /usr/local/share/dbus-1/services/org.freedesktop.impl.portal.desktop.termfilechooser.service
+    do
+        if [ -f "$candidate" ]; then
+            dbus_service="$candidate"
+            break
+        fi
+    done
+
+    for candidate in \
+        /usr/share/xdg-desktop-portal/portals/termfilechooser.portal \
+        /usr/local/share/xdg-desktop-portal/portals/termfilechooser.portal
+    do
+        if [ -f "$candidate" ]; then
+            portal_file="$candidate"
+            break
+        fi
+    done
+
+    [ -n "$binary_path" ] || return 1
+    [ -n "$dbus_service" ] || return 1
+    [ -n "$portal_file" ] || return 1
+
+    dbus_exec="$(awk -F= '$1 == "Exec" { print $2; exit }' "$dbus_service")"
+    [ -n "$dbus_exec" ] || return 1
+    [ -x "$dbus_exec" ] || return 1
+
+    dbus_systemd_service="$(awk -F= '$1 == "SystemdService" { print $2; exit }' "$dbus_service")"
+    if [ -n "$dbus_systemd_service" ]; then
+        for candidate in \
+            "/usr/lib/systemd/user/$dbus_systemd_service" \
+            "/usr/local/lib/systemd/user/$dbus_systemd_service" \
+            "/lib/systemd/user/$dbus_systemd_service"
+        do
+            if [ -f "$candidate" ]; then
+                systemd_unit="$candidate"
+                break
+            fi
+        done
+
+        [ -n "$systemd_unit" ] || return 1
+    fi
 }
 
 activate_termfilechooser() {
