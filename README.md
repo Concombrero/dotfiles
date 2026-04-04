@@ -81,7 +81,7 @@ What this does at a high level:
 
 1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
 2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using distro-specific package lists plus Arch AUR package lists through an existing `paru`/`yay` helper when available.
-3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, `kitty`, and `localsend`, installs current AUR-tracked packages through an AUR helper on Arch/CachyOS (`clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`), and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, `localsend`, etc.).
+3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, installs Julia via the official `juliaup` installer (`curl -fsSL https://install.julialang.org | sh`) on Linux, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, `kitty`, and `localsend`, installs current AUR-tracked packages through an AUR helper on Arch/CachyOS (`clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`), and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, `localsend`, etc.).
 4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
 5. **Configures System:** Adds fonts (optional), installs and applies the Catppuccin GTK theme, installs a DMZ cursor theme package, sets GNOME/GTK dark mode defaults (`prefer-dark`, Catppuccin Mocha Mauve, JetBrainsMono Nerd Font 10, `DMZ-White` cursor), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
 6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
@@ -157,6 +157,7 @@ Defined in distro-specific package lists:
 - `localsend` (official LocalSend release archive under `~/.local/opt/localsend` on Debian/Ubuntu; Arch-family package `localsend` on `pacman` systems)
 - `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
 - `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
+- `julia` + `juliaup` (official Julia installer via `https://install.julialang.org`)
 - `zen-browser` (official installer on Debian/Ubuntu; AUR package `zen-browser-bin` via an AUR helper on Arch)
 - `xdg-desktop-portal-termfilechooser` (built from upstream source on Debian/Ubuntu desktop installs; AUR package via an AUR helper on Arch)
 - `Catppuccin GTK theme` (official release archive in `~/.local/share/themes` on Debian/Ubuntu; AUR package `catppuccin-gtk-theme-mocha` via an AUR helper on Arch)

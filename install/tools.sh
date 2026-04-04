@@ -232,6 +232,7 @@ install_tools() {
     run_step "Rust toolchain install" install_rust_toolchain
     run_step "tree-sitter CLI install" install_tree_sitter_cli
     run_step "Neovim install" install_neovim
+    run_step "Julia install" install_julia
 
     if [ "$DISTRO_FAMILY" = "debian" ]; then
         install_upstream_tools
@@ -965,6 +966,32 @@ install_typst() {
 
     rm -rf "$tmp_dir"
     log "Typst installed to ~/.local/opt/typst."
+}
+
+install_julia() {
+    if command -v julia &>/dev/null || command -v juliaup &>/dev/null || [ -x "$HOME/.juliaup/bin/julia" ] || [ -x "$HOME/.juliaup/bin/juliaup" ]; then
+        warn "Julia/juliaup already installed, skipping."
+        return
+    fi
+
+    info "Installing Julia via the official juliaup installer..."
+
+    if ! (set -o pipefail; curl -fsSL https://install.julialang.org | sh -s -- --yes --add-to-path=no); then
+        error "Failed to install Julia."
+        return 1
+    fi
+
+    if [ ! -x "$HOME/.juliaup/bin/juliaup" ] || [ ! -x "$HOME/.juliaup/bin/julia" ]; then
+        error "Julia installer completed but ~/.juliaup/bin is missing expected binaries."
+        return 1
+    fi
+
+    if ! "$HOME/.juliaup/bin/julia" --version >/dev/null 2>&1; then
+        error "Julia installed but failed smoke test."
+        return 1
+    fi
+
+    log "Julia installed via juliaup."
 }
 
 install_clipboard() {

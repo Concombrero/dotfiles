@@ -34,7 +34,7 @@ source "$SCRIPT_REPO_DIR/install/bootstrap.sh"
 source "$SCRIPT_REPO_DIR/install/ppas.sh"
 source "$SCRIPT_REPO_DIR/install/tools.sh"
 
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.opencode/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.juliaup/bin:$HOME/.opencode/bin:$PATH"
 
 UPDATE_SYSTEM=true
 UPDATE_NON_SYSTEM=true
@@ -48,6 +48,7 @@ CLIPBOARD_INSTALL_DIR="$HOME/.local/opt/clipboard"
 SESH_INSTALL_DIR="$HOME/.local/opt/sesh"
 KITTY_INSTALL_DIR="$HOME/.local/kitty.app"
 LOCALSEND_INSTALL_DIR="$HOME/.local/opt/localsend"
+JULIAUP_INSTALL_DIR="$HOME/.juliaup"
 TPM_INSTALL_DIR="$HOME/.tmux/plugins/tpm"
 FONT_ROOT="/usr/local/share/fonts"
 FONT_DIR="$FONT_ROOT/nerd-fonts"
@@ -703,6 +704,40 @@ update_typst_managed() {
     log "Typst updated."
 }
 
+update_julia_managed() {
+    local juliaup_bin="$JULIAUP_INSTALL_DIR/bin/juliaup"
+    local julia_bin="$JULIAUP_INSTALL_DIR/bin/julia"
+
+    if any_system_package_installed juliaup julia; then
+        info "Skipping Julia: system package manager handles it."
+        return 0
+    fi
+
+    if [ ! -x "$juliaup_bin" ] && ! cmd_is_managed juliaup "$JULIAUP_INSTALL_DIR"; then
+        info "Skipping Julia: $JULIAUP_INSTALL_DIR is not installed."
+        return 0
+    fi
+
+    if [ ! -x "$juliaup_bin" ]; then
+        juliaup_bin=$(resolve_cmd_path juliaup) || return 1
+    fi
+
+    info "Updating Julia and juliaup..."
+    "$juliaup_bin" self update || return 1
+    "$juliaup_bin" update || return 1
+
+    if [ -x "$julia_bin" ]; then
+        "$julia_bin" --version >/dev/null 2>&1 || return 1
+    elif command -v julia >/dev/null 2>&1; then
+        julia --version >/dev/null 2>&1 || return 1
+    else
+        error "Julia updated but the julia launcher is not available on PATH."
+        return 1
+    fi
+
+    log "Julia updated."
+}
+
 update_clipboard_managed() {
     local version arch asset url tmp_dir
 
@@ -1154,6 +1189,7 @@ main() {
         run_step "Lazygit update" update_lazygit
         run_step "GitHub CLI update" update_gh_managed
         run_step "Typst update" update_typst_managed
+        run_step "Julia update" update_julia_managed
         run_step "Clipboard update" update_clipboard_managed
         run_step "sesh update" update_sesh_managed
         run_step "pipx tools update" update_python_tools_managed

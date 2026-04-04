@@ -29,18 +29,14 @@ fi
 # Ensure XDG_DATA_HOME is set so rofi/drun finds ~/.local/share/applications
 export XDG_DATA_HOME="$HOME/.local/share"
 
-# >>> juliaup initialize >>>
+if [ -d "$HOME/.juliaup/bin" ]; then
+    case ":$PATH:" in
+        *:"$HOME/.juliaup/bin":*)
+            ;;
+        *)
+            export PATH="$HOME/.juliaup/bin${PATH:+:${PATH}}"
+            ;;
+    esac
+fi
 
-# !! Contents within this block are managed by juliaup !!
-
-case ":$PATH:" in
-    *:"$HOME/.juliaup/bin":*)
-        ;;
-
-    *)
-        export PATH="$HOME/.juliaup/bin"${PATH:+:${PATH}}
-        ;;
-esac
-
-# <<< juliaup initialize <<<
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
