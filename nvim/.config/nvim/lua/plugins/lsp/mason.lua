@@ -31,6 +31,14 @@ return {
       return nil
     end
 
+    local function resolve_julia_lsp_env()
+      return vim.fn.expand("~/.julia/environments/nvim-lspconfig")
+    end
+
+    local function has_julia_lsp_env(env_path)
+      return vim.fn.filereadable(vim.fs.joinpath(env_path, "Project.toml")) == 1
+    end
+
     local function get_venv_python(venv_path)
       if not venv_path or venv_path == "" then
         return nil
@@ -122,13 +130,17 @@ return {
     mason_lspconfig.setup({
       ensure_installed = {
         "clangd",
-        "cmake",
+        -- Disabled for now: Mason's cmake-language-server install requires
+        -- Python < 3.14, so this retries and fails on Python 3.14-only systems.
+        -- "cmake",
         "pyright",
         "texlab",
         "tinymist",
         "lua_ls",
       },
-      automatic_installation = true,
+      automatic_installation = {
+        exclude = { "cmake" },
+      },
       automatic_enable = {
         exclude = { "julials" },
       },
@@ -203,55 +215,75 @@ return {
       },
     })
 
-    vim.lsp.config("julials", {
-      capabilities = capabilities,
-      single_file_support = true,
-      on_new_config = function(_, _)
-      end,
-      cmd = {
-        resolve_julia_bin() or "julia",
-        "--startup-file=no",
-        "--history-file=no",
-        "-e",
-        [[
-          ls_install_path = joinpath(
-            get(DEPOT_PATH, 1, joinpath(homedir(), ".julia")),
-            "environments",
-            "nvim-lspconfig"
+    local julia_bin = resolve_julia_bin()
+    local julia_lsp_env = resolve_julia_lsp_env()
+
+    if julia_bin then
+      vim.lsp.config("julials", {
+        capabilities = capabilities,
+        single_file_support = true,
+        on_new_config = function(_, _)
+        end,
+        cmd = {
+          julia_bin,
+          "--startup-file=no",
+          "--history-file=no",
+          "-e",
+          [[
+            ls_install_path = joinpath(
+              get(DEPOT_PATH, 1, joinpath(homedir(), ".julia")),
+              "environments",
+              "nvim-lspconfig"
+            )
+            pushfirst!(LOAD_PATH, ls_install_path)
+            using LanguageServer, SymbolServer, StaticLint
+            popfirst!(LOAD_PATH)
+            depot_path = get(ENV, "JULIA_DEPOT_PATH", "")
+            project_path = let
+              dirname(something(
+              Base.load_path_expand((
+                p = get(ENV, "JULIA_PROJECT", nothing);
+                p === nothing ? nothing : isempty(p) ? nothing : p
+              )),
+              Base.current_project(),
+              get(Base.load_path(), 1, nothing),
+              Base.load_path_expand("@v#.#")
+              ))
+            end
+
+            @info "Running language server" VERSION pwd() project_path depot_path
+            server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, depot_path)
+            server.runlinter = true
+            run(server)
+          ]],
+        },
+        filetypes = { "julia" },
+        root_markers = julia_root_markers,
+      })
+
+      if has_julia_lsp_env(julia_lsp_env) then
+        vim.lsp.enable("julials")
+      else
+        vim.schedule(function()
+          vim.notify_once(
+            "Julia LSP disabled: bootstrap ~/.julia/environments/nvim-lspconfig first.",
+            vim.log.levels.WARN
           )
-          pushfirst!(LOAD_PATH, ls_install_path)
-          using LanguageServer, SymbolServer, StaticLint
-          popfirst!(LOAD_PATH)
-          depot_path = get(ENV, "JULIA_DEPOT_PATH", "")
-          project_path = let
-            dirname(something(
-            Base.load_path_expand((
-              p = get(ENV, "JULIA_PROJECT", nothing);
-              p === nothing ? nothing : isempty(p) ? nothing : p
-            )),
-            Base.current_project(),
-            get(Base.load_path(), 1, nothing),
-            Base.load_path_expand("@v#.#")
-            ))
-          end
-
-          @info "Running language server" VERSION pwd() project_path depot_path
-          server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, depot_path)
-          server.runlinter = true
-          run(server)
-        ]],
-      },
-      filetypes = { "julia" },
-      root_markers = julia_root_markers,
-    })
-
-    vim.lsp.enable("julials")
+        end)
+      end
+    else
+      vim.schedule(function()
+        vim.notify_once("Julia LSP disabled: `julia` is not on PATH.", vim.log.levels.WARN)
+      end)
+    end
 
     -- MASON-TOOL-INSTALLER SETUP
     local ensure_installed_tools = {
       -- LSP servers
       "clangd",
-      "cmake-language-server",
+      -- Disabled for now: Mason's cmake-language-server install requires
+      -- Python < 3.14, so this retries and fails on Python 3.14-only systems.
+      -- "cmake-language-server",
       "pyright",
       "texlab",
       "tinymist",

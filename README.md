@@ -95,6 +95,15 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 2. Open Neovim and run:
    - `:checkhealth`
 3. Launch Zen once so it creates `~/.zen/<profile>/`, then move `~/.config/zen/chrome/` into that profile directory.
+4. If you use Julia in Neovim, bootstrap the local Julia LSP environment once:
+
+```bash
+# Stable Julia LSP bootstrap for the dedicated Neovim LanguageServer environment.
+julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/nvim-lspconfig" -e 'using Pkg; Pkg.add("LanguageServer"); Pkg.add("SymbolServer"); Pkg.add("StaticLint"); Pkg.instantiate()'
+
+# Julia 1.12+ fallback: use newer upstream branches if released packages fail.
+julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/nvim-lspconfig" -e 'using Pkg; Pkg.add(PackageSpec(name="LanguageServer", rev="main")); Pkg.add(PackageSpec(name="SymbolServer", rev="master")); Pkg.add(PackageSpec(name="StaticLint", rev="master")); Pkg.instantiate(); Pkg.precompile()'
+```
 
 > [!NOTE]
 > `install.sh` now runs headless `:Lazy sync` and `:MasonUpdate` automatically after stowing the Neovim config, so plugins and Mason registry metadata are ready on first launch.
