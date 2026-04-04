@@ -390,8 +390,12 @@ install_sddm_theme() {
     local theme_dst="/usr/share/sddm/themes/tagarchy"
     local conf_src="$DOTFILES_DIR/sddm/etc/sddm.conf.d/zz-tagarchy-theme.conf"
     local conf_dst="/etc/sddm.conf.d/zz-tagarchy-theme.conf"
+    local xsetup_src="$DOTFILES_DIR/sddm/usr/local/share/sddm/scripts/tagarchy-xsetup"
+    local xsetup_dst="/usr/local/share/sddm/scripts/tagarchy-xsetup"
     local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
     local repo_wallpaper="$DOTFILES_DIR/wallpapers/Pictures/Wallpapers/catppuccin_gyro.jpg"
+    local system_cursor_alias="/usr/share/icons/$GTK_THEME_CURSOR_NAME"
+    local fallback_name fallback_path cursor_alias_ready=false
 
     [ "$DISTRO_FAMILY" = arch ] || return 0
 
@@ -400,16 +404,51 @@ install_sddm_theme() {
         return 0
     fi
 
-    if [ ! -d "$theme_src" ] || [ ! -f "$conf_src" ]; then
+    if [ ! -d "$theme_src" ] || [ ! -f "$conf_src" ] || [ ! -f "$xsetup_src" ]; then
         error "Missing tracked SDDM theme files under $DOTFILES_DIR/sddm."
         return 1
     fi
 
     info "Installing Tagarchy SDDM theme..."
 
-    if ! sudo mkdir -p /usr/share/sddm/themes /etc/sddm.conf.d; then
+    if ! sudo mkdir -p /usr/share/sddm/themes /etc/sddm.conf.d /usr/local/share/sddm/scripts; then
         error "Failed to create SDDM theme/config directories."
         return 1
+    fi
+
+    if [ ! -d "/usr/share/icons/$GTK_THEME_CURSOR_NAME" ]; then
+        for fallback_name in Vanilla-DMZ Vanilla-DMZ-AA; do
+            for fallback_path in \
+                "/usr/share/icons/$fallback_name"
+            do
+                [ -d "$fallback_path" ] || continue
+
+                # SDDM cannot use the per-user ~/.icons alias created for the desktop session.
+                if sudo test -e "$system_cursor_alias" && ! sudo test -L "$system_cursor_alias"; then
+                    error "Cannot create system cursor alias at $system_cursor_alias because a non-symlink path already exists."
+                    return 1
+                fi
+
+                if ! sudo mkdir -p /usr/share/icons; then
+                    error "Failed to prepare /usr/share/icons for the SDDM cursor alias."
+                    return 1
+                fi
+
+                if ! sudo ln -sfn "$fallback_path" "$system_cursor_alias"; then
+                    error "Failed to alias $GTK_THEME_CURSOR_NAME to $fallback_name for SDDM."
+                    return 1
+                fi
+
+                log "Aliased $GTK_THEME_CURSOR_NAME to $fallback_name for SDDM cursor compatibility."
+                cursor_alias_ready=true
+                break 2
+            done
+        done
+
+        if [ "$cursor_alias_ready" = false ]; then
+            error "Cursor theme $GTK_THEME_CURSOR_NAME is not available system-wide for SDDM."
+            return 1
+        fi
     fi
 
     if ! sudo rm -rf "$theme_dst"; then
@@ -424,6 +463,11 @@ install_sddm_theme() {
 
     if ! sudo cp "$conf_src" "$conf_dst"; then
         error "Failed to install SDDM theme selection config."
+        return 1
+    fi
+
+    if ! sudo install -m 755 "$xsetup_src" "$xsetup_dst"; then
+        error "Failed to install the SDDM X11 setup script."
         return 1
     fi
 

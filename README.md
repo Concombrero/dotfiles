@@ -163,7 +163,8 @@ Defined in distro-specific package lists:
 
 ### Arch login manager theme
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`
-- theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf`
+- theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf` with `DMZ-White` cursor theme at size `16`
+- custom X11 display setup script installed to `/usr/local/share/sddm/scripts/tagarchy-xsetup` to seed `Xcursor.theme` and `Xcursor.size` before the Qt6 greeter starts
 - visual layout copied from Omarchy's SDDM theme, with the logo removed and renamed to Tagarchy
 - blurred background generated from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when possible
 
@@ -189,7 +190,7 @@ Installed in isolated environments to avoid breaking system Python:
 - GTK theme: `catppuccin-mocha-mauve-standard+default`
 - GTK font: `JetBrainsMono Nerd Font 10`
 - cursor theme: `DMZ-White` at size `16`
-- Ubuntu installs `dmz-cursor-theme`; Arch installs `xcursor-vanilla-dmz` and the installer aliases it to `DMZ-White` for cross-distro GTK compatibility
+- Ubuntu installs `dmz-cursor-theme`; Arch installs `xcursor-vanilla-dmz` and the installer aliases it to `DMZ-White` in user and `/usr/share/icons` paths for cross-distro GTK/SDDM compatibility
 
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/chrome/`

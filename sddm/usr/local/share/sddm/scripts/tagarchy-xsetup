@@ -1,0 +1,7 @@
+#!/bin/sh
+# Seed Xcursor Xresources before the Qt6 greeter starts so it does not
+# fall back to Adwaita when xcb-util-cursor ignores XCURSOR_THEME.
+
+if command -v xrdb >/dev/null 2>&1; then
+    printf 'Xcursor.theme: %s\nXcursor.size: %s\n' 'DMZ-White' '16' | xrdb -nocpp -merge
+fi
