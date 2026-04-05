@@ -24,6 +24,7 @@ xss-lock
 network-manager-applet
 # `libpulse` provides `pactl` and the other PulseAudio client tools on Arch.
 libpulse
+flatpak
 xdg-desktop-portal
 xdg-desktop-portal-gtk
 dconf

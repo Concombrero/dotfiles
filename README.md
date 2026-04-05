@@ -147,7 +147,7 @@ Defined in distro-specific package lists:
 - Arch AUR: `packages/common.aur.arch.txt` and `packages/desktop.aur.arch.txt`
 
 - **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
-- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`
+- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`, `flatpak`
 - **Arch desktop extras:** `sddm`, `dconf`, `lxappearance`, `xcursor-vanilla-dmz`, `nwg-look`, `adw-gtk-theme`, `gnome-themes-extra`, `localsend`
 - **Arch AUR packages (via existing `paru`/`yay`, bootstrapping `yay-bin` only when needed):** `clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`
 - **Image helpers:** `imagemagick`
