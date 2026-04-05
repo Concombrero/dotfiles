@@ -150,9 +150,11 @@ prepare_stow_package() {
     fi
 
     info "Preparing targets for package: $package"
+    # Skip files that are intentionally ignored or machine-local so we do not
+    # back them up and leave them absent after the restow.
     while IFS= read -r -d '' source; do
         prepare_stow_target "$source" "$package_dir" || return 1
-    done < <(find "$package_dir" -mindepth 1 \( -type f -o -type l \) ! -name 'AGENTS.md' -print0)
+    done < <(find "$package_dir" -mindepth 1 \( -type f -o -type l \) ! -path "$package_dir/AGENTS.md" ! -name '.gitignore' ! -name 'mimeinfo.cache' -print0)
 }
 
 restow_package() {
