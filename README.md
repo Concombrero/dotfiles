@@ -201,6 +201,9 @@ Installed in isolated environments to avoid breaking system Python:
 - GTK font: `JetBrainsMono Nerd Font 10`
 - cursor theme: `DMZ-White` at size `16`
 - Ubuntu installs `dmz-cursor-theme`; Arch installs `xcursor-vanilla-dmz` and the installer aliases it to `DMZ-White` in user and `/usr/share/icons` paths for cross-distro GTK/SDDM compatibility
+- GTK4/libadwaita assets are synced into `~/.config/gtk-4.0/{gtk.css,gtk-dark.css,assets}` from the active Catppuccin theme so GTK4 apps can consume the same palette as the rest of the desktop
+- if `flatpak` is installed, the desktop setup also adds global user overrides for `xdg-config/gtk-{3,4}.0`, `~/.themes`, `~/.local/share/themes`, and icon directories so sandboxed GTK apps can see the same theme files
+- rerun `~/.local/bin/sync-gtk4-theme` after changing the GTK theme package or refreshing GTK assets manually
 
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/chrome/`

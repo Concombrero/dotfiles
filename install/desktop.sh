@@ -204,6 +204,17 @@ configure_gtk_appearance() {
     log "GTK and GNOME appearance configured."
 }
 
+sync_gtk4_theme_support() {
+    local sync_script="$DOTFILES_DIR/scripts/.local/bin/sync-gtk4-theme"
+
+    if [ ! -f "$sync_script" ]; then
+        error "Missing GTK4 theme sync helper: $sync_script"
+        return 1
+    fi
+
+    GTK_THEME_NAME="$GTK_THEME_NAME" "$sync_script"
+}
+
 install_fonts() {
     info "Installing Fonts..."
     local FONT_ROOT="/usr/local/share/fonts"
@@ -634,6 +645,7 @@ install_desktop_extras() {
     run_step "Catppuccin GTK theme install" install_catppuccin_gtk_theme
     run_step "DMZ cursor theme compatibility" ensure_dmz_cursor_theme_name
     run_step "GTK appearance configuration" configure_gtk_appearance
+    run_step "GTK4/libadwaita theme sync" sync_gtk4_theme_support
     run_step "wallpaper setup" set_wallpaper
     run_step "MIME configuration" configure_mime
 }

@@ -37,6 +37,7 @@ main() {
     local repo_dir=""
     local default_repo_dir="$SCRIPT_REPO_DIR"
     local package
+    local sync_script
     local -a packages=()
 
     while [ "$#" -gt 0 ]; do
@@ -87,6 +88,17 @@ main() {
     [ -n "$STOW_BACKUP_DIR" ] && info "Backup directory: $STOW_BACKUP_DIR"
 
     if force_stow_packages "$repo_dir" "${packages[@]}"; then
+        sync_script="$repo_dir/scripts/.local/bin/sync-gtk4-theme"
+        for package in "${packages[@]}"; do
+            [ "$package" = "gtk" ] || continue
+
+            if [ -f "$sync_script" ]; then
+                info "Refreshing generated GTK4/libadwaita theme assets..."
+                "$sync_script" || warn "GTK4/libadwaita theme sync failed after restowing gtk."
+            fi
+            break
+        done
+
         log "Selected packages were restowed successfully."
         return 0
     fi
