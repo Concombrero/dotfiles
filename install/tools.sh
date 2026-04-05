@@ -54,6 +54,7 @@ install_7zip() {
         ensure_local_bin_dir || return 1
         ln -sfn "$install_dir/7zz" "$HOME/.local/bin/7zz" || return 1
         ln -sfn "$install_dir/7zz" "$HOME/.local/bin/7z" || return 1
+        export PATH="$HOME/.local/bin:$PATH"
         log "7-Zip ${version} already installed at ~/.local/opt/7zip."
         return 0
     fi
@@ -110,6 +111,7 @@ install_7zip() {
         return 1
     fi
 
+    export PATH="$HOME/.local/bin:$PATH"
     rm -rf "$tmp_dir"
     log "7-Zip ${version} installed to ~/.local/opt/7zip."
 }
