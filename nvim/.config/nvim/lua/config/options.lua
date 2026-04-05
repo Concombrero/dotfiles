@@ -93,6 +93,9 @@ function M.setup()
     vim.opt[k] = v
   end
 
+  -- Keep legacy regex syntax available for any filetype Treesitter doesn't cover.
+  vim.cmd("syntax enable")
+
   -- Clipboard: OSC 52 for copy (works through tmux), paste from unnamed register.
   -- OSC 52 paste hangs (terminal doesn't respond to read requests), so paste
   -- falls back to the unnamed register. Use Ctrl+Shift+V to paste from system clipboard.
