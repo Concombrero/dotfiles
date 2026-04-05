@@ -19,8 +19,7 @@ case "$CHOICE" in
         i3-msg exit
         ;;
     *Lock)
-        # You might need to install 'i3lock' for this
-        i3lock -c 000000
+        ~/.local/bin/lock-screen
         ;;
     *Suspend)
         systemctl suspend

@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+
+set -u
+
+SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+REPO_DIR=$(cd "$(dirname "$SCRIPT_PATH")/../../.." && pwd)
+
+DEFAULT_WALLPAPER="${LOCK_WALLPAPER:-$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg}"
+REPO_WALLPAPER="$REPO_DIR/wallpapers/Pictures/Wallpapers/catppuccin_gyro.jpg"
+SDDM_BACKGROUND="/usr/share/sddm/themes/tagarchy/background-blur.jpg"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/i3lock"
+CACHE_IMAGE="$CACHE_DIR/catppuccin-mocha-lock-blur-v1.jpg"
+
+has_cmd() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+pick_wallpaper() {
+    local candidate
+
+    for candidate in "$DEFAULT_WALLPAPER" "$REPO_WALLPAPER"; do
+        [ -f "$candidate" ] || continue
+        printf '%s\n' "$candidate"
+        return 0
+    done
+
+    return 1
+}
+
+render_lock_image() {
+    local source=$1
+    local image_cmd
+
+    [ -n "$source" ] || return 1
+
+    if [ -f "$CACHE_IMAGE" ] && [ "$CACHE_IMAGE" -nt "$source" ]; then
+        printf '%s\n' "$CACHE_IMAGE"
+        return 0
+    fi
+
+    if has_cmd magick; then
+        image_cmd=magick
+    elif has_cmd convert; then
+        image_cmd=convert
+    else
+        return 1
+    fi
+
+    mkdir -p "$CACHE_DIR" || return 1
+
+    # Cache the blurred wallpaper so suspend-time locks stay responsive.
+    if ! "$image_cmd" "$source" -strip -blur 0x24 -fill '#1e1e2e' -colorize 30 "$CACHE_IMAGE"; then
+        return 1
+    fi
+
+    printf '%s\n' "$CACHE_IMAGE"
+}
+
+supports_fancy_lock() {
+    local version
+
+    version=$(i3lock --version 2>&1 || true)
+    case "$version" in
+        *i3lock-color*|*version*.c.*)
+            return 0
+            ;;
+    esac
+
+    # Some packaged builds expose the color fork but keep --help terse.
+    i3lock --help 2>&1 | grep -Eq -- '--clock|--ring-color|--bar-indicator'
+}
+
+main() {
+    local wallpaper=""
+    local lock_image=""
+    local -a args=()
+
+    if ! has_cmd i3lock; then
+        printf 'lock-screen: i3lock was not found in PATH\n' >&2
+        exit 1
+    fi
+
+    wallpaper=$(pick_wallpaper 2>/dev/null || true)
+
+    if [ -n "${LOCK_BACKGROUND_IMAGE:-}" ] && [ -f "${LOCK_BACKGROUND_IMAGE}" ]; then
+        lock_image=$LOCK_BACKGROUND_IMAGE
+    elif [ -n "$wallpaper" ]; then
+        lock_image=$(render_lock_image "$wallpaper" 2>/dev/null || true)
+    fi
+
+    if [ -z "$lock_image" ]; then
+        if [ -r "$SDDM_BACKGROUND" ]; then
+            lock_image=$SDDM_BACKGROUND
+        elif [ -n "$wallpaper" ]; then
+            lock_image=$wallpaper
+        fi
+    fi
+
+    if supports_fancy_lock; then
+        args=(
+            -n
+            --ignore-empty-password
+            --show-failed-attempts
+            --indicator
+            --force-clock
+            --refresh-rate=1
+            --radius=120
+            --ring-width=6
+            --inside-color=1e1e2e66
+            --ring-color=cba6f7dd
+            --insidever-color=1e1e2e66
+            --ringver-color=bac2dedd
+            --insidewrong-color=1e1e2e66
+            --ringwrong-color=f38ba8dd
+            --line-color=00000000
+            --keyhl-color=fab387ff
+            --bshl-color=fab387ff
+            --separator-color=00000000
+            --verif-color=bac2deff
+            --wrong-color=f38ba8ff
+            --time-color=cdd6f4ff
+            --no-modkey-text
+            --pass-media-keys
+            --pass-screen-keys
+            "--time-font=JetBrainsMono Nerd Font Mono"
+            "--verif-font=JetBrainsMono Nerd Font Mono"
+            "--wrong-font=JetBrainsMono Nerd Font Mono"
+            --time-size=56
+            --verif-size=18
+            --wrong-size=18
+            "--time-str=%H:%M"
+            "--time-pos=ix:iy+14"
+            "--status-pos=ix:iy+64"
+            "--verif-pos=ix:iy+58"
+            "--wrong-pos=ix:iy+58"
+            "--date-str="
+            "--greeter-text="
+        )
+
+        if [ -n "$lock_image" ]; then
+            args+=(--image "$lock_image" --fill)
+        else
+            args+=(-c 1e1e2eff)
+        fi
+
+        exec i3lock "${args[@]}"
+    fi
+
+    if [ -n "$lock_image" ]; then
+        exec i3lock -n -e -i "$lock_image"
+    fi
+
+    exec i3lock -n -e -c 1e1e2e
+}
+
+main "$@"
