@@ -6,7 +6,7 @@ sddm
 
 # Window Manager
 i3-wm
-i3lock
+i3lock-color
 i3status
 polybar
 picom

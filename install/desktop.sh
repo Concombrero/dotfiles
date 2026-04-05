@@ -491,6 +491,96 @@ install_sddm_theme() {
     log "Tagarchy SDDM theme installed."
 }
 
+install_i3lock_color() {
+    local latest_tag current_tag tmp_dir archive extract_dir source_dir candidate
+    local license_path="/usr/local/share/licenses/i3lock-color/LICENSE"
+
+    [ "$DISTRO_FAMILY" = debian ] || return 0
+
+    latest_tag="$(github_latest_release_tag Raymo111/i3lock-color)"
+    if [ -z "$latest_tag" ]; then
+        error "Failed to determine the latest i3lock-color release tag."
+        return 1
+    fi
+
+    current_tag=""
+    if [ -x /usr/local/bin/i3lock ]; then
+        current_tag="$(/usr/local/bin/i3lock --version 2>/dev/null | awk 'NR==1 { print $3 }')"
+    fi
+
+    if [ "$current_tag" = "$latest_tag" ]; then
+        log "i3lock-color ${latest_tag} is already installed at /usr/local/bin/i3lock."
+        return 0
+    fi
+
+    info "Installing i3lock-color ${latest_tag} from source..."
+    tmp_dir="$(mktemp -d)"
+    archive="$tmp_dir/i3lock-color-${latest_tag}.tar.gz"
+    extract_dir="$tmp_dir/extracted"
+
+    if ! mkdir -p "$extract_dir"; then
+        error "Failed to prepare the i3lock-color build directory."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! curl -fsSL "https://github.com/Raymo111/i3lock-color/archive/refs/tags/${latest_tag}.tar.gz" -o "$archive"; then
+        error "Failed to download the i3lock-color source archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! tar -xzf "$archive" -C "$extract_dir"; then
+        error "Failed to extract the i3lock-color source archive."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    source_dir=""
+    for candidate in "$extract_dir"/i3lock-color-*; do
+        [ -d "$candidate" ] || continue
+        source_dir="$candidate"
+        break
+    done
+
+    if [ -z "$source_dir" ]; then
+        error "The i3lock-color source archive did not contain the expected source directory."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! (
+        cd "$source_dir" &&
+        autoreconf -fiv &&
+        mkdir -p build &&
+        cd build &&
+        # Install to /usr/local so the source build wins without replacing distro-managed files.
+        ../configure --prefix=/usr/local --sysconfdir=/etc &&
+        make &&
+        sudo make install
+    ); then
+        error "Failed to build or install i3lock-color."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! sudo install -Dm644 "$source_dir/LICENSE" "$license_path"; then
+        error "Failed to install the i3lock-color license file."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    current_tag="$(/usr/local/bin/i3lock --version 2>/dev/null | awk 'NR==1 { print $3 }')"
+    if [ "$current_tag" != "$latest_tag" ]; then
+        error "i3lock-color installed but reported version '$current_tag' instead of '$latest_tag'."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+    log "i3lock-color ${latest_tag} installed to /usr/local/bin/i3lock."
+}
+
 set_wallpaper() {
     local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
     local fehbg="$HOME/.fehbg"
@@ -640,6 +730,7 @@ configure_mime() {
 install_desktop_extras() {
     local fonts_enabled=$1
 
+    run_step "i3lock-color install" install_i3lock_color
     [ "$fonts_enabled" = true ] && run_step "font installation" install_fonts
     [ "$DISTRO_FAMILY" = arch ] && run_step "SDDM theme install" install_sddm_theme
     run_step "Catppuccin GTK theme install" install_catppuccin_gtk_theme

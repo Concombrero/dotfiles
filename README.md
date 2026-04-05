@@ -22,7 +22,7 @@ Visually, anything that can be is themed with [Catppuccin](https://github.com/ca
     - Status bar : `polybar` 
     - App launcher / Menu : `rofi`
     - Notifications : `dunst`
-    - Lockscreen : `i3lock`
+    - Lockscreen : `i3lock-color`
     - File Manager : `yazi` (via CLI)
 - Command Line Interface : 
   - Terminal emulator : `kitty`
