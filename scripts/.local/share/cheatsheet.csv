@@ -62,4 +62,3 @@ z/Z | fzf/ zoxide fzf
 Super + d | App launcher
 Super + t | Tmux session picker
 Super + p | Power menu
-Alt + d (tmux picker) | Kill selected session
