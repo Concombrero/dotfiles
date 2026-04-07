@@ -1,10 +1,10 @@
 # Workstation Dotfiles
-GNU Stow-managed dotfiles for a full Ubuntu/Debian or Arch-based + i3 workstation, with an experience mostly driven by the [i3](https://i3wm.org/) tiling window manager.
+GNU Stow-managed dotfiles for a full Ubuntu/Debian or Arch-based workstation, with an experience mostly driven by the [i3](https://i3wm.org/) tiling window manager.
 
 ![Home screen](preview.png)
 ## System Overview
 
-This repo is designed as one cohesive, keyboard-first environment rather than a loose set of config files.
+This repo is designed as one cohesive, keyboard-first environment you can apply on a fresh machine to immediately bootsrap a fully functional system.
 
 The principles used for building this system are simple :
 
@@ -13,7 +13,7 @@ The principles used for building this system are simple :
 - Defaults are fine
 
 This is all materialized through a set of tools that tries to stay minimal while providing a solid out of the box experience that can be easily extended and customized.
-Visually, anything that can be is themed with [Catppuccin](https://github.com/catppuccin), using the Mocha flavor.
+Visually, anything that can be uses the `JetBrainsMono` font and is themed with [Catppuccin](https://github.com/catppuccin), using the Mocha flavor.
 
 
 - Desktop/Window management:
@@ -23,7 +23,7 @@ Visually, anything that can be is themed with [Catppuccin](https://github.com/ca
     - App launcher / Menu : `rofi`
     - Notifications : `dunst`
     - Lockscreen : `i3lock-color`
-    - File Manager : `yazi` (via CLI)
+    - File Manager : `yazi` 
 - Command Line Interface : 
   - Terminal emulator : `kitty`
   - Shell : `fish`
@@ -64,38 +64,17 @@ cd ~/dotfiles
 > The installer performs user-scoped setup under `$HOME` and runs commands that must execute in the real user session.
 > Run it as your normal user account with sudo access; the script will call `sudo` itself only for the system-level steps that need it.
 
-**Headless install:**
-If you do not want the desktop profile (i3, polybar, fonts, wallpapers, Zen, etc.), run:
-
-```bash
-./install.sh --headless
-```
-
 > [!NOTE]
-> The bootstrap installer supports **Ubuntu/Debian**, **Arch** and other Arch-based distros that use `pacman`.
-
-> [!NOTE]
-> On Arch/CachyOS desktop installs, the installer also provisions the SDDM login stack (`sddm`). VM guest helpers and any optional Archinstall-managed desktop services remain manual.
-
-What this does at a high level:
-
-1. **Detects OS:** Verifies the distro family and uses `apt` or `pacman` as appropriate.
-2. **Installs Packages:** Core CLI packages and desktop packages (if not headless), using distro-specific package lists plus Arch AUR package lists through an existing `paru`/`yay` helper when available.
-3. **Installs Binaries:** Installs `neovim` from the upstream release archive on both Debian/Ubuntu and Arch-based systems, installs Julia via the official `juliaup` installer (`curl -fsSL https://install.julialang.org | sh`) on Linux, uses official Arch packages for tools like `fzf`, `starship`, `zoxide`, `yazi`, `lazygit`, `opencode`, `typst`, `kitty`, and `localsend`, installs current AUR-tracked packages through an AUR helper on Arch/CachyOS (`clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`), and falls back to upstream installers where needed on Debian/Ubuntu (`sesh`, `kitty`, `zen-browser`, `localsend`, etc.).
-4. **Installs Python Tools:** Uses `pipx` to safely install `ipython`, `black`, `isort`, etc.
-5. **Configures System:** Adds fonts (optional), installs and applies the Catppuccin GTK theme, installs a DMZ cursor theme package, sets GNOME/GTK dark mode defaults (`prefer-dark`, Catppuccin Mocha Mauve, JetBrainsMono Nerd Font 10, `DMZ-White` cursor), writes a persistent `feh` wallpaper launcher, sets the wallpaper when a graphical session is available, configures `xdg-open` defaults for PDFs/images/browser handlers, and on Arch enables `sddm.service` plus installs the Tagarchy SDDM theme.
-6. **Stows Configs:** Enforces the tracked dotfiles into `$HOME`, backing up conflicting existing files to `~/dotfiles-stow-backup-...` when needed.
-7. **Stages Zen UI CSS:** Stows a tracked `~/.config/zen/chrome/` directory so it can be moved into a Zen profile after first launch.
+> The installer force-restows packages by default. If an existing file in `$HOME` conflicts with a tracked dotfile, it is moved to `~/dotfiles-stow-backup-...` and the repo version is stowed in its place.
 
 Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/install.log`)
 
 ### First login checks
 
-1. Log out and back in.
-2. Open Neovim and run:
-   - `:checkhealth`
-3. Launch Zen once so it creates `~/.zen/<profile>/`, then move `~/.config/zen/chrome/` into that profile directory.
-4. If you use Julia in Neovim, bootstrap the local Julia LSP environment once:
+1. Open the keybindings cheatsheet with `Super + /`
+1. Open Neovim and run `:checkhealth`
+2. Launch Zen once so it creates `~/.zen/<profile>/`, then move `~/.config/zen/chrome/` into that profile directory.
+3. If you use Julia in Neovim, bootstrap the local Julia LSP environment once:
 
 ```bash
 # Stable Julia LSP bootstrap for the dedicated Neovim LanguageServer environment.
@@ -103,38 +82,6 @@ julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/n
 
 # Julia 1.12+ fallback: use newer upstream branches if released packages fail.
 julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/nvim-lspconfig" -e 'using Pkg; Pkg.add(PackageSpec(name="LanguageServer", rev="main")); Pkg.add(PackageSpec(name="SymbolServer", rev="master")); Pkg.add(PackageSpec(name="StaticLint", rev="master")); Pkg.instantiate(); Pkg.precompile()'
-```
-
-> [!NOTE]
-> `install.sh` now runs headless `:Lazy sync` and `:MasonUpdate` automatically after stowing the Neovim config, so plugins and Mason registry metadata are ready on first launch.
-
-> [!NOTE]
-> On Arch/CachyOS, the desktop install enables `sddm.service` automatically, replacing an existing `display-manager.service` symlink when a distro default like LightDM is already enabled, and installs a system-level `tagarchy` SDDM theme based on Omarchy's SDDM theme. NetworkManager, PipeWire, Bluetooth, and similar base services are left to the base install (for example via `archinstall`).
-
-> [!NOTE]
-> The desktop install writes `~/.fehbg` and uses it from i3 so the wallpaper persists across logins. The SDDM theme also generates a blurred background from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when ImageMagick is available.
-
-> [!IMPORTANT]
-> The i3 config swaps `Caps Lock` and `Escape` (`setxkbmap -option caps:swapescape`). If you do not want this behavior, remove that line from `i3/.config/i3/config`.
-
-> [!NOTE]
-> The installer force-restows packages by default. If an existing file in `$HOME` conflicts with a tracked dotfile, it is moved to `~/dotfiles-stow-backup-...` and the repo version is stowed in its place.
-
-## Installer Flags
-
-| Flag | Meaning |
-|---|---|
-| `--headless`, `--no-gui` | Skip desktop/GUI packages (i3, polybar, fonts, wallpapers, Zen browser). |
-| `--skip-packages` | Skip system package installation (`apt`/`pacman`). |
-| `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, `typst`, etc.). |
-| `--skip-fonts` | Skip Nerd Fonts installation. |
-| `--skip-ppas` | Skip adding Ubuntu PPAs and Debian/Ubuntu external apt repos. |
-| `--stow-only` | Only run stow (skip all installations). |
-
-Example:
-
-```bash
-./install.sh --headless
 ```
 
 ## What `install.sh` Provisions
@@ -146,37 +93,13 @@ Defined in distro-specific package lists:
 - Arch-based: `packages/common.arch.txt` and `packages/desktop.arch.txt`
 - Arch AUR: `packages/common.aur.arch.txt` and `packages/desktop.aur.arch.txt`
 
-- **Core:** `git`, `stow`, `tmux`, `curl`, `wget`, `unzip`, `bc`, compiler/build tooling, `python`, `nodejs`, `npm`, `btop`
-- **Desktop:** `i3-wm`, `polybar`, `picom`, `rofi`, `dunst`, `flameshot`, `kitty`, `fastfetch`, `zathura`, `sxiv`, `qutebrowser`, `flatpak`
-- **Arch desktop extras:** `sddm`, `dconf`, `lxappearance`, `xcursor-vanilla-dmz`, `nwg-look`, `adw-gtk-theme`, `gnome-themes-extra`, `localsend`
-- **Arch AUR packages (via existing `paru`/`yay`, bootstrapping `yay-bin` only when needed):** `clipboard`, `sesh-bin`, `zen-browser-bin`, `xdg-desktop-portal-termfilechooser`, `catppuccin-gtk-theme-mocha`
-- **Image helpers:** `imagemagick`
-
-### External Tools/Binaries
-- `neovim` (official prebuilt archive on Debian/Ubuntu and Arch-based systems)
-- `7zip` (official upstream release archive under `~/.local/opt/7zip` on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `fzf` (git clone to `~/.fzf` on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `starship` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `zoxide` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `sesh` (GitHub release binary under `~/.local/opt/sesh` on Debian/Ubuntu; AUR package `sesh-bin` via an AUR helper on Arch)
-- `clipboard` (official release archive under `~/.local/opt/clipboard` on Debian/Ubuntu; AUR package `clipboard` via an AUR helper on Arch)
-- `yazi` + `ya` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `lazygit` (GitHub release binary on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `kitty` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `localsend` (official LocalSend release archive under `~/.local/opt/localsend` on Debian/Ubuntu; Arch-family package `localsend` on `pacman` systems)
-- `opencode` (official installer on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `typst` (official Typst release archive on Debian/Ubuntu; official Arch package on `pacman` systems)
-- `julia` + `juliaup` (official Julia installer via `https://install.julialang.org`)
-- `zen-browser` (official installer on Debian/Ubuntu; AUR package `zen-browser-bin` via an AUR helper on Arch)
-- `xdg-desktop-portal-termfilechooser` (built from upstream source on Debian/Ubuntu desktop installs; AUR package via an AUR helper on Arch)
-- `Catppuccin GTK theme` (official release archive in `~/.local/share/themes` on Debian/Ubuntu; AUR package `catppuccin-gtk-theme-mocha` via an AUR helper on Arch)
+Package managers installs are preferred whenever they ship the latest version. This leads to a lot of external PPAs, official binaries and source installs on Ubuntu. Use Arch if you can.
 
 ### Arch login manager theme
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`
-- theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf` with `DMZ-White` cursor theme at size `16`
+- theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf` 
 - custom X11 display setup script installed to `/usr/local/share/sddm/scripts/tagarchy-xsetup` to seed `Xcursor.theme` and `Xcursor.size` before the Qt6 greeter starts
-- visual layout copied from Omarchy's SDDM theme, with the logo removed and renamed to Tagarchy
-- blurred background generated from `~/Pictures/Wallpapers/catppuccin_gyro.jpg` when possible
+- blurred background generated from `~/Pictures/Wallpapers/catppuccin_gyro.jpg`
 
 ### Python Tools (via pipx)
 Installed in isolated environments to avoid breaking system Python:
@@ -189,21 +112,14 @@ Installed in isolated environments to avoid breaking system Python:
 - `yazi.desktop` for directory opens (`inode/directory`)
 
 ### Fonts
+All fonts are installed under `/usr/local/share/fonts/`
 - `JetBrainsMono Nerd Font`
 - `RobotoMono Nerd Font`
 - `NerdFontsSymbolsOnly`
 - `Font Awesome`
-- installed system-wide under `/usr/local/share/fonts/`
 
-### GTK / GNOME Appearance
-- GNOME color scheme: `prefer-dark`
-- GTK theme: `catppuccin-mocha-mauve-standard+default`
-- GTK font: `JetBrainsMono Nerd Font 10`
-- cursor theme: `DMZ-White` at size `16`
-- Ubuntu installs `dmz-cursor-theme`; Arch installs `xcursor-vanilla-dmz` and the installer aliases it to `DMZ-White` in user and `/usr/share/icons` paths for cross-distro GTK/SDDM compatibility
-- GTK4/libadwaita assets are synced into `~/.config/gtk-4.0/{gtk.css,gtk-dark.css,assets}` from the active Catppuccin theme so GTK4 apps can consume the same palette as the rest of the desktop
-- if `flatpak` is installed, the desktop setup also adds global user overrides for `xdg-config/gtk-{3,4}.0`, `~/.themes`, `~/.local/share/themes`, and icon directories so sandboxed GTK apps can see the same theme files
-- rerun `~/.local/bin/sync-gtk4-theme` after changing the GTK theme package or refreshing GTK assets manually
+### GTK / GNOME  apps appearance
+All GNOME and GTK apps are themed using Catppuccin (Mocha flavor). This includes GTK2/GTK3/GTK4/libadwaita apps and a workaround for sandboxed apps (flatpaks)
 
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/chrome/`
@@ -211,74 +127,28 @@ Installed in isolated environments to avoid breaking system Python:
 - includes Catppuccin Zen Browser Mocha + Mauve upstream assets
 - after Zen creates a profile, move that `chrome/` directory into `~/.zen/<profile>/`
 
-## Stow Packages Applied by Installer
+## Stow 
+The installer stows config files for every package included in the repo.
 
-| Package | Target |
+Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply the repo aggressively after a distro installer or another tool has recreated config files under `$HOME`.
+
+## Installer Flags
+
+| Flag | Meaning |
 |---|---|
-| `bash` | `~/.bashrc`, `~/.profile`, `~/.fzf.bash` |
-| `fish` | `~/.config/fish/` |
-| `starship` | `~/.config/starship.toml` |
-| `git` | `~/.gitconfig` |
-| `i3` | `~/.config/i3/config` |
-| `polybar` | `~/.config/polybar/` |
-| `picom` | `~/.config/picom/picom.conf` |
-| `rofi` | `~/.config/rofi/` |
-| `dunst` | `~/.config/dunst/dunstrc` |
-| `kitty` | `~/.config/kitty/kitty.conf` and `~/.config/kitty/themes/` |
-| `nvim` | `~/.config/nvim/` |
-| `yazi` | `~/.config/yazi/` |
-| `zathura` | `~/.config/zathura/` |
-| `lazygit` | `~/.config/lazygit/config.yml` |
-| `fontconfig` | `~/.config/fontconfig/fonts.conf` |
-| `fastfetch` | `~/.config/fastfetch/config.jsonc` |
-| `btop` | `~/.config/btop/btop.conf` |
-| `tmux` | `~/.config/tmux/tmux.conf` |
-| `systemd` | `~/.config/systemd/user/tmux.service` |
-| `qutebrowser` | `~/.config/qutebrowser/` |
-| `xdg-desktop-portal` | `~/.config/xdg-desktop-portal/portals.conf` |
-| `xdg-desktop-portal-termfilechooser` | `~/.config/xdg-desktop-portal-termfilechooser/` |
-| `latex` | `~/texmf/` (custom `.bst` files) |
-| `scripts` | `~/.local/bin/` and `~/.local/share/applications/` |
-| `wallpapers` | `~/Pictures/Wallpapers/` |
-| `opencode` | `~/.config/opencode/opencode.json` |
-| `x11` | `~/.xprofile` |
-| `gtk` | `~/.config/gtk-3.0/` and `~/.config/gtk-4.0/` |
-| `zen` | `~/.config/zen/chrome/` |
+| `--headless`, `--no-gui` | Skip desktop/GUI packages (i3, polybar, fonts, wallpapers, Zen browser). |
+| `--skip-packages` | Skip system package installation (`apt`/`pacman`). |
+| `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, `typst`, etc.). |
+| `--skip-fonts` | Skip Nerd Fonts installation. |
+| `--skip-ppas` | Skip adding Ubuntu PPAs and Debian/Ubuntu external apt repos. |
+| `--stow-only` | Only run stow (skip all installations). |
 
-> [!NOTE]
-> Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply the repo aggressively after a distro installer or another tool has recreated config files under `$HOME`.
+## Machine-Local Overrides
 
-## Manual Setup Checklist
+Keep personal and machine-specific values in local files, not in the tracked files of this repo:
 
-These items are still machine-specific or useful post-install checks.
+- Git identity/settings: `~/.gitconfig.local` 
+- Fish local env vars/secrets: `~/.config/fish/local.fish`
+- Local i3 config (monitor setup, power management...) : `.config/i3/local.conf` 
 
-### 3) Workspace-local PDF/image tabs.
-
-`zathura-tabbed` and `sxiv-tabbed` use native i3 tabbed containers. 
-
-Behavior per workspace:
-
-- First opened PDF/image creates a dedicated tabbed container for PDFs/images in that workspace.
-- Any subsequent PDF/image opened via `xdg-open` in that workspace is appended as a new tab in the matching container.
-- Tab titles are normalized to basename-only (for example `paper.pdf`, `figure.png`).
-
-### 4) CUDA (optional)
-
-Shell configs auto-detect `/usr/local/cuda-12.8` or `/usr/local/cuda` and update `PATH` / `LD_LIBRARY_PATH`.
-
-## Machine-Local Overrides (Recommended)
-
-Keep personal and machine-specific values in local files, not in this public repo:
-
-- Git identity/settings: `~/.gitconfig.local` (included by `~/.gitconfig`)
-- Fish local env vars/secrets: `~/.config/fish/local.fish` (sourced from `config.fish` if present)
-
-Example for `~/.config/fish/local.fish`:
-
-```fish
-set -gx GOOGLE_VERTEX_PROJECT your-project-id
-set -gx GOOGLE_VERTEX_LOCATION global
-set -gx GOOGLE_APPLICATION_CREDENTIALS $HOME/.config/gcloud/application_default_credentials.json
-```
-
-`~/.config/fish/local.fish` is machine-local and intentionally not tracked in git.
+These files are automatically included in the main configs if present.
