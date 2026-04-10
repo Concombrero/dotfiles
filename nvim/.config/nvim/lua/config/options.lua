@@ -51,6 +51,7 @@ function M.setup()
     showbreak = "  ",               -- set indent of wrapped lines
     cmdheight = 1,                  -- space in the neovim command line for displaying messages
     pumheight = 7,                  -- pop up menu height
+    winborder = "rounded",         -- Neovim 0.11+ global border for floating windows
     showmode = false,               -- we don't need to see things like -- INSERT -- anymore
     title = true,                   -- let nvim manage the terminal window title
     titlestring = "nvim %{fnamemodify(getcwd(), ':~')}", -- show nvim + current working directory

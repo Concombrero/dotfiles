@@ -59,6 +59,19 @@ return {
       return nil
     end
 
+    local python_root_markers = {
+      "pyrightconfig.json",
+      "pyproject.toml",
+      "setup.py",
+      "setup.cfg",
+      "requirements.txt",
+      "Pipfile",
+      ".venv",
+      "venv",
+      "env",
+      ".git",
+    }
+
     local function resolve_python_path(root_dir)
       if root_dir and root_dir ~= "" then
         for _, venv_name in ipairs({ ".venv", "venv", "env" }) do
@@ -148,6 +161,7 @@ return {
 
     vim.lsp.config("pyright", {
       capabilities = capabilities,
+      root_markers = python_root_markers,
       before_init = function(_, config)
         config.settings = config.settings or {}
         config.settings.python = config.settings.python or {}
