@@ -22,7 +22,7 @@ local function sanitize_kernel_name(name)
   sanitized = sanitized:gsub("%-+$", "")
 
   if sanitized == "" then
-    return "python-312"
+    return "python"
   end
 
   return sanitized
@@ -33,16 +33,84 @@ local function run_system(command)
   return vim.v.shell_error == 0, output
 end
 
-local function python312()
-  local python = vim.fn.exepath("python3.12")
-  if python == "" then
-    return nil
-  end
-  return python
-end
-
 local function normalize_path(path)
   return vim.fn.fnamemodify(path, ":p"):gsub("/+$", "")
+end
+
+local function python_not_found_message()
+  return "No usable Python interpreter found (checked workspace .venv, then python3, then python)"
+end
+
+local venv_python_path
+
+local function resolve_python(preferred_dir)
+  local roots = {}
+  local seen = {}
+
+  local function add_root(path)
+    if not path or path == "" then
+      return
+    end
+
+    local normalized = normalize_path(path)
+    if seen[normalized] then
+      return
+    end
+
+    seen[normalized] = true
+    roots[#roots + 1] = normalized
+  end
+
+  add_root(preferred_dir)
+  add_root(vim.fn.getcwd())
+
+  for _, root in ipairs(roots) do
+    local venv_python = venv_python_path(vim.fs.joinpath(root, ".venv"))
+    if venv_python then
+      return venv_python
+    end
+  end
+
+  for _, candidate in ipairs({ "python3", "python" }) do
+    local python = vim.fn.exepath(candidate)
+    if python ~= "" then
+      return python
+    end
+  end
+
+  return nil
+end
+
+venv_python_path = function(venv_dir)
+  local candidates = {
+    vim.fs.joinpath(venv_dir, "bin", "python"),
+    vim.fs.joinpath(venv_dir, "bin", "python3"),
+    vim.fs.joinpath(venv_dir, "Scripts", "python.exe"),
+  }
+
+  for _, candidate in ipairs(candidates) do
+    if vim.fn.executable(candidate) == 1 then
+      return candidate
+    end
+  end
+
+  return nil
+end
+
+local function install_notebook_packages(venv_python)
+  local command = {
+    venv_python,
+    "-m",
+    "pip",
+    "install",
+    "--upgrade",
+    "ipykernel",
+    "jupyterlab",
+    "jupytext",
+    "neopyter",
+  }
+
+  return run_system(command)
 end
 
 local function is_within(path, root)
@@ -348,16 +416,16 @@ local function connect_and_sync(relative_ipynb_path)
 end
 
 function M.setup_project_venv()
-  local python = python312()
-  if not python then
-    vim.notify("python3.12 was not found on PATH", vim.log.levels.ERROR)
-    return
-  end
-
-  local cwd = vim.fn.getcwd()
-  local venv_dir = cwd .. "/.venv"
+  local cwd = normalize_path(vim.fn.getcwd())
+  local venv_dir = vim.fs.joinpath(cwd, ".venv")
 
   if vim.fn.isdirectory(venv_dir) ~= 1 then
+    local python = resolve_python()
+    if not python then
+      vim.notify(python_not_found_message(), vim.log.levels.ERROR)
+      return
+    end
+
     local ok, output = run_system({ python, "-m", "venv", venv_dir })
     if not ok then
       vim.notify("Creating .venv failed: " .. trim_or_default(output), vim.log.levels.ERROR)
@@ -365,22 +433,30 @@ function M.setup_project_venv()
     end
   end
 
-  local venv_python = venv_dir .. "/bin/python"
+  local venv_python = venv_python_path(venv_dir)
+  if not venv_python then
+    vim.notify("Could not find the Python executable inside .venv", vim.log.levels.ERROR)
+    return
+  end
+
   local ok_pip, pip_output = run_system({ venv_python, "-m", "pip", "install", "--upgrade", "pip" })
   if not ok_pip then
     vim.notify("Upgrading pip in .venv failed: " .. trim_or_default(pip_output), vim.log.levels.ERROR)
     return
   end
 
-  local ok_kernel, kernel_output = run_system({ venv_python, "-m", "pip", "install", "ipykernel" })
-  if not ok_kernel then
-    vim.notify("Installing ipykernel in .venv failed: " .. trim_or_default(kernel_output), vim.log.levels.ERROR)
+  local ok_packages, packages_output = install_notebook_packages(venv_python)
+  if not ok_packages then
+    vim.notify("Installing notebook tools in .venv failed: " .. trim_or_default(packages_output), vim.log.levels.ERROR)
     return
   end
 
   local project_name = vim.fn.fnamemodify(cwd, ":t")
-  local kernel_name = sanitize_kernel_name(project_name .. "-py312")
-  local display_name = "Python 3.12 (" .. project_name .. ")"
+  local kernel_name = sanitize_kernel_name(project_name ~= "" and project_name or "python")
+  local display_name = "Python"
+  if project_name ~= "" then
+    display_name = display_name .. " (" .. project_name .. ")"
+  end
 
   local ok_register, register_output = run_system({
     venv_python,
@@ -451,9 +527,9 @@ function M.convert_current_ipynb_to_ju()
     return
   end
 
-  local python = python312()
+  local python = resolve_python(vim.fn.fnamemodify(buffer_path, ":h"))
   if not python then
-    vim.notify("python3.12 was not found on PATH", vim.log.levels.ERROR)
+    vim.notify(python_not_found_message(), vim.log.levels.ERROR)
     return
   end
 
@@ -479,15 +555,15 @@ function M.convert_current_ipynb_to_ju()
 end
 
 function M.open_current_notebook()
-  local python = python312()
-  if not python then
-    vim.notify("python3.12 was not found on PATH", vim.log.levels.ERROR)
-    return
-  end
-
   local paths, err = notebook_paths_from_current_buffer()
   if not paths then
     vim.notify(err, vim.log.levels.ERROR)
+    return
+  end
+
+  local python = resolve_python(vim.fn.fnamemodify(paths.source_path, ":h"))
+  if not python then
+    vim.notify(python_not_found_message(), vim.log.levels.ERROR)
     return
   end
 
@@ -520,7 +596,7 @@ function M.setup()
   end
 
   vim.api.nvim_create_user_command("JupyterVenvSetup", M.setup_project_venv, {
-    desc = "Create .venv, install ipykernel, register kernel",
+    desc = "Create .venv, install notebook tools, register kernel",
   })
 
   vim.api.nvim_create_user_command("JupyterSaveIpynb", M.save_current_as_ipynb, {

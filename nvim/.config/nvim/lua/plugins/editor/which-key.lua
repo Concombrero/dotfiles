@@ -227,7 +227,7 @@ return {
           { "<leader>jo", "<cmd>lua require('util.jupyter').open_current_notebook()<CR>", desc = "open notebook in browser" },
           { "<leader>jr", "<cmd>Neopyter kernel restart<CR>", desc = "restart kernel" },
           { "<leader>js", "<cmd>Neopyter sync current<CR>", desc = "sync current notebook tab" },
-          { "<leader>jv", "<cmd>lua require('util.jupyter').setup_project_venv()<CR>", desc = "bootstrap .venv (py3.12)" },
+          { "<leader>jv", "<cmd>lua require('util.jupyter').setup_project_venv()<CR>", desc = "bootstrap .venv" },
         },
 
         {

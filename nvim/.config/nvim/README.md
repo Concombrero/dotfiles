@@ -79,10 +79,14 @@ This config uses a two-file notebook model:
 
 ### Required Tools
 
-- `python3.12`
+- a usable Python interpreter (`python3` preferred, `python` fallback)
 - `jupyter lab`
 - `jupytext` CLI
 - `neopyter` Python package (JupyterLab extension)
+
+`<leader>jv` can bootstrap a project `.venv` with `jupyterlab`, `jupytext`, `ipykernel`, and `neopyter`, then register that environment as a kernel.
+
+Notebook helpers prefer the project `.venv` when it exists, and fall back to `python3` or `python` otherwise.
 
 ### Recommended Daily Flow
 
@@ -108,7 +112,7 @@ This config uses a two-file notebook model:
 - File operations:
   - `<leader>jI` convert current `.ipynb` to `.ju.py` and open it
   - `<leader>jS` save `.ipynb` with outputs
-  - `<leader>jv` bootstrap project `.venv` + register kernel (Python 3.12)
+  - `<leader>jv` bootstrap project `.venv`, install notebook tooling, and register kernel
 
 ### Cell Execution Shortcuts (`*.ju.*` buffers)
 
