@@ -18,6 +18,7 @@ To get detailed keymaps help, press leader (space) + f (find) + k (keymaps)
 - Formatting: conform.nvim (`<leader>lf`) with per-filetype formatters; format-on-save stays off by default
 - Linting: nvim-lint (`<leader>lL`) with executable-aware setup and auto-lint toggles on `<leader>lg` / `<leader>lB`
 - AI: OpenCode actions (`<leader>o`) plus Copilot control from `<leader>c`
+- Focus: Zen mode on `<leader>z`
 
 ## Bibliography (Zotero)
 
@@ -40,6 +41,8 @@ adjust your local citation workflow settings.
 - Plugin management:
   - `:Lazy`
   - `:ReloadConfig` to reload config
+- Focus:
+  - `<leader>z` toggle Zen mode
 - Formatting and linting:
   - `<leader>lf` format buffer/selection
   - `<leader>lL` lint now

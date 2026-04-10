@@ -86,7 +86,7 @@ lua/
     tools/                        gitsigns, lazygit, mini, surround, todo-comments,
                                   yanky, yazi, snacks, opencode, copilot
     text/                         vimtex, markdown-preview, jupyter (jupytext + neopyter)
-    ui/                           catppuccin theme, bufferline, lualine, nvim-web-devicons, sessions
+    ui/                           catppuccin theme, bufferline, lualine, nvim-web-devicons, sessions, zen mode
     typst/                        typst-preview, typst.vim, typst-specific LuaSnip config
   util/
     init.lua                      Utility loader: safe_require, submodule aggregation

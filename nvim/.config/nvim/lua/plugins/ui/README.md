@@ -9,6 +9,7 @@ This directory contains interface-layer plugins.
 - `bufferline.lua`: buffer/tab line behavior
 - `nvim-web-devicons.lua`: icon provider
 - `sessions.lua`: session persistence and restore flow
+- `zen_mode.lua`: distraction-free editing mode
 
 UI plugins should avoid owning core editor logic; keep behavior-oriented workflows in `editor/` or `tools/`.
 

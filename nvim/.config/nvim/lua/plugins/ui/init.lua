@@ -7,6 +7,7 @@
 -- - bufferline.lua: Buffer line configuration
 -- - nvim-web-devicons.lua: File icons
 -- - sessions.lua: Session management
+-- - zen_mode.lua: Distraction-free editing mode
 --
 -- The module uses a consistent error handling approach to ensure
 -- NeoVim starts properly even if some plugin specifications fail.
@@ -28,6 +29,7 @@ local lualine_module = safe_require("plugins.ui.lualine")
 local bufferline_module = safe_require("plugins.ui.bufferline")
 local web_devicons_module = safe_require("plugins.ui.nvim-web-devicons")
 local sessions_module = safe_require("plugins.ui.sessions")
+local zen_mode_module = safe_require("plugins.ui.zen_mode")
 
 -- Return plugin specs
 return {
@@ -36,4 +38,5 @@ return {
   bufferline_module,
   web_devicons_module,
   sessions_module,
+  zen_mode_module,
 }

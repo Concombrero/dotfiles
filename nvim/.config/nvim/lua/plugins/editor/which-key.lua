@@ -173,6 +173,7 @@ return {
         { "<leader>a", "<cmd>b#<CR>", desc = "alternate buffer", mode = "n" },
         { "<leader>q", "<cmd>wa! | qa!<CR>", desc = "quit" },
         { "<leader>w", "<cmd>wa!<CR>", desc = "write" },
+        { "<leader>z", "<cmd>ZenMode<CR>", desc = "zen mode" },
 
         {
           "<leader>c",
