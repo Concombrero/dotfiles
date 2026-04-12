@@ -198,6 +198,16 @@ return {
 
     local colors = get_colors()
 
+    local function is_diffview_open()
+      local ok, lib = pcall(require, "diffview.lib")
+      return ok and lib.get_current_view() ~= nil
+    end
+
+    local function refresh_tabline_visibility()
+      local should_hide = vim.bo.filetype == "alpha" or is_diffview_open()
+      vim.opt.showtabline = should_hide and 0 or 2
+    end
+
     bufferline.setup({
       highlights = get_bufferline_highlights(colors),
       options = {
@@ -273,22 +283,46 @@ return {
     vim.api.nvim_create_autocmd("User", {
       pattern = "AlphaReady",
       group = aug,
-      desc = "Disable tabline for alpha",
+      desc = "Refresh tabline for alpha",
       callback = function()
-        vim.opt.showtabline = 0
+        vim.schedule(refresh_tabline_visibility)
       end,
     })
 
     vim.api.nvim_create_autocmd("BufUnload", {
       group = aug,
-      desc = "Enable tabline after alpha",
+      desc = "Refresh tabline after alpha",
       callback = function(args)
         if vim.api.nvim_buf_is_valid(args.buf)
             and vim.bo[args.buf].filetype == "alpha" then
-          vim.opt.showtabline = 2
+          vim.schedule(refresh_tabline_visibility)
         end
       end,
     })
+
+    vim.api.nvim_create_autocmd({ "TabEnter", "BufEnter" }, {
+      group = aug,
+      callback = function()
+        vim.schedule(refresh_tabline_visibility)
+      end,
+      desc = "Refresh tabline for current view",
+    })
+
+    vim.api.nvim_create_autocmd("User", {
+      group = aug,
+      pattern = {
+        "DiffviewViewOpened",
+        "DiffviewViewClosed",
+        "DiffviewViewEnter",
+        "DiffviewViewLeave",
+      },
+      callback = function()
+        vim.schedule(refresh_tabline_visibility)
+      end,
+      desc = "Refresh tabline for Diffview",
+    })
+
+    refresh_tabline_visibility()
 
     vim.api.nvim_create_autocmd("FileType", {
       group = aug,

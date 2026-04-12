@@ -17,6 +17,7 @@ To get detailed keymaps help, press leader (space) + f (find) + k (keymaps)
 - LSP: pyright, texlab, tinymist, lua-language-server, julials
 - Formatting: conform.nvim (`<leader>lf`) with per-filetype formatters; format-on-save stays off by default
 - Linting: nvim-lint (`<leader>lL`) with executable-aware setup and auto-lint toggles on `<leader>lg` / `<leader>lB`
+- Git: Diffview toggle on `<leader>g`
 - AI: OpenCode actions (`<leader>o`) plus Copilot control from `<leader>c`
 - Focus: Zen mode on `<leader>z`
 
@@ -52,6 +53,8 @@ adjust your local citation workflow settings.
   - `<leader>lt` start (`:lsp enable`)
   - `<leader>lk` stop (`:lsp stop`)
   - `<leader>ls` restart (`:lsp restart`)
+- Git / Diffview:
+  - `<leader>g` toggle the current worktree/index Diffview tab
 
 ## AI Workflow
 

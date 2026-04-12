@@ -2,8 +2,8 @@
 -- Tool Integration Plugins
 --
 -- This module loads plugins that integrate various tools:
--- - gitsigns.lua: Git integration
--- - lazygit.lua: LazyGit terminal UI
+-- - diffview.lua: Git diff and merge review UI
+-- - gitsigns.lua: Git signs in buffers
 -- - mini.lua: Mini plugins collection (pairs, comments, etc.)
 -- - surround.lua: Text surrounding functionality
 -- - todo-comments.lua: Highlight and search TODO comments
@@ -56,6 +56,7 @@ local function safe_require(module)
 end
 
 -- Load modules
+local diffview_module = safe_require("plugins.tools.diffview")
 local gitsigns_module = safe_require("plugins.tools.gitsigns")
 local snacks_module = safe_require("plugins.tools.snacks")
 local mini_module = safe_require("plugins.tools.mini")
@@ -77,6 +78,7 @@ local function add_if_valid(spec)
 end
 
 -- Add only valid plugin specs
+add_if_valid(diffview_module)
 add_if_valid(gitsigns_module)
 add_if_valid(snacks_module)
 add_if_valid(mini_module)

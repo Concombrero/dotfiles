@@ -17,10 +17,10 @@ which are called by autocmds when specific filetypes are detected.
 ----------------------------------------------------------------------------------
 TERMINAL MODE KEYBINDINGS                      | DESCRIPTION
 ----------------------------------------------------------------------------------
-<Esc>                                          | Exit terminal mode (except lazygit/yazi)
+<Esc>                                          | Exit terminal mode (except yazi)
 <C-t>                                          | Toggle terminal window
 <C-h>, <C-j>, <C-k>, <C-l>                     | Navigate between windows
-<C-a>                                          | Ask OpenCode in terminal (non-lazygit only)
+<C-a>                                          | Ask OpenCode in terminal (non-yazi only)
 <M-h>, <M-l>, <M-Left>, <M-Right>              | Resize terminal window horizontally
 
 ----------------------------------------------------------------------------------
@@ -100,7 +100,6 @@ function M.setup()
   end
 
   local native_escape_terminal_filetypes = {
-    lazygit = true,
     yazi = true,
   }
 
@@ -130,8 +129,8 @@ function M.setup()
     buf_map(0, "t", "<M-l>", "<Cmd>vertical resize -2<CR>", "Resize right")
     buf_map(0, "t", "<M-h>", "<Cmd>vertical resize +2<CR>", "Resize left")
 
-    -- OpenCode integration (only for non-lazygit buffers)
-    if vim.bo.filetype ~= "lazygit" then
+    -- OpenCode integration (only for non-yazi buffers)
+    if vim.bo.filetype ~= "yazi" then
       buf_map(0, "t", "<C-a>", "<Cmd>lua require('opencode').ask('@this: ', { submit = true })<CR>", "Ask OpenCode")
       buf_map(0, "n", "<C-a>", "<Cmd>lua require('opencode').ask('@this: ', { submit = true })<CR>", "Ask OpenCode")
       buf_map(0, "v", "<C-a>", "<Cmd>lua require('opencode').ask('@this: ', { submit = true })<CR>", "Ask OpenCode")

@@ -81,6 +81,16 @@ local function live_grep_word_or_selection()
   })
 end
 
+local function toggle_diffview()
+  local ok, lib = pcall(require, "diffview.lib")
+  if ok and lib.get_current_view() then
+    vim.cmd("DiffviewClose")
+    return
+  end
+
+  vim.cmd("DiffviewOpen")
+end
+
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",
@@ -168,7 +178,7 @@ return {
         { "<leader>b", build_current_buffer, desc = "build", mode = "n" },
         { "<leader>d", "<cmd>update! | lua Snacks.bufdelete()<CR>", desc = "delete buffer" },
         { "<leader>e", "<cmd>Yazi<CR>", desc = "explorer" },
-        { "<leader>g", "<cmd>lua vim.schedule(function() require('plugins.tools.snacks.utils').safe_lazygit() end)<cr>", desc = "git" },
+        { "<leader>g", toggle_diffview, desc = "git diff", mode = "n" },
         { "<leader>h", "<cmd>vert sb<CR>", desc = "horizontal split" },
         { "<leader>a", "<cmd>b#<CR>", desc = "alternate buffer", mode = "n" },
         { "<leader>q", "<cmd>wa! | qa!<CR>", desc = "quit" },

@@ -94,6 +94,9 @@ function M.setup()
     vim.opt[k] = v
   end
 
+  -- Use diagonal fillers for deleted lines in diff mode.
+  vim.opt.fillchars:append({ diff = "╱" })
+
   -- Keep legacy regex syntax available for any filetype Treesitter doesn't cover.
   vim.cmd("syntax enable")
 

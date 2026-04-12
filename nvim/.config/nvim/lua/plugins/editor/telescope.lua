@@ -126,6 +126,5 @@ return {
     pcall(telescope.load_extension, "fzf")
     pcall(telescope.load_extension, "yank_history")
     pcall(telescope.load_extension, "bibtex")
-    pcall(telescope.load_extension, "lazygit")
   end,
 }

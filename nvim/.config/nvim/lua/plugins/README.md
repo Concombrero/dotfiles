@@ -9,7 +9,7 @@ Plugin specs are organized by domain and loaded through lazy.nvim category impor
 - `lsp/`: LSP/completion and external tool management
   - `lspconfig.lua`, `mason.lua`, `nvim-cmp.lua`, `vimtex-cmp.lua`
 - `tools/`: utility and integration plugins
-  - git (`gitsigns.lua`, `lazygit.lua`), AI (`opencode.lua`, `copilot.lua`), file tools (`yazi.lua`), editor helpers (`mini.lua`, `surround.lua`, `todo-comments.lua`, `yanky.lua`, `snacks/`)
+  - git (`gitsigns.lua`, `diffview.lua`), AI (`opencode.lua`, `copilot.lua`), file tools (`yazi.lua`), editor helpers (`mini.lua`, `surround.lua`, `todo-comments.lua`, `yanky.lua`, `snacks/`)
 - `text/`: writing-focused plugins
   - `vimtex.lua`, `markdown-preview.lua`, `jupyter/`
 - `ui/`: visual shell around editing
@@ -25,6 +25,5 @@ Plugin specs are organized by domain and loaded through lazy.nvim category impor
 
 ## Notes
 
-- `lazygit.nvim` is the active LazyGit integration.
-- Snacks' `lazygit` module is intentionally disabled to avoid overlap.
+- `diffview.nvim` is the main Git review/history/merge UI.
 - `yazi.nvim` handles file navigation (replaces nvim-tree).

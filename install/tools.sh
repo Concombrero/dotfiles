@@ -585,7 +585,7 @@ install_yazi() {
             ;;
     esac
 
-    YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/${asset}"
+ases/download/${YAZI_VERSION}/${asset}"
     local TMP_DIR
     TMP_DIR=$(mktemp -d)
 

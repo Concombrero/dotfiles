@@ -83,7 +83,7 @@ lua/
   plugins/
     editor/                       Formatting, linting, telescope, toggleterm, treesitter, which-key
     lsp/                          lspconfig, mason, nvim-cmp, vimtex-cmp
-    tools/                        gitsigns, lazygit, mini, surround, todo-comments,
+    tools/                        gitsigns, diffview, mini, surround, todo-comments,
                                   yanky, yazi, snacks, opencode, copilot
     text/                         vimtex, markdown-preview, jupyter (jupytext + neopyter)
     ui/                           catppuccin theme, bufferline, lualine, nvim-web-devicons, sessions, zen mode
