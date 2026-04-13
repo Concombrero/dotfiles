@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+if [ -z "${BASH_VERSION:-}" ]; then
+    exec bash "$0" "$@"
+    printf 'This installer requires bash.\n' >&2
+    exit 1
+fi
+
+if shopt -qo posix; then
+    exec bash "$0" "$@"
+    printf 'This installer requires bash without POSIX mode enabled.\n' >&2
+    exit 1
+fi
+
 set -e
 
 INSTALL_PACKAGES=true
