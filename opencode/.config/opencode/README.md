@@ -5,6 +5,7 @@ This directory is stowed to `~/.config/opencode/`.
 Files:
 
 - `opencode.json`: main OpenCode configuration for MCP and provider settings.
+- `AGENTS.md`: global OpenCode rules applied across all sessions on this machine.
 
 ## Firecrawl MCP API Key (Optional)
 
