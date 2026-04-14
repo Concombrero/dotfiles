@@ -14,6 +14,31 @@ return {
   config = function()
     local telescope = require("telescope")
     local actions = require("telescope.actions")
+    local telescope_border_state = {
+      active = false,
+      previous = nil,
+    }
+
+    local function restore_global_winborder()
+      if not telescope_border_state.active then
+        return
+      end
+
+      vim.o.winborder = telescope_border_state.previous or "none"
+      telescope_border_state.previous = nil
+      telescope_border_state.active = false
+    end
+
+    local function suppress_global_winborder()
+      if telescope_border_state.active then
+        return
+      end
+
+      telescope_border_state.previous = vim.o.winborder
+      telescope_border_state.active = true
+      vim.o.winborder = "none"
+    end
+
     local bibliography_candidates = {
       vim.fn.expand('~/texmf/bibtex/bib/Zotero.bib'),
     }
@@ -126,5 +151,31 @@ return {
     pcall(telescope.load_extension, "fzf")
     pcall(telescope.load_extension, "yank_history")
     pcall(telescope.load_extension, "bibtex")
+
+    local aug = vim.api.nvim_create_augroup("TelescopeBorderFix", { clear = true })
+
+    vim.api.nvim_create_autocmd("User", {
+      group = aug,
+      pattern = "TelescopeFindPre",
+      callback = suppress_global_winborder,
+      desc = "Prevent Telescope from inheriting global float borders",
+    })
+
+    vim.api.nvim_create_autocmd("FileType", {
+      group = aug,
+      pattern = "TelescopePrompt",
+      callback = function(args)
+        vim.api.nvim_create_autocmd({ "BufLeave", "BufWipeout" }, {
+          group = aug,
+          buffer = args.buf,
+          once = true,
+          callback = function()
+            vim.schedule(restore_global_winborder)
+          end,
+          desc = "Restore global float borders after Telescope closes",
+        })
+      end,
+      desc = "Track Telescope prompt lifecycle for border restore",
+    })
   end,
 }
