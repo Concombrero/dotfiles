@@ -310,6 +310,7 @@ return {
           { "<leader>od", opencode_call("diff_open"), desc = "open diff view" },
           { "<leader>oh", opencode_call("select_history"), desc = "select from history" },
           { "<leader>oo", opencode_call("open_input"), desc = "open input window" },
+          { "<leader>oq", opencode_call("close"), desc = "close UI windows" },
           {
             "<leader>or",
             group = "restore/revert",
