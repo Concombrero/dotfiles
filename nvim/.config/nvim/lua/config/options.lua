@@ -24,6 +24,8 @@ function M.setup()
   vim.g.loaded_ruby_provider = 0
   vim.g.loaded_perl_provider = 0
   
+  local in_tmux = os.getenv("TMUX") ~= nil
+
   local options = {
     -- GENERAL
     timeoutlen = 300,               -- allow prefixed mappings like surround and leader chords to resolve reliably
@@ -74,7 +76,6 @@ function M.setup()
     -- EDIT
     spell = false,                  -- disable built-in spellchecker
     spelllang = { 'en_us' },        -- sets spelling dictionary
-    clipboard = "unnamedplus",      -- allows neovim to access the system clipboard
     mouse = "a",                    -- allow the mouse to be used in neovim
     mousescroll = "ver:2,hor:4",    -- change the speed of the scroll wheel
     ignorecase = true,              -- ignore case in search patterns
@@ -94,16 +95,22 @@ function M.setup()
     vim.opt[k] = v
   end
 
+  -- Keep implicit system clipboard sync outside tmux.
+  -- Inside tmux, unnamedplus makes routine edits like `x` emit OSC 52 writes
+  -- on every delete, which is enough to destabilize this tmux setup.
+  vim.opt.clipboard = in_tmux and "" or "unnamedplus"
+
   -- Use diagonal fillers for deleted lines in diff mode.
   vim.opt.fillchars:append({ diff = "╱" })
 
   -- Keep legacy regex syntax available for any filetype Treesitter doesn't cover.
   vim.cmd("syntax enable")
 
-  -- Clipboard: OSC 52 for copy (works through tmux), paste from unnamed register.
+  -- Clipboard inside tmux: keep explicit `"+`/`"*` access over OSC 52 without
+  -- routing every delete/change through the system clipboard.
   -- OSC 52 paste hangs (terminal doesn't respond to read requests), so paste
   -- falls back to the unnamed register. Use Ctrl+Shift+V to paste from system clipboard.
-  if os.getenv("TMUX") then
+  if in_tmux then
     local function paste()
       return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") }
     end
