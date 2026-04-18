@@ -204,6 +204,39 @@ configure_gtk_appearance() {
     log "GTK and GNOME appearance configured."
 }
 
+configure_default_terminal() {
+    local had_failure=false
+
+    if ! command -v kitty &>/dev/null; then
+        warn "Kitty is not installed; skipping default terminal configuration."
+        return 0
+    fi
+
+    if ! mkdir -p "$HOME/.config"; then
+        error "Failed to prepare ~/.config for terminal preferences."
+        return 1
+    fi
+
+    if ! printf 'kitty.desktop\n' > "$HOME/.config/xdg-terminals.list"; then
+        warn "Failed to configure xdg-terminals.list for Kitty."
+        had_failure=true
+    fi
+
+    if has_cmd gsettings; then
+        run_gsettings set org.gnome.desktop.default-applications.terminal exec kitty || {
+            warn "Failed to set the GNOME default terminal executable to Kitty."
+            had_failure=true
+        }
+        run_gsettings set org.gnome.desktop.default-applications.terminal exec-arg -- || {
+            warn "Failed to set the GNOME default terminal argument style for Kitty."
+            had_failure=true
+        }
+    fi
+
+    [ "$had_failure" = false ] || return 1
+    log "Default terminal configured for Kitty."
+}
+
 sync_gtk4_theme_support() {
     local sync_script="$DOTFILES_DIR/scripts/.local/bin/sync-gtk4-theme"
 
@@ -675,6 +708,65 @@ set_default_file_manager() {
     set_default_mime_handler yazi.desktop inode/directory
 }
 
+set_default_text_editor() {
+    local had_failure=false
+    local text_mimes=(
+        text/english
+        text/plain
+        text/markdown
+        text/x-r-markdown
+        text/x-quarto-markdown
+        text/x-changelog
+        text/csv
+        text/csv-schema
+        text/tab-separated-values
+        text/x-log
+        text/x-python
+        text/x-python3
+        text/x-lua
+        text/x-makefile
+        text/x-c
+        text/x-c++
+        text/x-csrc
+        text/x-c++src
+        text/x-chdr
+        text/x-c++hdr
+        text/x-java
+        text/x-tex
+        text/x-texinfo
+        text/x-dbus-service
+        text/x-systemd-unit
+        application/json
+        application/ld+json
+        application/geo+json
+        application/jrd+json
+        application/json-patch+json
+        application/x-ipynb+json
+        application/x-shellscript
+        application/x-yaml
+        application/raml+yaml
+        application/sql
+        application/x-desktop
+    )
+
+    if ! command -v nvim &>/dev/null; then
+        warn "Neovim is not installed; skipping default text editor configuration."
+        return 0
+    fi
+
+    if ! command -v kitty &>/dev/null; then
+        warn "Kitty is not installed; skipping default text editor configuration."
+        return 0
+    fi
+
+    if ! set_default_mime_handler nvim.desktop "${text_mimes[@]}"; then
+        warn "Failed to fully configure Neovim as the default text editor."
+        had_failure=true
+    fi
+
+    [ "$had_failure" = false ]
+}
+
 configure_mime() {
     info "Configuring MIME types..."
     local had_failure=false
@@ -717,6 +809,10 @@ configure_mime() {
         had_failure=true
     fi
 
+    if ! set_default_text_editor; then
+        had_failure=true
+    fi
+
     if command -v update-desktop-database &>/dev/null; then
         update-desktop-database "$HOME/.local/share/applications" || true
     fi
@@ -736,6 +832,7 @@ install_desktop_extras() {
     run_step "Catppuccin GTK theme install" install_catppuccin_gtk_theme
     run_step "DMZ cursor theme compatibility" ensure_dmz_cursor_theme_name
     run_step "GTK appearance configuration" configure_gtk_appearance
+    run_step "default terminal configuration" configure_default_terminal
     run_step "GTK4/libadwaita theme sync" sync_gtk4_theme_support
     run_step "wallpaper setup" set_wallpaper
     run_step "MIME configuration" configure_mime
