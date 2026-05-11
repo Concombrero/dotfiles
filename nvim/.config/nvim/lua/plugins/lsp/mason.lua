@@ -113,9 +113,13 @@ return {
 
     -- DIAGNOSTICS CONFIGURATION
     local signs = { Error = "󰅜", Warn = "󰀦", Hint = "󰌵", Info = "󰋽" }
+    local visible_diagnostic_severity = { min = vim.diagnostic.severity.WARN }
     vim.diagnostic.config({
-      virtual_text = true,
+      virtual_text = {
+        severity = visible_diagnostic_severity,
+      },
       signs = {
+        severity = visible_diagnostic_severity,
         text = {
           [vim.diagnostic.severity.ERROR] = signs.Error,
           [vim.diagnostic.severity.WARN] = signs.Warn,
@@ -123,7 +127,12 @@ return {
           [vim.diagnostic.severity.INFO] = signs.Info,
         },
       },
-      underline = true,
+      underline = {
+        severity = visible_diagnostic_severity,
+      },
+      float = {
+        severity = visible_diagnostic_severity,
+      },
       update_in_insert = false,
       severity_sort = true,
     })

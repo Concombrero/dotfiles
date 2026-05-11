@@ -268,7 +268,16 @@ return {
             ),
             desc = "clangd symbol info",
           },
-          { "<leader>lb", "<cmd>Telescope diagnostics bufnr=0<CR>", desc = "buffer diagnostics" },
+          {
+            "<leader>lb",
+            function()
+              require("telescope.builtin").diagnostics({
+                bufnr = 0,
+                severity_limit = vim.diagnostic.severity.WARN,
+              })
+            end,
+            desc = "buffer diagnostics",
+          },
           { "<leader>lc", "<cmd>lua vim.lsp.buf.code_action()<CR>", desc = "code action" },
           { "<leader>ld", "<cmd>lua vim.lsp.buf.definition()<CR>", desc = "definition" },
           { "<leader>lf", function() require("conform").format({ async = true, lsp_fallback = true }) end, desc = "format buffer" },
@@ -276,9 +285,27 @@ return {
           { "<leader>lh", "<cmd>lua vim.lsp.buf.hover()<CR>", desc = "help" },
           { "<leader>li", "<cmd>Telescope lsp_implementations<CR>", desc = "implementations" },
           { "<leader>lk", "<cmd>lsp stop<CR>", desc = "stop lsp" },
-          { "<leader>ll", "<cmd>lua vim.diagnostic.open_float()<CR>", desc = "line diagnostics" },
-          { "<leader>ln", "<cmd>lua vim.diagnostic.goto_next()<CR>", desc = "next diagnostic" },
-          { "<leader>lp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", desc = "previous diagnostic" },
+          {
+            "<leader>ll",
+            function()
+              vim.diagnostic.open_float({ severity = { min = vim.diagnostic.severity.WARN } })
+            end,
+            desc = "line diagnostics",
+          },
+          {
+            "<leader>ln",
+            function()
+              vim.diagnostic.goto_next({ severity = { min = vim.diagnostic.severity.WARN } })
+            end,
+            desc = "next diagnostic",
+          },
+          {
+            "<leader>lp",
+            function()
+              vim.diagnostic.goto_prev({ severity = { min = vim.diagnostic.severity.WARN } })
+            end,
+            desc = "previous diagnostic",
+          },
           { "<leader>lr", "<cmd>Telescope lsp_references<CR>", desc = "references" },
           { "<leader>ls", "<cmd>lsp restart<CR>", desc = "restart lsp" },
           { "<leader>lt", "<cmd>lsp enable<CR>", desc = "start lsp" },

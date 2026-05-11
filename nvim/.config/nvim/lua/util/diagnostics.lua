@@ -90,7 +90,7 @@ end
 
 -- Function to copy diagnostics to clipboard
 function M.copy_diagnostics_to_clipboard()
-  local diagnostics = vim.diagnostic.get(0)  -- Get diagnostics for current buffer
+  local diagnostics = vim.diagnostic.get(0, { severity = { min = vim.diagnostic.severity.WARN } })
   if #diagnostics == 0 then
     vim.notify("No diagnostics found", vim.log.levels.INFO)
     return
