@@ -21,8 +21,6 @@ set scroll-step 40 # Increase scroll speed
 # Keybindings
 # ---------------------
 map <Space> toggle_index
-map K zoom in
-map J zoom out
 map p print
 map w recolor
 map k scroll up
@@ -95,4 +93,3 @@ set recolor-keephue             true     # Don't preserve original colors in ima
 # You can toggle recolor with 'w' (mapped above)
 # To disable recoloring completely, change to:
 # set recolor false
-
