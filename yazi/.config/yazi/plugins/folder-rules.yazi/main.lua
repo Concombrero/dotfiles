@@ -1,14 +1,23 @@
+local subscribed = false
+
 local function setup()
-	local home = os.getenv("HOME")
-	local downloads = home and Url(home .. "/Downloads")
+	if subscribed then
+		return
+	end
 
 	ps.sub("ind-sort", function(opt)
-		if downloads and cx.active.current.cwd == downloads then
+		local cwd = cx.active.current.cwd
+
+		if cwd and cwd:ends_with("Downloads") then
 			opt.by, opt.reverse, opt.dir_first = "mtime", true, false
+		else
+			opt.by, opt.reverse, opt.dir_first = "natural", false, true
 		end
 
 		return opt
 	end)
+
+	subscribed = true
 end
 
 return { setup = setup }
