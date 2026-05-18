@@ -4,6 +4,31 @@ set -eu
 iface=""
 gateway=""
 name=""
+display_alias=""
+alias_file="${XDG_CONFIG_HOME:-$HOME/.config}/polybar/network-aliases"
+
+network_alias() {
+    [ -f "$alias_file" ] || return 0
+
+    awk -F= -v key="$1" '
+        /^[[:space:]]*(#|$)/ { next }
+        {
+            alias_key = $1
+            sub(/^[[:space:]]+/, "", alias_key)
+            sub(/[[:space:]]+$/, "", alias_key)
+            if (alias_key == key) {
+                alias_value = $0
+                sub(/^[^=]*=/, "", alias_value)
+                sub(/^[[:space:]]+/, "", alias_value)
+                sub(/[[:space:]]+$/, "", alias_value)
+                if (alias_value != "") {
+                    print alias_value
+                    exit
+                }
+            }
+        }
+    ' "$alias_file" 2>/dev/null || true
+}
 
 if command -v nmcli >/dev/null 2>&1; then
     iface="$(nmcli -t -f DEVICE,TYPE,STATE device status 2>/dev/null | awk -F: '$2 == "ethernet" && $3 == "connected" { print $1; exit }')"
@@ -37,6 +62,8 @@ if [ -n "$name" ]; then
     name="${name%.}"
     name="${name%%.*}"
     name="$(printf '%s\n' "$name" | awk '{ print tolower($0) }')"
+    # systemd-resolved synthesizes _gateway for the default gateway; it is not a useful network label.
+    [ "$name" = "_gateway" ] && name=""
 fi
 
 if [ -z "$name" ] && command -v nmcli >/dev/null 2>&1; then
@@ -45,6 +72,16 @@ if [ -z "$name" ] && command -v nmcli >/dev/null 2>&1; then
 fi
 
 if [ -n "$name" ]; then
+    display_alias="$(network_alias "$name")"
+fi
+
+if [ -z "$display_alias" ]; then
+    display_alias="$(network_alias "$iface")"
+fi
+
+if [ -n "$display_alias" ]; then
+    printf '%s\n' "$display_alias"
+elif [ -n "$name" ]; then
     printf '%s\n' "$name"
 else
     printf 'LAN\n'
