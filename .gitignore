@@ -5,6 +5,7 @@ install.log
 **/local.conf
 git/.gitconfig.local
 fish/.config/fish/local.fish
+picom/.config/picom/extra.conf
 
 # OpenCode local secrets (not tracked)
 **/firecrawl_api_key
