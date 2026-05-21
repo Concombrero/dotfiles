@@ -4,7 +4,8 @@ Documentation=man:tmux(1)
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/env tmux new-session -d
+ExecStartPre=/usr/bin/env bash -lc '$HOME/.config/tmux/repair-resurrect-last'
+ExecStart=/usr/bin/env bash -lc 'tmux new-session -d && { TMUX="$(tmux display-message -p "#{socket_path},#{pid},0")" "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" >/dev/null 2>&1 || true; }'
 
 ExecStop=/usr/bin/env bash -lc 'tmux ls >/dev/null 2>&1 && "$HOME/.tmux/plugins/tmux-resurrect/scripts/save.sh" || true'
 ExecStop=/usr/bin/env bash -lc 'tmux ls >/dev/null 2>&1 && tmux kill-server || true'
