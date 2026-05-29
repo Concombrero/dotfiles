@@ -72,7 +72,7 @@ return {
 
     local function build_custom_highlights(colors)
       local groups = {
-        fill = { bg = colors.mid },
+        fill = { bg = "NONE" },
       }
 
       local function assign(names, fg, bg, extra)
@@ -248,7 +248,7 @@ return {
     local function set_tabline_hls()
       colors = get_colors()
       vim.api.nvim_set_hl(0, "TabLine", { fg = colors.muted, bg = colors.mid })
-      vim.api.nvim_set_hl(0, "TabLineFill", { bg = colors.mid })
+      vim.api.nvim_set_hl(0, "TabLineFill", { bg = "NONE" })
       vim.api.nvim_set_hl(0, "TabLineSel", {
         fg = colors.accent,
         bg = colors.light,
