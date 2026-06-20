@@ -34,6 +34,15 @@ local function build_current_buffer()
   vim.cmd("make")
 end
 
+local function format_current_buffer()
+  if vim.b.cpp_training_mode == true then
+    vim.notify("Formatting disabled in C/C++ training mode", vim.log.levels.INFO)
+    return
+  end
+
+  require("conform").format({ async = true, lsp_fallback = true })
+end
+
 local function open_yank_history()
   local lazy_ok, lazy = pcall(require, "lazy")
   if lazy_ok then
@@ -280,7 +289,7 @@ return {
           },
           { "<leader>lc", "<cmd>lua vim.lsp.buf.code_action()<CR>", desc = "code action" },
           { "<leader>ld", "<cmd>lua vim.lsp.buf.definition()<CR>", desc = "definition" },
-          { "<leader>lf", function() require("conform").format({ async = true, lsp_fallback = true }) end, desc = "format buffer" },
+          { "<leader>lf", format_current_buffer, desc = "format buffer" },
           { "<leader>lg", "<cmd>LintToggle<CR>", desc = "toggle global linting" },
           { "<leader>lh", "<cmd>lua vim.lsp.buf.hover()<CR>", desc = "help" },
           { "<leader>li", "<cmd>Telescope lsp_implementations<CR>", desc = "implementations" },

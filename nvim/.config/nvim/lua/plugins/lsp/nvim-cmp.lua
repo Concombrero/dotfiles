@@ -53,6 +53,9 @@ return {
     -- find more here: https://www.nerdfonts.com/cheat-sheet
 
     cmp.setup({
+      enabled = function()
+        return vim.b.cpp_training_mode ~= true
+      end,
       completion = {
         completeopt = "menu,noselect",
         -- completeopt = "menuone,preview,noinsert,noselect",
@@ -74,6 +77,11 @@ return {
         ["<CR>"] = cmp.mapping.confirm({ select = false }),
         -- supertab (with Copilot integration)
         ["<Tab>"] = cmp.mapping(function(fallback)
+          if vim.b.cpp_training_mode == true then
+            fallback()
+            return
+          end
+
           -- Copilot: accept suggestion if visible
           if package.loaded["copilot.suggestion"] then
             local copilot_ok, copilot_suggestion = pcall(require, "copilot.suggestion")
@@ -103,6 +111,11 @@ return {
           -- elseif has_words_before() then
           --  cmp.complete()
         ["<S-Tab>"] = cmp.mapping(function(fallback)
+          if vim.b.cpp_training_mode == true then
+            fallback()
+            return
+          end
+
           -- Standard cmp Shift-Tab behavior
           if cmp.visible() then
             cmp.select_prev_item()

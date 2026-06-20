@@ -10,6 +10,7 @@ Shared helper modules used across this Neovim config.
 - `url.lua`: URL detection/opening helpers (`gx`, Ctrl+Click workflow)
 - `diagnostics.lua`: diagnostic UI helpers and clipboard export
 - `misc.lua`: small utility functions and user commands
+- `cpp_training.lua`: C/C++ exam practice mode toggle
 - `optimize.lua`: startup/plugin profiling commands
 
 ## User Commands Defined by Util Modules
@@ -25,6 +26,7 @@ Shared helper modules used across this Neovim config.
 - `:ProfilePlugins`
 - `:OptimizationReport`
 - `:SuggestLazyLoading`
+- `:CppTrainingMode`
 
 ## Backward-Compatible Globals
 

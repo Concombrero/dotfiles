@@ -10,6 +10,7 @@
 -- - url.lua: URL detection and handling
 -- - diagnostics.lua: LSP diagnostic utilities
 -- - misc.lua: Miscellaneous helper functions
+-- - cpp_training.lua: C/C++ exam training mode toggle
 -- - optimize.lua: Performance optimization utilities
 --
 -- Each module follows a consistent pattern with a setup()
@@ -66,6 +67,7 @@ function M._load_submodules()
     "url",
     "diagnostics",
     "misc",
+    "cpp_training",
     "jupyter",
   }
   

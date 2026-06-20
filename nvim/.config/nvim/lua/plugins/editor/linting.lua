@@ -186,6 +186,11 @@ return {
     end
 
     local function try_lint_current()
+      if vim.b.cpp_training_mode == true then
+        vim.notify("Linting disabled in C/C++ training mode", vim.log.levels.INFO)
+        return
+      end
+
       local filetype = vim.bo.filetype
 
       if filetype == "python" then

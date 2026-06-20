@@ -83,6 +83,10 @@ return {
     -- Add custom quote handling
     for _, char in ipairs({ '"',  '`' }) do
       vim.keymap.set('i', char, function()
+        if vim.b.cpp_training_mode == true then
+          return char
+        end
+
         local col = vim.api.nvim_win_get_cursor(0)[2]
         local line = vim.api.nvim_get_current_line()
 

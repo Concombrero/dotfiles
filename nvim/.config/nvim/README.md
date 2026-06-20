@@ -53,6 +53,8 @@ adjust your local citation workflow settings.
   - `<leader>lt` start (`:lsp enable`)
   - `<leader>lk` stop (`:lsp stop`)
   - `<leader>ls` restart (`:lsp restart`)
+- C/C++ exam practice:
+  - `:CppTrainingMode` toggle plain C/C++ mode without LSP, syntax, completion, diagnostics, linting, formatting helpers, Copilot suggestions, or auto-pairs
 - Git / Diffview:
   - `<leader>g` toggle the current worktree/index Diffview tab
 
