@@ -15,6 +15,9 @@ Options:
                                  Only update non-package-manager tools
   --with-fonts                   Refresh repo-managed fonts
   -h, --help                     Show this help text
+
+Environment:
+  JULIA_UPDATE_TIMEOUT           Time before skipping a stuck juliaup command (default: 5m)
 EOF
 }
 
@@ -49,6 +52,7 @@ SESH_INSTALL_DIR="$HOME/.local/opt/sesh"
 KITTY_INSTALL_DIR="$HOME/.local/kitty.app"
 LOCALSEND_INSTALL_DIR="$HOME/.local/opt/localsend"
 JULIAUP_INSTALL_DIR="$HOME/.juliaup"
+JULIA_UPDATE_TIMEOUT=${JULIA_UPDATE_TIMEOUT:-5m}
 TPM_INSTALL_DIR="$HOME/.tmux/plugins/tpm"
 FONT_ROOT="/usr/local/share/fonts"
 FONT_DIR="$FONT_ROOT/nerd-fonts"
@@ -707,6 +711,7 @@ update_typst_managed() {
 update_julia_managed() {
     local juliaup_bin="$JULIAUP_INSTALL_DIR/bin/juliaup"
     local julia_bin="$JULIAUP_INSTALL_DIR/bin/julia"
+    local status
 
     if any_system_package_installed juliaup julia; then
         info "Skipping Julia: system package manager handles it."
@@ -723,8 +728,33 @@ update_julia_managed() {
     fi
 
     info "Updating Julia and juliaup..."
-    "$juliaup_bin" self update || return 1
-    "$juliaup_bin" update || return 1
+    run_juliaup_with_timeout "$juliaup_bin" self update
+    status=$?
+    case "$status" in
+        0)
+            ;;
+        124|137)
+            warn "Skipping Julia: juliaup self update timed out after $JULIA_UPDATE_TIMEOUT."
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    run_juliaup_with_timeout "$juliaup_bin" update
+    status=$?
+    case "$status" in
+        0)
+            ;;
+        124|137)
+            warn "Skipping Julia: juliaup update timed out after $JULIA_UPDATE_TIMEOUT."
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
 
     if [ -x "$julia_bin" ]; then
         "$julia_bin" --version >/dev/null 2>&1 || return 1
@@ -736,6 +766,16 @@ update_julia_managed() {
     fi
 
     log "Julia updated."
+}
+
+run_juliaup_with_timeout() {
+    if command -v timeout >/dev/null 2>&1; then
+        timeout --kill-after=30s "$JULIA_UPDATE_TIMEOUT" "$@"
+        return $?
+    fi
+
+    warn "timeout is not available; Julia update cannot be auto-skipped if it hangs."
+    "$@"
 }
 
 update_clipboard_managed() {
