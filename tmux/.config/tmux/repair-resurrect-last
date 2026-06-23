@@ -1,31 +1,12 @@
 #!/usr/bin/env sh
 set -eu
 
-dir=${TMUX_RESURRECT_DIR:-}
-[ -n "$dir" ] || dir=$(tmux show-option -gqv @resurrect-dir 2>/dev/null || true)
-[ -n "$dir" ] || dir="$HOME/.tmux/resurrect"
+snapshot=${1:-}
+[ -n "$snapshot" ] || exit 0
 
-case "$dir" in
-	~/*) dir="$HOME/${dir#~/}" ;;
-	\$HOME/*) dir="$HOME/${dir#\$HOME/}" ;;
-esac
+awk -F '\t' '$1 == "pane" && $2 != "0" { found = 1 } END { exit !found }' "$snapshot" && exit 0
 
-[ -d "$dir" ] || exit 0
+last=$(dirname "$snapshot")/last
+[ -s "$last" ] || exit 0
 
-latest=
-for snapshot in "$dir"/tmux_resurrect_*.txt; do
-	[ -s "$snapshot" ] || continue
-	if awk -F '\t' '$1 == "pane" && $2 != "0" { found = 1 } END { exit !found }' "$snapshot"; then
-		latest=$(basename "$snapshot")
-	fi
-done
-
-[ -n "$latest" ] || exit 0
-
-last="$dir/last"
-if [ "$(readlink "$last" 2>/dev/null || true)" = "$latest" ] && [ -s "$last" ]; then
-	exit 0
-fi
-
-rm -f "$last"
-ln -s "$latest" "$last"
+cp "$last" "$snapshot"
