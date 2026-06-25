@@ -1,5 +1,40 @@
 #!/usr/bin/env bash
 
+ensure_flameshot_x11_legacy() {
+    [ "${XDG_SESSION_TYPE:-}" = "x11" ] || return 0
+
+    config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/flameshot"
+    config_file="$config_dir/flameshot.ini"
+    changed=0
+
+    mkdir -p "$config_dir" || return 0
+
+    if [ ! -f "$config_file" ]; then
+        {
+            printf '%s\n' '[General]'
+            printf '%s\n' 'useX11LegacyScreenshot=true'
+        } >"$config_file" || return 0
+        changed=1
+    elif grep -q '^useX11LegacyScreenshot=true$' "$config_file"; then
+        return 0
+    elif grep -q '^useX11LegacyScreenshot=' "$config_file"; then
+        sed -i 's/^useX11LegacyScreenshot=.*/useX11LegacyScreenshot=true/' "$config_file" && changed=1
+    elif grep -q '^\[General\]' "$config_file"; then
+        sed -i '/^\[General\]/a useX11LegacyScreenshot=true' "$config_file" && changed=1
+    else
+        {
+            printf '\n%s\n' '[General]'
+            printf '%s\n' 'useX11LegacyScreenshot=true'
+        } >>"$config_file" && changed=1
+    fi
+
+    if [ "$changed" -eq 1 ]; then
+        pkill -x flameshot >/dev/null 2>&1 || true
+    fi
+}
+
+ensure_flameshot_x11_legacy
+
 previous_window=""
 if command -v xdotool >/dev/null 2>&1; then
     previous_window="$(xdotool getactivewindow 2>/dev/null || true)"
