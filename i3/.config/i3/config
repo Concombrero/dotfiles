@@ -21,11 +21,12 @@ exec_always --no-startup-id setxkbmap -option caps:swapescape
 exec_always --no-startup-id picom
 
 exec --no-startup-id dex --autostart --environment i3
-# Import GUI variables into systemd/dbus activation environments, restart the
-# portal services, and refresh tmux's server/session environment in place.
+# Import GUI variables into systemd/dbus activation environments, keep
+# systemd's graphical-session.target active for portals, restart the portal
+# services, and refresh tmux's server/session environment in place.
 # Avoid restarting tmux here: a login-time restart can overwrite resurrect's
 # `last` snapshot with the fresh bootstrap session before continuum restores.
-exec --no-startup-id sh -c 'systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH; if command -v dbus-update-activation-environment >/dev/null 2>&1; then dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH; fi; systemctl --user restart xdg-desktop-portal.service xdg-desktop-portal-termfilechooser.service; if ! tmux ls >/dev/null 2>&1; then systemctl --user start tmux.service; fi; if tmux ls >/dev/null 2>&1; then for key in DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH; do value=$(printenv "$key"); [ -n "$value" ] || continue; tmux set-environment -g "$key" "$value"; tmux list-sessions -F "#S" 2>/dev/null | while IFS= read -r s; do tmux set-environment -t "$s" "$key" "$value"; done; done; fi'
+exec --no-startup-id sh -c 'systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH; if command -v dbus-update-activation-environment >/dev/null 2>&1; then dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH; fi; if command -v systemd-run >/dev/null 2>&1; then systemctl --user stop i3-graphical-session.service >/dev/null 2>&1 || true; systemctl --user reset-failed i3-graphical-session.service >/dev/null 2>&1 || true; systemd-run --user --unit=i3-graphical-session --collect --property=BindsTo=graphical-session.target --property=Before=graphical-session.target --property=Slice=session.slice /bin/sh -c "while kill -0 $PPID 2>/dev/null; do sleep 60; done" >/dev/null 2>&1 || true; fi; systemctl --user restart xdg-desktop-portal.service xdg-desktop-portal-termfilechooser.service; if ! tmux ls >/dev/null 2>&1; then systemctl --user start tmux.service; fi; if tmux ls >/dev/null 2>&1; then for key in DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS I3SOCK PATH; do value=$(printenv "$key"); [ -n "$value" ] || continue; tmux set-environment -g "$key" "$value"; tmux list-sessions -F "#S" 2>/dev/null | while IFS= read -r s; do tmux set-environment -t "$s" "$key" "$value"; done; done; fi'
 
 # Status bar 
 exec_always --no-startup-id killall polybar
