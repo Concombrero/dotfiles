@@ -105,6 +105,9 @@ Package managers installs are preferred whenever they ship the latest version. T
 Installed in isolated environments to avoid breaking system Python:
 - `ipython`, `jupytext`, `black`, `isort`, `pylint`
 
+### Source-built CLI tools
+- TUXEDO Tailor CLI (`tailor`) from [`AaronErhardt/tuxedo-rs`](https://github.com/AaronErhardt/tuxedo-rs)
+
 ### Default `xdg-open` handlers
 - `zathura-tabbed.desktop` for PDF and common PDF-like MIME aliases
 - `sxiv-tabbed.desktop` for common image MIME types

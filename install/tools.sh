@@ -5,6 +5,17 @@ github_latest_release_tag() {
     curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4
 }
 
+github_latest_release_tag_with_prefix() {
+    local repo=$1
+    local prefix=$2
+
+    curl -fsSL "https://api.github.com/repos/${repo}/releases?per_page=100" \
+        | grep '"tag_name"' \
+        | cut -d'"' -f4 \
+        | grep -F "$prefix" \
+        | head -1
+}
+
 install_upstream_tools() {
     run_step "7-Zip install" install_7zip
     run_step "fzf install" install_fzf
@@ -228,11 +239,68 @@ install_tree_sitter_cli() {
     log "tree-sitter CLI installed."
 }
 
+install_tailor_cli() {
+    local repo="AaronErhardt/tuxedo-rs"
+    local version src_dir tmp_dir
+
+    if command -v tailor &>/dev/null; then
+        warn "TUXEDO Tailor CLI already installed, skipping."
+        return
+    fi
+
+    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+    if ! command -v cargo &>/dev/null; then
+        if ! install_rust_toolchain; then
+            error "Rust toolchain is required to install TUXEDO Tailor CLI."
+            return 1
+        fi
+    fi
+
+    version="$(github_latest_release_tag_with_prefix "$repo" "tailor-v")"
+    if [ -z "$version" ]; then
+        error "Could not determine the latest TUXEDO Tailor CLI release."
+        return 1
+    fi
+
+    info "Installing TUXEDO Tailor CLI ${version#tailor-v} from source..."
+    tmp_dir="$(mktemp -d)"
+    src_dir="$tmp_dir/tuxedo-rs"
+
+    if ! git clone --depth 1 --branch "$version" "https://github.com/${repo}.git" "$src_dir"; then
+        error "Failed to clone TUXEDO Tailor CLI source."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! cargo install --locked --path "$src_dir/tailor_cli"; then
+        error "Failed to build and install TUXEDO Tailor CLI."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! link_cargo_binary tailor; then
+        error "Failed to link TUXEDO Tailor CLI into ~/.local/bin."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
+
+    if ! "$HOME/.local/bin/tailor" --help >/dev/null 2>&1; then
+        error "TUXEDO Tailor CLI installed but failed smoke test."
+        return 1
+    fi
+
+    log "TUXEDO Tailor CLI ${version#tailor-v} installed from source."
+}
+
 install_tools() {
     run_step "TPM install" install_tpm
     [ "$DISTRO_FAMILY" = "debian" ] && run_step "Clipboard install" install_clipboard
     run_step "Rust toolchain install" install_rust_toolchain
     run_step "tree-sitter CLI install" install_tree_sitter_cli
+    run_step "TUXEDO Tailor CLI install" install_tailor_cli
     run_step "Neovim install" install_neovim
     run_step "Julia install" install_julia
 
