@@ -10,6 +10,7 @@
       }
     }
   },
+  "lsp": {},
   "mcp": {
     "firecrawl": {
       "type": "local",
