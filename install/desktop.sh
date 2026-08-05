@@ -204,6 +204,14 @@ install_solarc_gtk_theme() {
         return 1
     fi
 
+    # Inkscape 1.x deprecates `--export-plain-svg=<path>` in favor of pairing
+    # `--export-filename` with the boolean `--export-plain-svg` flag.
+    if ! sed -i 's/--export-plain-svg={}/--export-filename={} --export-plain-svg/g' "$source_dir/solarize.sh"; then
+        error "Failed to patch the SolArc helper script for current Inkscape releases."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
     if ! (
         cd "$source_dir" &&
         ./solarize.sh
@@ -653,6 +661,22 @@ install_sddm_theme() {
     log "Tagarchy SDDM theme installed."
 }
 
+detect_i3lock_version() {
+    local binary_path=$1
+    local version_output=""
+
+    [ -x "$binary_path" ] || return 1
+
+    version_output="$($binary_path --version 2>&1 || true)"
+    if [ -z "$version_output" ]; then
+        version_output="$($binary_path -v 2>&1 || true)"
+    fi
+
+    [ -n "$version_output" ] || return 1
+
+    printf '%s\n' "$version_output" | grep -Eo '[0-9]+([.][0-9A-Za-z]+)+' | head -1
+}
+
 install_i3lock_color() {
     local latest_tag current_tag tmp_dir archive extract_dir source_dir candidate
     local license_path="/usr/local/share/licenses/i3lock-color/LICENSE"
@@ -667,7 +691,7 @@ install_i3lock_color() {
 
     current_tag=""
     if [ -x /usr/local/bin/i3lock ]; then
-        current_tag="$(/usr/local/bin/i3lock --version 2>/dev/null | awk 'NR==1 { print $3 }')"
+        current_tag="$(detect_i3lock_version /usr/local/bin/i3lock || true)"
     fi
 
     if [ "$current_tag" = "$latest_tag" ]; then
@@ -732,15 +756,31 @@ install_i3lock_color() {
         return 1
     fi
 
-    current_tag="$(/usr/local/bin/i3lock --version 2>/dev/null | awk 'NR==1 { print $3 }')"
-    if [ "$current_tag" != "$latest_tag" ]; then
+    if [ ! -x /usr/local/bin/i3lock ]; then
+        error "i3lock-color install completed but /usr/local/bin/i3lock was not found."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if ! /usr/local/bin/i3lock --help >/dev/null 2>&1 && ! /usr/local/bin/i3lock -h >/dev/null 2>&1; then
+        error "i3lock-color installed but the binary failed a basic smoke test."
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    current_tag="$(detect_i3lock_version /usr/local/bin/i3lock || true)"
+    if [ -n "$current_tag" ] && [ "$current_tag" != "$latest_tag" ]; then
         error "i3lock-color installed but reported version '$current_tag' instead of '$latest_tag'."
         rm -rf "$tmp_dir"
         return 1
     fi
 
     rm -rf "$tmp_dir"
-    log "i3lock-color ${latest_tag} installed to /usr/local/bin/i3lock."
+    if [ -n "$current_tag" ]; then
+        log "i3lock-color ${current_tag} installed to /usr/local/bin/i3lock."
+    else
+        log "i3lock-color installed to /usr/local/bin/i3lock."
+    fi
 }
 
 set_wallpaper() {

@@ -5,3 +5,7 @@
 if command -v xrdb >/dev/null 2>&1; then
     printf 'Xcursor.theme: %s\nXcursor.size: %s\n' 'DMZ-White' '16' | xrdb -nocpp -merge
 fi
+
+if command -v setxkbmap >/dev/null 2>&1; then
+    setxkbmap -layout fr -option caps:swapescape
+fi
