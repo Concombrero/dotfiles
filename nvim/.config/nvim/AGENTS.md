@@ -7,7 +7,7 @@ Config name: Neovim
 
 This is a NeoVim configuration focused on academic writing (LaTeX, Typst, Markdown),
 Python development, Jupyter notebooks, and Lua plugin development. It uses lazy.nvim for
-plugin management and is maintained in this Ubuntu/Debian workstation repo. AI workflows
+plugin management and is maintained in this multi-distro workstation repo. AI workflows
 are built around OpenCode + Copilot, with a few writing helpers still exposed through
 existing Lectic-related commands.
 

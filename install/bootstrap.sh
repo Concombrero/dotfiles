@@ -72,6 +72,10 @@ detect_distro_family() {
                 printf 'debian\n'
                 return
                 ;;
+            fedora)
+                printf 'fedora\n'
+                return
+                ;;
             arch|archlinux|cachyos)
                 printf 'arch\n'
                 return
@@ -112,11 +116,11 @@ detect_os() {
 
 ensure_supported_distro() {
     case "$DISTRO_FAMILY" in
-        debian|arch)
+        debian|fedora|arch)
             return 0
             ;;
         *)
-            die "Unsupported distribution: $DISTRO. This installer currently supports Debian/Ubuntu and Arch-based distros that use pacman."
+            die "Unsupported distribution: $DISTRO. This installer currently supports Debian/Ubuntu, Fedora, and Arch-based distros."
             ;;
     esac
 }
@@ -129,6 +133,11 @@ refresh_package_database() {
             [ "$PACKAGE_DB_READY" = true ] && return 0
             info "Refreshing apt package metadata..."
             sudo apt-get update || return 1
+            ;;
+        fedora)
+            [ "$PACKAGE_DB_READY" = true ] && return 0
+            info "Refreshing dnf package metadata..."
+            sudo dnf makecache || return 1
             ;;
         arch)
             [ "$PACMAN_FULL_UPGRADE_DONE" = true ] && return 0
@@ -150,6 +159,13 @@ install_single_package() {
             manager_name="Debian"
             info "Installing ${manager_name} package: $package"
             if sudo apt-get install -y "$package"; then
+                return 0
+            fi
+            ;;
+        fedora)
+            manager_name="Fedora"
+            info "Installing ${manager_name} package: $package"
+            if sudo dnf install -y "$package"; then
                 return 0
             fi
             ;;

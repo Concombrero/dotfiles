@@ -104,16 +104,22 @@ apply_requested_desktop_extras() {
 
 activate_desktop_integrations() {
     [ "$INSTALL_DESKTOP" = true ] || return 0
-    [ "$DISTRO_FAMILY" = arch ] && run_step "Arch desktop service setup" configure_arch_desktop_services
+    case "$DISTRO_FAMILY" in
+        arch|fedora)
+            run_step "display manager service setup" configure_display_manager_services
+            ;;
+    esac
     activate_termfilechooser
 }
 
 print_post_install_notes() {
-    if [ "$DISTRO_FAMILY" = arch ] && [ "$INSTALL_DESKTOP" = true ]; then
-        info "Arch desktop installs provision the SDDM login stack and enable sddm.service."
-    fi
-
     if [ "$INSTALL_DESKTOP" = true ]; then
+        case "$DISTRO_FAMILY" in
+            arch|fedora)
+                info "$OS desktop installs provision the SDDM login stack and enable sddm.service."
+                ;;
+        esac
+
         info "Zen UI CSS is staged at ~/.config/zen/chrome/."
         info "After launching Zen once, move that chrome directory into your active profile under ~/.zen/<profile>/chrome/."
     fi

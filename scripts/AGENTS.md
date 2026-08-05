@@ -11,7 +11,7 @@ Treat this package with extra caution. These scripts glue together i3, tmux, por
 
 ## General Rules
 
-- Keep scripts portable across Ubuntu/Debian machines.
+- Keep scripts portable across Ubuntu/Debian, Fedora, and Arch-based machines.
 - Do not hardcode usernames, hostnames, monitor outputs, or secret values.
 - Prefer POSIX `sh` when possible; use `bash` only when arrays, `mapfile`, `[[ ... ]]`, or other bash-specific features materially help.
 - Quote all arguments and paths carefully, especially anything forwarded to terminals, `i3-msg`, `tmux`, `rofi`, or desktop files.

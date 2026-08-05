@@ -1,5 +1,5 @@
 # Workstation Dotfiles
-GNU Stow-managed dotfiles for a full Ubuntu/Debian or Arch-based workstation, with an experience mostly driven by the [i3](https://i3wm.org/) tiling window manager.
+GNU Stow-managed dotfiles for a full Ubuntu/Debian, Fedora, or Arch-based workstation, with an experience mostly driven by the [i3](https://i3wm.org/) tiling window manager.
 
 ![Home screen](preview.png)
 ## System Overview
@@ -50,6 +50,14 @@ cd ~/dotfiles
 ./install.sh
 ```
 
+**Fedora:**
+```bash
+sudo dnf install -y git
+git clone https://github.com/Malik-Hacini/dotfiles ~/dotfiles
+cd ~/dotfiles
+./install.sh
+```
+
 **Arch Linux:**
 
 ```bash
@@ -90,12 +98,13 @@ julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/n
 Defined in distro-specific package lists:
 
 - Debian/Ubuntu: `packages/common.txt` and `packages/desktop.txt`
+- Fedora: `packages/common.fedora.txt` and `packages/desktop.fedora.txt`
 - Arch-based: `packages/common.arch.txt` and `packages/desktop.arch.txt`
 - Arch AUR: `packages/common.aur.arch.txt` and `packages/desktop.aur.arch.txt`
 
-Package managers installs are preferred whenever they ship the latest version. This leads to a lot of external PPAs, official binaries and source installs on Ubuntu. Use Arch if you can.
+Package manager installs are preferred whenever they ship the latest version. Debian/Ubuntu and Fedora still rely on a few upstream binaries and source builds where repo packages lag or are missing. Arch remains the closest path to an all-package-managed install.
 
-### Arch login manager theme
+### Arch/Fedora login manager theme
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`
 - theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf` 
 - custom X11 display setup script installed to `/usr/local/share/sddm/scripts/tagarchy-xsetup` to seed `Xcursor.theme` and `Xcursor.size` before the Qt6 greeter starts
@@ -140,7 +149,7 @@ Use `bash scripts/.local/bin/force-stow-dotfiles` any time you want to re-apply 
 | Flag | Meaning |
 |---|---|
 | `--headless`, `--no-gui` | Skip desktop/GUI packages (i3, polybar, fonts, wallpapers, Zen browser). |
-| `--skip-packages` | Skip system package installation (`apt`/`pacman`). |
+| `--skip-packages` | Skip system package installation (`apt`/`dnf`/`pacman`). |
 | `--skip-tools` | Skip external tool installation (binaries like `starship`, `yazi`, `typst`, etc.). |
 | `--skip-fonts` | Skip Nerd Fonts installation. |
 | `--skip-ppas` | Skip adding Ubuntu PPAs and Debian/Ubuntu external apt repos. |

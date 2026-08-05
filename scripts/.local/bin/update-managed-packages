@@ -10,8 +10,9 @@ Update distro packages plus the non-package-manager tools installed by this
 dotfiles repo.
 
 Options:
-  --system-only, --apt-only      Only update distro-managed packages
-  --non-system-only, --non-apt-only
+    --system-only, --apt-only, --pacman-only, --dnf-only
+                                                                 Only update distro-managed packages
+    --non-system-only, --non-apt-only, --non-pacman-only, --non-dnf-only
                                  Only update non-package-manager tools
   --with-fonts                   Refresh repo-managed fonts
   -h, --help                     Show this help text
@@ -60,10 +61,10 @@ FONT_AWESOME_DIR="$FONT_ROOT/fontawesome"
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        --system-only|--apt-only)
+        --system-only|--apt-only|--pacman-only|--dnf-only)
             UPDATE_NON_SYSTEM=false
             ;;
-        --non-system-only|--non-apt-only)
+        --non-system-only|--non-apt-only|--non-pacman-only|--non-dnf-only)
             UPDATE_SYSTEM=false
             ;;
         --with-fonts)
@@ -143,6 +144,9 @@ system_package_is_installed() {
         debian)
             status=$(dpkg-query -W -f='${db:Status-Status}\n' "$package" 2>/dev/null || true)
             [ "$status" = installed ]
+            ;;
+        fedora)
+            rpm -q "$package" >/dev/null 2>&1
             ;;
         arch)
             pacman -Q "$package" >/dev/null 2>&1
@@ -267,6 +271,10 @@ update_system_packages() {
 
             info "Upgrading installed apt packages..."
             sudo apt-get upgrade -y --with-new-pkgs || return 1
+            ;;
+        fedora)
+            info "Refreshing dnf metadata and upgrading installed packages..."
+            sudo dnf upgrade --refresh -y || return 1
             ;;
         arch)
             AUR_HELPER_CMD="$(current_aur_helper 2>/dev/null || true)"

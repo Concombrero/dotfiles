@@ -2,10 +2,10 @@
 
 ## Overview
 
-This repository is a GNU Stow-managed dotfiles setup for a keyboard-first Ubuntu/Debian or Arch-based workstation.
+This repository is a GNU Stow-managed dotfiles setup for a keyboard-first Ubuntu/Debian, Fedora, or Arch-based workstation.
 It is organized as package directories that mirror the final paths under `$HOME`.
 
-- Primary platform: Ubuntu/Debian and Arch-based distros on X11
+- Primary platform: Ubuntu/Debian, Fedora, and Arch-based distros on X11
 - Window manager: `i3`
 - Compositor: `picom`
 - Status bar: `polybar`
@@ -61,7 +61,7 @@ Prefer portable, machine-agnostic code and config.
 - Prefer discovery, environment variables, conditional checks, and safe fallbacks.
 - Keep hardware- or host-specific overrides in local files outside git whenever possible.
 - If a config must reference a local path, make it optional and guarded with existence checks.
-- Preserve cross-machine behavior for Ubuntu/Debian and Arch-based systems; do not silently narrow support to one exact machine.
+- Preserve cross-machine behavior for Ubuntu/Debian, Fedora, and Arch-based systems; do not silently narrow support to one exact machine.
 
 Good patterns already used in this repo:
 
@@ -98,7 +98,7 @@ Be careful when changing shell startup, portal, tmux, i3 startup, or PATH logic:
 
 ## Repo Layout
 
-- `install.sh`: bootstrap entrypoint for supported Debian/Ubuntu and Arch-based installs
+- `install.sh`: bootstrap entrypoint for supported Debian/Ubuntu, Fedora, and Arch-based installs
 - `install/`: modular installer logic for packages, tools, desktop setup, and Stow
 - `packages/`: distro-specific package lists and Stow package list
 - `sddm/`: system-level SDDM theme assets copied into place by the installer
@@ -180,7 +180,7 @@ Some subdirectories also contain upstream/vendor READMEs. Treat those as third-p
 
 ## Practical Defaults For Agents
 
-- Assume Ubuntu/Debian, X11, `i3`, `fish`, `kitty`, and GNU Stow unless a file clearly targets something else.
+- Assume Ubuntu/Debian, Fedora, or Arch-based Linux on X11 with `i3`, `fish`, `kitty`, and GNU Stow unless a file clearly targets something else.
 - Prefer repo-relative config edits over changing live state in `$HOME`.
 - Prefer machine-local override files for identity, secrets, and hardware-specific behavior.
 - When adding automation, keep it idempotent and safe for repeated bootstrap/stow runs.

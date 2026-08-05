@@ -297,14 +297,18 @@ install_tailor_cli() {
 
 install_tools() {
     run_step "TPM install" install_tpm
-    [ "$DISTRO_FAMILY" = "debian" ] && run_step "Clipboard install" install_clipboard
+    case "$DISTRO_FAMILY" in
+        debian|fedora)
+            run_step "Clipboard install" install_clipboard
+            ;;
+    esac
     run_step "Rust toolchain install" install_rust_toolchain
     run_step "tree-sitter CLI install" install_tree_sitter_cli
     run_step "TUXEDO Tailor CLI install" install_tailor_cli
     run_step "Neovim install" install_neovim
     run_step "Julia install" install_julia
 
-    if [ "$DISTRO_FAMILY" = "debian" ]; then
+    if [ "$DISTRO_FAMILY" = "debian" ] || [ "$DISTRO_FAMILY" = "fedora" ]; then
         install_upstream_tools
         run_step "Sesh install" install_sesh_binary
     elif [ "$INSTALL_PACKAGES" = true ]; then
@@ -315,7 +319,7 @@ install_tools() {
 
     run_step "Python tool install" install_python_tools
 
-    if [ "$1" = true ] && [ "$DISTRO_FAMILY" = "debian" ]; then
+    if [ "$1" = true ] && { [ "$DISTRO_FAMILY" = "debian" ] || [ "$DISTRO_FAMILY" = "fedora" ]; }; then
         run_step "Kitty install" install_kitty
         run_step "LocalSend install" install_localsend
         run_step "termfilechooser install" install_termfilechooser

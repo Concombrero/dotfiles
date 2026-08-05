@@ -1,0 +1,37 @@
+# Fedora package names for the shared workstation baseline.
+# Fast-moving CLI tools such as fzf, starship, yazi, lazygit, gh, typst,
+# and opencode are installed from upstream in install/tools.sh on Fedora.
+
+# Core Tools
+git
+stow
+tmux
+curl
+wget
+unzip
+bc
+xdg-utils
+btop
+ripgrep
+fd-find
+bat
+jq
+tldr
+nodejs
+
+# Build Essentials
+gcc
+gcc-c++
+make
+cmake
+pkgconf-pkg-config
+clang
+python3
+python3-pip
+
+# Runtime libraries for upstream CLI tools
+alsa-lib
+
+# Shell
+zsh
+fish

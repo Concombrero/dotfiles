@@ -167,12 +167,18 @@ wait_and_set_basename() {
 }
 
 main() {
-  local mark target label cid
+  local mark target label cid viewer
   mark="$(workspace_mark)"
+  viewer="$(command -v sxiv 2>/dev/null || command -v nsxiv 2>/dev/null || true)"
+
+  if [ -z "$viewer" ]; then
+    printf 'sxiv-tabbed: neither sxiv nor nsxiv is installed.\n' >&2
+    exit 1
+  fi
 
   if [ "$#" -eq 0 ]; then
     ensure_image_container "$mark" >/dev/null
-    sxiv >/dev/null 2>&1 &
+    "$viewer" >/dev/null 2>&1 &
     exit 0
   fi
 
@@ -183,7 +189,7 @@ main() {
     label="$(basename_label "$target")"
 
     mapfile -t old_ids < <(list_window_con_ids "$cid")
-    sxiv -- "$target" >/dev/null 2>&1 &
+    "$viewer" -- "$target" >/dev/null 2>&1 &
     wait_and_set_basename "$cid" "$label" "${old_ids[@]}" >/dev/null 2>&1 || true
     sleep 0.06
   done

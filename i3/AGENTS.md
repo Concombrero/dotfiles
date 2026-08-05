@@ -19,7 +19,7 @@ This file is the session orchestrator for the desktop. It does more than keybind
 
 ## Local-Only Pattern
 
-Tracked config should remain portable across Ubuntu/Debian machines.
+Tracked config should remain portable across Ubuntu/Debian, Fedora, and Arch-based machines.
 Use this file for machine-local overrides:
 
 - `~/.config/i3/local.conf`

@@ -87,7 +87,7 @@ install_catppuccin_gtk_theme() {
         return 0
     fi
 
-    if [ "$DISTRO_FAMILY" != debian ]; then
+    if [ "$DISTRO_FAMILY" = arch ]; then
         warn "Catppuccin GTK theme was not found after package installation."
         return 1
     fi
@@ -384,8 +384,15 @@ ensure_system_service() {
     return 0
 }
 
-configure_arch_desktop_services() {
-    [ "$DISTRO_FAMILY" = arch ] || return 0
+configure_display_manager_services() {
+    case "$DISTRO_FAMILY" in
+        arch|fedora)
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+
     ensure_system_service sddm.service true
 }
 
@@ -441,7 +448,13 @@ install_sddm_theme() {
     local system_cursor_alias="/usr/share/icons/$GTK_THEME_CURSOR_NAME"
     local fallback_name fallback_path cursor_alias_ready=false
 
-    [ "$DISTRO_FAMILY" = arch ] || return 0
+    case "$DISTRO_FAMILY" in
+        arch|fedora)
+            ;;
+        *)
+            return 0
+            ;;
+    esac
 
     if ! has_cmd sddm; then
         warn "SDDM is not installed; skipping Tagarchy theme install."
@@ -528,7 +541,7 @@ install_i3lock_color() {
     local latest_tag current_tag tmp_dir archive extract_dir source_dir candidate
     local license_path="/usr/local/share/licenses/i3lock-color/LICENSE"
 
-    [ "$DISTRO_FAMILY" = debian ] || return 0
+    [ "$DISTRO_FAMILY" = arch ] && return 0
 
     latest_tag="$(github_latest_release_tag Raymo111/i3lock-color)"
     if [ -z "$latest_tag" ]; then
@@ -828,7 +841,11 @@ install_desktop_extras() {
 
     run_step "i3lock-color install" install_i3lock_color
     [ "$fonts_enabled" = true ] && run_step "font installation" install_fonts
-    [ "$DISTRO_FAMILY" = arch ] && run_step "SDDM theme install" install_sddm_theme
+    case "$DISTRO_FAMILY" in
+        arch|fedora)
+            run_step "SDDM theme install" install_sddm_theme
+            ;;
+    esac
     run_step "Catppuccin GTK theme install" install_catppuccin_gtk_theme
     run_step "DMZ cursor theme compatibility" ensure_dmz_cursor_theme_name
     run_step "GTK appearance configuration" configure_gtk_appearance

@@ -1,0 +1,73 @@
+# Fedora package names for the desktop/X11 workstation layer.
+
+# Base login stack
+sddm
+
+# Window Manager
+i3
+i3status
+polybar
+picom
+rofi
+dunst
+xdotool
+xclip
+xrandr
+setxkbmap
+xprop
+xrdb
+xsetroot
+dex-autostart
+xss-lock
+NetworkManager-applet
+pulseaudio-utils
+flatpak
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+lxappearance
+vanilla-dmz-icon-theme
+gnome-themes-extra
+
+# Image/Graphics
+ImageMagick
+feh
+nsxiv
+flameshot
+
+# Documents
+zathura
+zathura-pdf-poppler
+latexmk
+
+# Other
+vlc
+qutebrowser
+fastfetch
+
+# Kitty, LocalSend, xdg-desktop-portal-termfilechooser, Zen Browser,
+# and the Catppuccin GTK theme are installed from upstream on Fedora.
+
+# i3lock-color build deps
+autoconf
+automake
+pam-devel
+cairo-devel
+fontconfig-devel
+libxcb-devel
+libev-devel
+libX11-devel
+xcb-util-devel
+xcb-util-image-devel
+xcb-util-wm-devel
+xcb-util-xrm-devel
+libxkbcommon-devel
+libxkbcommon-x11-devel
+libjpeg-turbo-devel
+giflib-devel
+
+# Portal file chooser build deps
+meson
+ninja-build
+inih-devel
+systemd-devel
+scdoc
