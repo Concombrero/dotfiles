@@ -5,62 +5,159 @@ GTK_THEME_CURSOR_NAME="DMZ-White"
 GTK_THEME_CURSOR_SIZE=16
 GTK_THEME_FONT_NAME="JetBrainsMono Nerd Font 10"
 
-cursor_theme_is_installed() {
+cursor_theme_search_paths() {
     local theme_name=$1
+    local scope=${2:-user}
+
+    case "$scope" in
+        user)
+            printf '%s\n' \
+                "$HOME/.icons/$theme_name" \
+                "$HOME/.local/share/icons/$theme_name" \
+                "$HOME/.local/share/themes/$theme_name" \
+                "/usr/local/share/icons/$theme_name" \
+                "/usr/share/icons/$theme_name"
+            ;;
+        system)
+            printf '%s\n' \
+                "/usr/local/share/icons/$theme_name" \
+                "/usr/share/icons/$theme_name"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+find_cursor_theme_dir() {
+    local theme_name=$1
+    local scope=${2:-user}
     local candidate
 
-    for candidate in \
-        "$HOME/.icons/$theme_name" \
-        "$HOME/.local/share/icons/$theme_name" \
-        "$HOME/.local/share/themes/$theme_name" \
-        "/usr/local/share/icons/$theme_name" \
-        "/usr/share/icons/$theme_name"
-    do
-        [ -d "$candidate" ] && return 0
+    while IFS= read -r candidate; do
+        [ -d "$candidate" ] || continue
+        printf '%s\n' "$candidate"
+        return 0
+    done < <(cursor_theme_search_paths "$theme_name" "$scope")
+
+    return 1
+}
+
+cursor_theme_is_installed() {
+    find_cursor_theme_dir "$1" "${2:-user}" >/dev/null
+}
+
+dmz_cursor_theme_fallbacks() {
+    printf '%s\n' Vanilla-DMZ Vanilla-DMZ-AA
+
+    case "$DISTRO_FAMILY" in
+        fedora)
+            # Fedora 43 does not ship a DMZ cursor package, but Adwaita is
+            # available and can back the DMZ-White compatibility alias.
+            printf '%s\n' Adwaita
+            ;;
+    esac
+}
+
+ensure_cursor_theme_alias() {
+    local target_name=$1
+    local scope=$2
+    shift 2
+
+    local fallback_name fallback_path alias_dir alias_path compatibility_scope
+
+    if cursor_theme_is_installed "$target_name" "$scope"; then
+        return 0
+    fi
+
+    case "$scope" in
+        user)
+            alias_dir="$HOME/.icons"
+            alias_path="$alias_dir/$target_name"
+            compatibility_scope="desktop session"
+            ;;
+        system)
+            alias_dir="/usr/share/icons"
+            alias_path="$alias_dir/$target_name"
+            compatibility_scope="system services"
+            ;;
+        *)
+            error "Unsupported cursor theme alias scope: $scope"
+            return 1
+            ;;
+    esac
+
+    if [ "$#" -eq 0 ]; then
+        error "No fallback cursor themes were provided for $target_name."
+        return 1
+    fi
+
+    for fallback_name in "$@"; do
+        fallback_path="$(find_cursor_theme_dir "$fallback_name" "$scope" || true)"
+        [ -n "$fallback_path" ] || continue
+
+        if [ "$scope" = user ]; then
+            if [ -e "$alias_path" ] && [ ! -L "$alias_path" ]; then
+                error "Cannot create cursor alias at $alias_path because a non-symlink path already exists."
+                return 1
+            fi
+
+            if ! mkdir -p "$alias_dir"; then
+                error "Failed to prepare $alias_dir for the cursor alias."
+                return 1
+            fi
+
+            if ! ln -sfn "$fallback_path" "$alias_path"; then
+                error "Failed to alias $target_name to $fallback_name."
+                return 1
+            fi
+        else
+            if sudo test -e "$alias_path" && ! sudo test -L "$alias_path"; then
+                error "Cannot create cursor alias at $alias_path because a non-symlink path already exists."
+                return 1
+            fi
+
+            if ! sudo mkdir -p "$alias_dir"; then
+                error "Failed to prepare $alias_dir for the cursor alias."
+                return 1
+            fi
+
+            if ! sudo ln -sfn "$fallback_path" "$alias_path"; then
+                error "Failed to alias $target_name to $fallback_name."
+                return 1
+            fi
+        fi
+
+        log "Aliased $target_name to $fallback_name for $compatibility_scope cursor compatibility."
+        return 0
     done
 
     return 1
 }
 
 ensure_dmz_cursor_theme_name() {
-    local alias_path fallback_name fallback_path
-    local fallbacks=(Vanilla-DMZ Vanilla-DMZ-AA)
+    local fallbacks=()
 
-    if cursor_theme_is_installed "$GTK_THEME_CURSOR_NAME"; then
+    mapfile -t fallbacks < <(dmz_cursor_theme_fallbacks)
+
+    if ensure_cursor_theme_alias "$GTK_THEME_CURSOR_NAME" user "${fallbacks[@]}"; then
         return 0
     fi
 
-    for fallback_name in "${fallbacks[@]}"; do
-        for fallback_path in \
-            "$HOME/.icons/$fallback_name" \
-            "$HOME/.local/share/icons/$fallback_name" \
-            "/usr/local/share/icons/$fallback_name" \
-            "/usr/share/icons/$fallback_name"
-        do
-            [ -d "$fallback_path" ] || continue
-
-            alias_path="$HOME/.icons/$GTK_THEME_CURSOR_NAME"
-            if [ -e "$alias_path" ] && [ ! -L "$alias_path" ]; then
-                error "Cannot create cursor alias at $alias_path because a non-symlink path already exists."
-                return 1
-            fi
-
-            if ! mkdir -p "$HOME/.icons"; then
-                error "Failed to prepare ~/.icons for the cursor alias."
-                return 1
-            fi
-
-            ln -sfn "$fallback_path" "$alias_path" || {
-                error "Failed to alias $GTK_THEME_CURSOR_NAME to $fallback_name."
-                return 1
-            }
-
-            log "Aliased $GTK_THEME_CURSOR_NAME to $fallback_name for GTK cursor compatibility."
-            return 0
-        done
-    done
-
     error "Cursor theme $GTK_THEME_CURSOR_NAME was not found after package installation."
+    return 1
+}
+
+ensure_system_dmz_cursor_theme_name() {
+    local fallbacks=()
+
+    mapfile -t fallbacks < <(dmz_cursor_theme_fallbacks)
+
+    if ensure_cursor_theme_alias "$GTK_THEME_CURSOR_NAME" system "${fallbacks[@]}"; then
+        return 0
+    fi
+
+    error "Cursor theme $GTK_THEME_CURSOR_NAME is not available system-wide for SDDM."
     return 1
 }
 
@@ -384,6 +481,11 @@ ensure_system_service() {
         return 1
     fi
 
+    if ! sudo systemctl cat "$service" >/dev/null 2>&1; then
+        warn "System service $service is not installed."
+        return 1
+    fi
+
     if ! sudo systemctl is-enabled --quiet "$service"; then
         if [ "$force_enable" = true ] && sudo test -L /etc/systemd/system/display-manager.service; then
             current_dm_target=$(sudo readlink -f /etc/systemd/system/display-manager.service 2>/dev/null || true)
@@ -407,6 +509,29 @@ ensure_system_service() {
     return 0
 }
 
+ensure_system_default_target() {
+    local target=$1
+    local current_target
+
+    if ! has_cmd systemctl; then
+        warn "systemctl not found; skipping default-target setup for $target."
+        return 1
+    fi
+
+    current_target=$(systemctl get-default 2>/dev/null || true)
+    if [ "$current_target" = "$target" ]; then
+        return 0
+    fi
+
+    info "Setting system default target: $target"
+    if ! sudo systemctl set-default "$target"; then
+        warn "Failed to set the system default target to $target."
+        return 1
+    fi
+
+    return 0
+}
+
 configure_display_manager_services() {
     case "$DISTRO_FAMILY" in
         arch|fedora)
@@ -416,7 +541,8 @@ configure_display_manager_services() {
             ;;
     esac
 
-    ensure_system_service sddm.service true
+    ensure_system_service sddm.service true || return 1
+    ensure_system_default_target graphical.target
 }
 
 generate_sddm_background() {
@@ -468,8 +594,6 @@ install_sddm_theme() {
     local xsetup_dst="/usr/local/share/sddm/scripts/tagarchy-xsetup"
     local wallpaper="$HOME/Pictures/Wallpapers/wallpaper.jpg"
     local repo_wallpaper="$DOTFILES_DIR/wallpapers/Pictures/Wallpapers/wallpaper.jpg"
-    local system_cursor_alias="/usr/share/icons/$GTK_THEME_CURSOR_NAME"
-    local fallback_name fallback_path cursor_alias_ready=false
 
     case "$DISTRO_FAMILY" in
         arch|fedora)
@@ -496,39 +620,8 @@ install_sddm_theme() {
         return 1
     fi
 
-    if [ ! -d "/usr/share/icons/$GTK_THEME_CURSOR_NAME" ]; then
-        for fallback_name in Vanilla-DMZ Vanilla-DMZ-AA; do
-            for fallback_path in \
-                "/usr/share/icons/$fallback_name"
-            do
-                [ -d "$fallback_path" ] || continue
-
-                # SDDM cannot use the per-user ~/.icons alias created for the desktop session.
-                if sudo test -e "$system_cursor_alias" && ! sudo test -L "$system_cursor_alias"; then
-                    error "Cannot create system cursor alias at $system_cursor_alias because a non-symlink path already exists."
-                    return 1
-                fi
-
-                if ! sudo mkdir -p /usr/share/icons; then
-                    error "Failed to prepare /usr/share/icons for the SDDM cursor alias."
-                    return 1
-                fi
-
-                if ! sudo ln -sfn "$fallback_path" "$system_cursor_alias"; then
-                    error "Failed to alias $GTK_THEME_CURSOR_NAME to $fallback_name for SDDM."
-                    return 1
-                fi
-
-                log "Aliased $GTK_THEME_CURSOR_NAME to $fallback_name for SDDM cursor compatibility."
-                cursor_alias_ready=true
-                break 2
-            done
-        done
-
-        if [ "$cursor_alias_ready" = false ]; then
-            error "Cursor theme $GTK_THEME_CURSOR_NAME is not available system-wide for SDDM."
-            return 1
-        fi
+    if ! ensure_system_dmz_cursor_theme_name; then
+        return 1
     fi
 
     if ! sudo rm -rf "$theme_dst"; then

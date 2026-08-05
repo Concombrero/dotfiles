@@ -550,27 +550,53 @@ install_neovim() {
 }
 
 install_fzf() {
-    if command -v fzf &>/dev/null; then
+    local fzf_dir="$HOME/.fzf"
+    local fzf_bin="$fzf_dir/bin/fzf"
+
+    if command -v fzf &>/dev/null || [ -x "$fzf_bin" ]; then
+        if [ -x "$fzf_bin" ]; then
+            ensure_local_bin_dir || return 1
+            ln -sfn "$fzf_bin" "$HOME/.local/bin/fzf" || return 1
+            export PATH="$HOME/.local/bin:$PATH"
+        fi
+
         warn "fzf already installed, skipping."
         return
     fi
 
-    if [ -d "$HOME/.fzf" ]; then
-        warn "fzf already installed at ~/.fzf, skipping."
-        return
+    if [ -d "$fzf_dir" ]; then
+        if [ ! -f "$fzf_dir/install" ]; then
+            error "Existing $fzf_dir is not a valid fzf checkout."
+            return 1
+        fi
+
+        info "Completing existing fzf checkout at ~/.fzf..."
+    else
+        info "Installing fzf via git..."
+
+        if ! git clone --depth 1 https://github.com/junegunn/fzf.git "$fzf_dir"; then
+            error "Failed to clone fzf."
+            return 1
+        fi
     fi
 
-    info "Installing fzf via git..."
-
-    if ! git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"; then
-        error "Failed to clone fzf."
-        return 1
-    fi
-
-    if ! "$HOME/.fzf/install" --bin; then
+    if ! "$fzf_dir/install" --bin; then
         error "Failed to install fzf binaries."
         return 1
     fi
+
+    if [ ! -x "$fzf_bin" ]; then
+        error "fzf install completed but the expected binary was not found."
+        return 1
+    fi
+
+    ensure_local_bin_dir || return 1
+    if ! ln -sfn "$fzf_bin" "$HOME/.local/bin/fzf"; then
+        error "Failed to link fzf into ~/.local/bin."
+        return 1
+    fi
+
+    export PATH="$HOME/.local/bin:$PATH"
 
     log "fzf installed to ~/.fzf."
 }

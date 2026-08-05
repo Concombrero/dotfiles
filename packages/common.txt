@@ -4,6 +4,7 @@ stow
 tmux
 curl
 wget
+tar
 unzip
 bc
 xdg-utils

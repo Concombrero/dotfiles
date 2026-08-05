@@ -2,6 +2,10 @@
 
 # Base login stack
 sddm
+xorg-x11-server-Xorg
+xorg-x11-xauth
+xorg-x11-xinit
+xorg-x11-drv-libinput
 
 # Window Manager
 i3
@@ -19,20 +23,20 @@ xrdb
 xsetroot
 dex-autostart
 xss-lock
-NetworkManager-applet
+network-manager-applet
 pulseaudio-utils
 flatpak
 xdg-desktop-portal
 xdg-desktop-portal-gtk
 lxappearance
-vanilla-dmz-icon-theme
+adwaita-cursor-theme
 gnome-themes-extra
 gtk-murrine-engine
 
 # Image/Graphics
 ImageMagick
 feh
-nsxiv
+sxiv
 flameshot
 
 # Documents
