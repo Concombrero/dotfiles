@@ -27,6 +27,7 @@ xdg-desktop-portal-gtk
 lxappearance
 vanilla-dmz-icon-theme
 gnome-themes-extra
+gtk-murrine-engine
 
 # Image/Graphics
 ImageMagick
@@ -45,17 +46,21 @@ qutebrowser
 fastfetch
 
 # Kitty, LocalSend, xdg-desktop-portal-termfilechooser, Zen Browser,
-# and the Catppuccin GTK theme are installed from upstream on Fedora.
+# and the SolArc GTK theme are installed from upstream on Fedora.
 
 # i3lock-color build deps
 autoconf
 automake
+gtk3-devel
+inkscape
 pam-devel
 cairo-devel
 fontconfig-devel
 libxcb-devel
 libev-devel
 libX11-devel
+optipng
+sassc
 xcb-util-devel
 xcb-util-image-devel
 xcb-util-wm-devel

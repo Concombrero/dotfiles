@@ -5,9 +5,13 @@ Rectangle {
     id: root
     width: 640
     height: 480
-    color: "#1e1e2e"
+    color: "#fdf6e3"
 
-    property color mochaBase: "#1e1e2e"
+    property color panelBase: "#fdf6e3"
+    property color panelSurface: "#eee8d5"
+    property color panelText: "#586e75"
+    property color accentColor: "#268bd2"
+    property color errorColor: "#dc322f"
     property int columnSpacing: Math.round(root.height * 0.04)
     property int rowSpacing: Math.round(root.width * 0.007)
     property int lockSize: Math.round(root.height * 0.025)
@@ -31,7 +35,7 @@ Rectangle {
 
     Rectangle {
         anchors.fill: parent
-        color: root.mochaBase
+        color: root.panelBase
         opacity: backgroundImage.status === Image.Ready ? 0.35 : 1.0
     }
 
@@ -67,7 +71,7 @@ Rectangle {
 
             Text {
                 text: "\uf007"
-                color: "#ffffff"
+                color: root.panelText
                 font.family: root.fontFamily
                 font.pixelSize: root.lockSize
                 anchors.verticalCenter: parent.verticalCenter
@@ -76,8 +80,8 @@ Rectangle {
             Rectangle {
                 width: root.fieldWidth
                 height: root.fieldHeight
-                color: root.mochaBase
-                border.color: "#ffffff"
+                color: root.panelSurface
+                border.color: root.accentColor
                 border.width: 1
                 clip: true
 
@@ -88,7 +92,7 @@ Rectangle {
                     verticalAlignment: TextInput.AlignVCenter
                     font.family: root.fontFamily
                     font.pixelSize: root.usernameFontSize
-                    color: "#ffffff"
+                    color: root.panelText
                     text: root.currentUser
 
                     Keys.onPressed: {
@@ -107,7 +111,7 @@ Rectangle {
 
             Text {
                 text: "\uf023"
-                color: "#ffffff"
+                color: root.panelText
                 font.family: root.fontFamily
                 font.pixelSize: root.lockSize
                 anchors.verticalCenter: parent.verticalCenter
@@ -116,8 +120,8 @@ Rectangle {
             Rectangle {
                 width: root.fieldWidth
                 height: root.fieldHeight
-                color: root.mochaBase
-                border.color: "#ffffff"
+                color: root.panelSurface
+                border.color: root.accentColor
                 border.width: 1
                 clip: true
 
@@ -131,7 +135,7 @@ Rectangle {
                     font.pixelSize: root.passwordFontSize
                     font.letterSpacing: root.height * 0.004
                     passwordCharacter: "\u2022"
-                    color: "#ffffff"
+                    color: root.panelText
                     focus: true
 
                     Keys.onPressed: {
@@ -153,7 +157,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         text: ""
         height: root.errorHeight
-        color: "#f7768e"
+        color: root.errorColor
         font.family: root.fontFamily
         font.pixelSize: root.errorFontSize
         horizontalAlignment: Text.AlignHCenter

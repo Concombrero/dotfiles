@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-GTK_THEME_NAME="catppuccin-mocha-mauve-standard+default"
+GTK_THEME_NAME="SolArc"
 GTK_THEME_CURSOR_NAME="DMZ-White"
 GTK_THEME_CURSOR_SIZE=16
 GTK_THEME_FONT_NAME="JetBrainsMono Nerd Font 10"
@@ -79,62 +79,85 @@ gtk_theme_is_installed() {
     return 1
 }
 
-install_catppuccin_gtk_theme() {
-    local latest_tag tmp_dir archive extract_dir theme_dir install_dir
+install_solarc_gtk_theme() {
+    local tmp_dir source_dir build_dir candidate
 
     if gtk_theme_is_installed; then
-        log "Catppuccin GTK theme is already available."
+        log "SolArc GTK theme is already available."
         return 0
     fi
 
     if [ "$DISTRO_FAMILY" = arch ]; then
-        warn "Catppuccin GTK theme was not found after package installation."
-        return 1
-    fi
-
-    latest_tag="$(github_latest_release_tag catppuccin/gtk)"
-    if [ -z "$latest_tag" ]; then
-        error "Failed to determine the latest Catppuccin GTK release tag."
+        warn "SolArc GTK theme was not found after package installation."
         return 1
     fi
 
     tmp_dir="$(mktemp -d)"
-    archive="$tmp_dir/${GTK_THEME_NAME}.zip"
-    extract_dir="$tmp_dir/extracted"
-    theme_dir="$extract_dir/$GTK_THEME_NAME"
-    install_dir="$HOME/.local/share/themes/$GTK_THEME_NAME"
+    source_dir="$tmp_dir/solarc-theme"
 
-    if ! mkdir -p "$extract_dir" "$HOME/.local/share/themes"; then
-        error "Failed to prepare Catppuccin GTK theme directories."
+    if ! mkdir -p "$HOME/.local/share/themes"; then
+        error "Failed to prepare the SolArc GTK theme directory."
         rm -rf "$tmp_dir"
         return 1
     fi
 
-    if ! curl -fsSL "https://github.com/catppuccin/gtk/releases/download/${latest_tag}/${GTK_THEME_NAME}.zip" -o "$archive"; then
-        error "Failed to download the Catppuccin GTK theme archive."
+    if ! git clone --depth 1 https://github.com/schemar/solarc-theme.git "$source_dir"; then
+        error "Failed to clone the SolArc GTK theme source repository."
         rm -rf "$tmp_dir"
         return 1
     fi
 
-    if ! unzip -q "$archive" -d "$extract_dir"; then
-        error "Failed to extract the Catppuccin GTK theme archive."
+    if ! (
+        cd "$source_dir" &&
+        ./solarize.sh
+    ); then
+        error "Failed to patch Arc with the Solarized Light palette."
         rm -rf "$tmp_dir"
         return 1
     fi
 
-    if [ ! -f "$theme_dir/index.theme" ]; then
-        error "Catppuccin GTK theme archive did not contain the expected theme directory."
+    build_dir=""
+    for candidate in "$source_dir"/arc-theme-*; do
+        [ -d "$candidate" ] || continue
+        build_dir="$candidate"
+        break
+    done
+
+    if [ -z "$build_dir" ]; then
+        error "Could not find the generated Arc theme source tree for SolArc."
         rm -rf "$tmp_dir"
         return 1
     fi
 
-    if ! replace_path "$theme_dir" "$install_dir"; then
+    if ! (
+        cd "$build_dir" &&
+        ./autogen.sh \
+            --prefix="$HOME/.local" \
+            --disable-darker \
+            --disable-dark \
+            --disable-gnome-shell \
+            --disable-cinnamon \
+            --disable-metacity \
+            --disable-unity \
+            --disable-xfwm \
+            --disable-plank \
+            --disable-openbox &&
+        make &&
+        make install
+    ); then
+        error "Failed to build or install the SolArc GTK theme."
         rm -rf "$tmp_dir"
         return 1
     fi
 
     rm -rf "$tmp_dir"
-    log "Catppuccin GTK theme installed to ~/.local/share/themes/$GTK_THEME_NAME."
+
+    if ! gtk_theme_is_installed; then
+        error "SolArc GTK theme install completed, but $GTK_THEME_NAME was not found."
+        return 1
+    fi
+
+    log "SolArc GTK theme installed to ~/.local/share/themes/$GTK_THEME_NAME."
 }
 
 run_gsettings() {
@@ -178,8 +201,8 @@ configure_gtk_appearance() {
         warn "gsettings not found; skipping GNOME appearance configuration."
         had_failure=true
     else
-        run_gsettings set org.gnome.desktop.interface color-scheme prefer-dark || {
-            warn "Failed to set GNOME color-scheme to prefer-dark."
+        run_gsettings set org.gnome.desktop.interface color-scheme prefer-light || {
+            warn "Failed to set GNOME color-scheme to prefer-light."
             had_failure=true
         }
         run_gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME_NAME" || {
@@ -443,8 +466,8 @@ install_sddm_theme() {
     local conf_dst="/etc/sddm.conf.d/zz-tagarchy-theme.conf"
     local xsetup_src="$DOTFILES_DIR/sddm/usr/local/share/sddm/scripts/tagarchy-xsetup"
     local xsetup_dst="/usr/local/share/sddm/scripts/tagarchy-xsetup"
-    local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
-    local repo_wallpaper="$DOTFILES_DIR/wallpapers/Pictures/Wallpapers/catppuccin_gyro.jpg"
+    local wallpaper="$HOME/Pictures/Wallpapers/wallpaper.jpg"
+    local repo_wallpaper="$DOTFILES_DIR/wallpapers/Pictures/Wallpapers/wallpaper.jpg"
     local system_cursor_alias="/usr/share/icons/$GTK_THEME_CURSOR_NAME"
     local fallback_name fallback_path cursor_alias_ready=false
 
@@ -628,7 +651,7 @@ install_i3lock_color() {
 }
 
 set_wallpaper() {
-    local wallpaper="$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg"
+    local wallpaper="$HOME/Pictures/Wallpapers/wallpaper.jpg"
     local fehbg="$HOME/.fehbg"
 
     if [ ! -f "$wallpaper" ]; then
@@ -846,7 +869,7 @@ install_desktop_extras() {
             run_step "SDDM theme install" install_sddm_theme
             ;;
     esac
-    run_step "Catppuccin GTK theme install" install_catppuccin_gtk_theme
+    run_step "SolArc GTK theme install" install_solarc_gtk_theme
     run_step "DMZ cursor theme compatibility" ensure_dmz_cursor_theme_name
     run_step "GTK appearance configuration" configure_gtk_appearance
     run_step "default terminal configuration" configure_default_terminal

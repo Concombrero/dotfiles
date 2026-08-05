@@ -13,7 +13,7 @@ The principles used for building this system are simple :
 - Defaults are fine
 
 This is all materialized through a set of tools that tries to stay minimal while providing a solid out of the box experience that can be easily extended and customized.
-Visually, anything that can be uses the `JetBrainsMono` font and is themed with [Catppuccin](https://github.com/catppuccin), using the Mocha flavor.
+Visually, anything that can be uses the `JetBrainsMono` font and follows a [Solarized Light](https://ethanschoonover.com/solarized/) palette, with `SolArc` handling GTK theming.
 
 
 - Desktop/Window management:
@@ -108,7 +108,7 @@ Package manager installs are preferred whenever they ship the latest version. De
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`
 - theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf` 
 - custom X11 display setup script installed to `/usr/local/share/sddm/scripts/tagarchy-xsetup` to seed `Xcursor.theme` and `Xcursor.size` before the Qt6 greeter starts
-- blurred background generated from `~/Pictures/Wallpapers/catppuccin_gyro.jpg`
+- blurred background generated from `~/Pictures/Wallpapers/wallpaper.jpg`
 
 ### Python Tools (via pipx)
 Installed in isolated environments to avoid breaking system Python:
@@ -131,12 +131,12 @@ All fonts are installed under `/usr/local/share/fonts/`
 - `Font Awesome`
 
 ### GTK / GNOME  apps appearance
-All GNOME and GTK apps are themed using Catppuccin (Mocha flavor). This includes GTK2/GTK3/GTK4/libadwaita apps and a workaround for sandboxed apps (flatpaks)
+All GNOME and GTK apps are themed using SolArc plus Solarized Light overrides. This includes GTK2/GTK3/GTK4/libadwaita apps and a workaround for sandboxed apps (flatpaks)
 
 ### Zen Browser CSS
 - source of truth: `zen/.config/zen/chrome/`
 - stowed to `~/.config/zen/chrome/`
-- includes Catppuccin Zen Browser Mocha + Mauve upstream assets
+- includes Solarized Light Zen Browser assets
 - after Zen creates a profile, move that `chrome/` directory into `~/.zen/<profile>/`
 
 ## Stow 

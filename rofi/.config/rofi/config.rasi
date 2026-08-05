@@ -11,7 +11,7 @@ configuration{
     sidebar-mode: false;
 }
 
-@theme "catppuccin-mocha"
+@theme "solarized-light"
 
 listview {
     lines: 5;

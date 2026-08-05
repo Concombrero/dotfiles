@@ -1,0 +1,71 @@
+@define-color window_bg_color #fdf6e3;
+@define-color window_fg_color #586e75;
+@define-color view_bg_color #fdf6e3;
+@define-color view_fg_color #586e75;
+@define-color headerbar_bg_color #eee8d5;
+@define-color headerbar_fg_color #586e75;
+@define-color sidebar_bg_color #eee8d5;
+@define-color sidebar_fg_color #586e75;
+@define-color card_bg_color #f7f0dd;
+@define-color card_fg_color #586e75;
+@define-color popover_bg_color #fdf6e3;
+@define-color popover_fg_color #586e75;
+@define-color dialog_bg_color #fdf6e3;
+@define-color dialog_fg_color #586e75;
+@define-color accent_color #268bd2;
+@define-color accent_bg_color #268bd2;
+@define-color accent_fg_color #fdf6e3;
+@define-color destructive_color #dc322f;
+@define-color destructive_bg_color #dc322f;
+@define-color destructive_fg_color #fdf6e3;
+@define-color success_color #859900;
+@define-color warning_color #b58900;
+@define-color error_color #dc322f;
+@define-color border_color #d2c9b2;
+@define-color scrollbar_outline_color #d2c9b2;
+
+window,
+dialog,
+popover,
+.background,
+view,
+textview,
+entry,
+box,
+list,
+row {
+    background-color: @window_bg_color;
+    color: @window_fg_color;
+}
+
+headerbar,
+headerbar windowhandle {
+    background-color: @headerbar_bg_color;
+    color: @headerbar_fg_color;
+    border-color: @border_color;
+}
+
+button,
+spinbutton,
+menubutton,
+entry,
+combobox box {
+    background-color: @card_bg_color;
+    color: @card_fg_color;
+    border-color: @border_color;
+}
+
+button.suggested-action {
+    background-color: @accent_bg_color;
+    color: @accent_fg_color;
+}
+
+button.destructive-action {
+    background-color: @destructive_bg_color;
+    color: @destructive_fg_color;
+}
+
+selection {
+    background-color: @accent_bg_color;
+    color: @accent_fg_color;
+}

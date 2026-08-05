@@ -1,6 +1,6 @@
 # AUR packages used on Arch when they track the current upstream release.
 
 # Desktop applications and themes not shipped in the official Arch repositories.
-catppuccin-gtk-theme-mocha
+gtk-theme-solarc-git
 xdg-desktop-portal-termfilechooser
 zen-browser-bin

@@ -19,6 +19,7 @@ xdg-desktop-portal-gtk
 lxappearance
 dmz-cursor-theme
 gnome-themes-extra
+gtk2-engines-murrine
 
 # Image/Graphics
 imagemagick
@@ -42,12 +43,16 @@ fastfetch
 # i3lock-color build deps
 autoconf
 automake
+inkscape
 libpam0g-dev
 libcairo2-dev
 libfontconfig1-dev
+libgtk-3-dev
 libxcb-composite0-dev
 libev-dev
 libx11-xcb-dev
+optipng
+sassc
 libxcb-xkb-dev
 libxcb-xinerama0-dev
 libxcb-randr0-dev

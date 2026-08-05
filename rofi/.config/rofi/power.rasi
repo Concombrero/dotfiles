@@ -1,4 +1,4 @@
-@theme "catppuccin-mocha"
+@theme "solarized-light"
 
 window {
     font: "JetBrainsMono Nerd Font 14";

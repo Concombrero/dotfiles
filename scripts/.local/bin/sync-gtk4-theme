@@ -31,7 +31,7 @@ resolve_theme_name() {
         return 0
     fi
 
-    printf '%s\n' 'catppuccin-mocha-mauve-standard+default'
+    printf '%s\n' 'SolArc'
 }
 
 find_theme_dir() {
@@ -88,6 +88,12 @@ sync_gtk4_assets() {
     log "Synced GTK4/libadwaita theme assets from $theme_dir."
 }
 
+has_local_gtk4_assets() {
+    local target_dir=${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0
+
+    [ -f "$target_dir/gtk.css" ] && [ -f "$target_dir/gtk-dark.css" ]
+}
+
 configure_flatpak_overrides() {
     if ! command -v flatpak >/dev/null 2>&1; then
         info "flatpak not found; skipping Flatpak theme overrides."
@@ -113,12 +119,15 @@ main() {
     local theme_name theme_dir
 
     theme_name=$(resolve_theme_name)
-    if ! theme_dir=$(find_theme_dir "$theme_name"); then
-        error "Could not find the GTK theme '$theme_name' in standard theme directories."
+    if theme_dir=$(find_theme_dir "$theme_name"); then
+        sync_gtk4_assets "$theme_name" "$theme_dir" || return 1
+    elif has_local_gtk4_assets; then
+        info "Using tracked GTK4/libadwaita overrides in ${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0."
+    else
+        error "Could not find the GTK theme '$theme_name' in standard theme directories, and no tracked GTK4 fallback exists."
         return 1
     fi
 
-    sync_gtk4_assets "$theme_name" "$theme_dir" || return 1
     configure_flatpak_overrides || return 1
 }
 

@@ -5,11 +5,11 @@ set -u
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 REPO_DIR=$(cd "$(dirname "$SCRIPT_PATH")/../../.." && pwd)
 
-DEFAULT_WALLPAPER="${LOCK_WALLPAPER:-$HOME/Pictures/Wallpapers/catppuccin_gyro.jpg}"
-REPO_WALLPAPER="$REPO_DIR/wallpapers/Pictures/Wallpapers/catppuccin_gyro.jpg"
+DEFAULT_WALLPAPER="${LOCK_WALLPAPER:-$HOME/Pictures/Wallpapers/wallpaper.jpg}"
+REPO_WALLPAPER="$REPO_DIR/wallpapers/Pictures/Wallpapers/wallpaper.jpg"
 SDDM_BACKGROUND="/usr/share/sddm/themes/tagarchy/background-blur.jpg"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/i3lock"
-CACHE_IMAGE="$CACHE_DIR/catppuccin-mocha-lock-blur-v1.jpg"
+CACHE_IMAGE="$CACHE_DIR/solarized-light-lock-blur-v1.jpg"
 
 has_cmd() {
     command -v "$1" >/dev/null 2>&1
@@ -49,7 +49,7 @@ render_lock_image() {
     mkdir -p "$CACHE_DIR" || return 1
 
     # Cache the blurred wallpaper so suspend-time locks stay responsive.
-    if ! "$image_cmd" "$source" -strip -blur 0x24 -fill '#1e1e2e' -colorize 30 "$CACHE_IMAGE"; then
+    if ! "$image_cmd" "$source" -strip -blur 0x24 -fill '#fdf6e3' -colorize 18 "$CACHE_IMAGE"; then
         return 1
     fi
 
@@ -106,19 +106,19 @@ main() {
             --refresh-rate=1
             --radius=120
             --ring-width=6
-            --inside-color=1e1e2e66
-            --ring-color=cba6f7dd
-            --insidever-color=1e1e2e66
-            --ringver-color=bac2dedd
-            --insidewrong-color=1e1e2e66
-            --ringwrong-color=f38ba8dd
+            --inside-color=fdf6e366
+            --ring-color=268bd2dd
+            --insidever-color=fdf6e366
+            --ringver-color=2aa198dd
+            --insidewrong-color=fdf6e366
+            --ringwrong-color=dc322fdd
             --line-color=00000000
-            --keyhl-color=fab387ff
-            --bshl-color=fab387ff
+            --keyhl-color=b58900ff
+            --bshl-color=b58900ff
             --separator-color=00000000
-            --verif-color=bac2deff
-            --wrong-color=f38ba8ff
-            --time-color=cdd6f4ff
+            --verif-color=586e75ff
+            --wrong-color=dc322fff
+            --time-color=586e75ff
             --no-modkey-text
             --pass-media-keys
             --pass-screen-keys
@@ -140,7 +140,7 @@ main() {
         if [ -n "$lock_image" ]; then
             args+=(--image "$lock_image" --fill)
         else
-            args+=(-c 1e1e2eff)
+            args+=(-c fdf6e3ff)
         fi
 
         exec i3lock "${args[@]}"
@@ -150,7 +150,7 @@ main() {
         exec i3lock -n -e -i "$lock_image"
     fi
 
-    exec i3lock -n -e -c 1e1e2e
+    exec i3lock -n -e -c fdf6e3
 }
 
 main "$@"
