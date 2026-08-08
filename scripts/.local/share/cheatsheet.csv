@@ -1,6 +1,7 @@
 # i3
 Super + Enter | Open terminal
 Super + d | App launcher
+Super + b | Bitwarden password menu
 Super + / | Keybinding cheatsheet
 Super + n | Open Neovim
 Super + g | Open Lazygit
@@ -60,5 +61,11 @@ s / S | Search by name / content
 z/Z | fzf/ zoxide fzf
 # Rofi
 Super + d | App launcher
+Super + b | Bitwarden: select and autotype login
+Alt + c | Bitwarden: copy password (clears after 30s)
+Alt + u | Bitwarden: copy username
+Alt + t | Bitwarden: copy TOTP
+Alt + m | Bitwarden: choose a field and action
+Alt + s | Bitwarden: sync vault
 Super + t | Tmux session picker
 Super + p | Power menu

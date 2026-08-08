@@ -12,6 +12,8 @@ polybar
 picom
 rofi
 dunst
+pinentry
+rbw
 xdotool
 xclip
 xorg-xrandr

@@ -295,6 +295,45 @@ install_tailor_cli() {
     log "TUXEDO Tailor CLI ${version#tailor-v} installed from source."
 }
 
+install_rbw() {
+    local current_version=""
+
+    if command -v rbw &>/dev/null; then
+        current_version="$(rbw --version 2>/dev/null | awk '{ print $2 }')"
+    fi
+
+    if [ -n "$current_version" ] && [ "$(printf '%s\n' 1.14 "$current_version" | sort -V | head -1)" = 1.14 ]; then
+        log "rbw ${current_version} already installed."
+        return 0
+    fi
+
+    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+    if ! command -v cargo &>/dev/null; then
+        if ! install_rust_toolchain; then
+            error "Rust toolchain is required to install rbw."
+            return 1
+        fi
+    fi
+
+    info "Installing rbw from crates.io..."
+
+    if ! cargo install --locked rbw; then
+        error "Failed to install rbw."
+        return 1
+    fi
+
+    link_cargo_binary rbw || return 1
+    link_cargo_binary rbw-agent || return 1
+
+    if ! "$HOME/.local/bin/rbw" --version >/dev/null 2>&1; then
+        error "rbw installed but failed smoke test."
+        return 1
+    fi
+
+    log "rbw installed from crates.io."
+}
+
 install_tools() {
     run_step "TPM install" install_tpm
     case "$DISTRO_FAMILY" in
@@ -317,7 +356,15 @@ install_tools() {
         warn "Skipping remaining Arch-managed CLI tools because package installation was disabled."
     fi
 
-    run_step "Python tool install" install_python_tools
+    if [ "$1" = true ]; then
+        case "$DISTRO_FAMILY" in
+            debian|fedora)
+                run_step "rbw install" install_rbw
+                ;;
+        esac
+    fi
+
+    run_step "Python tool install" install_python_tools "$1"
 
     if [ "$1" = true ] && { [ "$DISTRO_FAMILY" = "debian" ] || [ "$DISTRO_FAMILY" = "fedora" ]; }; then
         run_step "Kitty install" install_kitty

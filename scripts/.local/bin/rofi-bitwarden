@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -u
+
+show_error() {
+    if command -v rofi >/dev/null 2>&1; then
+        rofi -e "$1"
+    else
+        printf 'rofi-bitwarden: %s\n' "$1" >&2
+    fi
+}
+
+for dependency in rbw rofi-rbw rofi xdotool xclip; do
+    if ! command -v "$dependency" >/dev/null 2>&1; then
+        show_error "Missing dependency: $dependency"
+        exit 1
+    fi
+done
+
+if output=$(rofi-rbw \
+    --selector rofi \
+    --typer xdotool \
+    --clipboarder xclip \
+    --action type \
+    --target username \
+    --target tab \
+    --target password \
+    --clear-after 30 \
+    --typing-start-delay 100 2>&1); then
+    exit 0
+fi
+
+if [ -z "$output" ]; then
+    output="rofi-rbw failed. Configure rbw from a terminal, then try again."
+fi
+
+show_error "$output"
+exit 1

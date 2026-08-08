@@ -92,6 +92,9 @@ bindsym $mod+q kill
 # Start rofi, a modern dmenu replacement
  bindsym $mod+d exec --no-startup-id rofi -show combi
 
+# Bitwarden credential picker and autotype
+bindsym $mod+b exec --no-startup-id ~/.local/bin/rofi-bitwarden
+
 # change focus
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 install_python_tools() {
+    local desktop_mode=${1:-false}
     info "Installing Python tools via pipx..."
     local had_failure=false
 
@@ -27,6 +28,10 @@ install_python_tools() {
         isort
         pylint
     )
+
+    if [ "$desktop_mode" = true ]; then
+        tools+=(rofi-rbw)
+    fi
 
     for tool in "${tools[@]}"; do
         if pipx list | grep -q "$tool"; then

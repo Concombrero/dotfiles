@@ -24,6 +24,7 @@ Visually, anything that can be uses the `JetBrainsMono` font and follows a [Sola
     - Notifications : `dunst`
     - Lockscreen : `i3lock-color`
     - File Manager : `yazi` 
+    - Password Manager : `rofi-rbw` with Bitwarden via `rbw`
 - Command Line Interface : 
   - Terminal emulator : `kitty`
   - Shell : `fish`
@@ -80,9 +81,10 @@ Installer log: `<repo>/install.log` (for the default clone path, `~/dotfiles/ins
 ### First login checks
 
 1. Open the keybindings cheatsheet with `Super + /`
-1. Open Neovim and run `:checkhealth`
-2. Launch Zen once so it creates `~/.zen/<profile>/`, then move `~/.config/zen/chrome/` into that profile directory.
-3. If you use Julia in Neovim, bootstrap the local Julia LSP environment once:
+2. Configure `rbw` for Bitwarden using the setup below.
+3. Open Neovim and run `:checkhealth`
+4. Launch Zen once so it creates `~/.zen/<profile>/`, then move `~/.config/zen/chrome/` into that profile directory.
+5. If you use Julia in Neovim, bootstrap the local Julia LSP environment once:
 
 ```bash
 # Stable Julia LSP bootstrap for the dedicated Neovim LanguageServer environment.
@@ -91,6 +93,25 @@ julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/n
 # Julia 1.12+ fallback: use newer upstream branches if released packages fail.
 julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/nvim-lspconfig" -e 'using Pkg; Pkg.add(PackageSpec(name="LanguageServer", rev="main")); Pkg.add(PackageSpec(name="SymbolServer", rev="master")); Pkg.add(PackageSpec(name="StaticLint", rev="master")); Pkg.instantiate(); Pkg.precompile()'
 ```
+
+### Bitwarden and rofi-rbw setup
+
+Account details and API credentials remain machine-local. Configure your Bitwarden email, register the device, and download the vault from a terminal:
+
+```bash
+rbw config set email "you@example.com"
+rbw config set pinentry pinentry-gnome3
+rbw register
+rbw sync
+```
+
+For the official Bitwarden service, `rbw register` requests the personal API key available in the Bitwarden web vault under **Settings > Security > Keys**. For a self-hosted server, set its URL before registration:
+
+```bash
+rbw config set base_url "https://bitwarden.example.com"
+```
+
+Press `Super + b` from a login field to open the vault. `Enter` types the username, presses `Tab`, and types the password. The menu also provides `Alt + c` to copy only the password, `Alt + u` to copy the username, `Alt + t` to copy a TOTP, `Alt + m` to choose another field/action, and `Alt + s` to sync. Passwords copied through the launcher are cleared from the clipboard after 30 seconds.
 
 ## What `install.sh` Provisions
 
@@ -113,9 +134,11 @@ Package manager installs are preferred whenever they ship the latest version. De
 ### Python Tools (via pipx)
 Installed in isolated environments to avoid breaking system Python:
 - `ipython`, `jupytext`, `black`, `isort`, `pylint`
+- `rofi-rbw` on desktop installs
 
 ### Source-built CLI tools
 - TUXEDO Tailor CLI (`tailor`) from [`AaronErhardt/tuxedo-rs`](https://github.com/AaronErhardt/tuxedo-rs)
+- `rbw` on Debian/Ubuntu and Fedora, where distro versions may be unavailable or older than `rofi-rbw` requires
 
 ### Default `xdg-open` handlers
 - `zathura-tabbed.desktop` for PDF and common PDF-like MIME aliases

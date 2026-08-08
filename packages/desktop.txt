@@ -5,6 +5,7 @@ polybar
 picom
 rofi
 dunst
+pinentry-gnome3
 xdotool
 xclip
 x11-xserver-utils
