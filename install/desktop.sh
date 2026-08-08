@@ -545,6 +545,19 @@ ensure_system_default_target() {
     return 0
 }
 
+configure_system_keyboard_layout() {
+    if ! has_cmd localectl; then
+        warn "localectl not found; cannot configure the system X11 keyboard layout."
+        return 1
+    fi
+
+    info "Configuring the system X11 keyboard layout: fr (caps:escape)"
+    if ! sudo localectl set-x11-keymap fr "" "" caps:escape; then
+        warn "Failed to configure the system X11 keyboard layout."
+        return 1
+    fi
+}
+
 configure_display_manager_services() {
     case "$DISTRO_FAMILY" in
         arch|fedora)
@@ -554,6 +567,7 @@ configure_display_manager_services() {
             ;;
     esac
 
+    configure_system_keyboard_layout || return 1
     ensure_system_service sddm.service true || return 1
     ensure_system_default_target graphical.target
 }
