@@ -14,6 +14,7 @@ The principles used for building this system are simple :
 
 This is all materialized through a set of tools that tries to stay minimal while providing a solid out of the box experience that can be easily extended and customized.
 Visually, anything that can be uses the `JetBrainsMono` font and follows a [Solarized Light](https://ethanschoonover.com/solarized/) palette, with `SolArc` handling GTK theming.
+The X11 session and SDDM greeter use the French AZERTY layout. Caps Lock acts as Escape without remapping the physical Escape key, and normal Kitty/Neovim text uses a black foreground.
 
 
 - Desktop/Window management:

@@ -7,5 +7,5 @@ if command -v xrdb >/dev/null 2>&1; then
 fi
 
 if command -v setxkbmap >/dev/null 2>&1; then
-    setxkbmap -layout fr -option caps:swapescape
+    setxkbmap -layout fr -option '' -option caps:escape
 fi

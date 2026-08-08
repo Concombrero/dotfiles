@@ -142,6 +142,8 @@ link_cargo_binary() {
 }
 
 install_rust_toolchain() {
+    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
     if ! command -v rustup &>/dev/null; then
         info "Installing rustup..."
 
@@ -150,8 +152,6 @@ install_rust_toolchain() {
             return 1
         fi
     fi
-
-    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 
     if ! rustup default stable >/dev/null 2>&1; then
         error "Failed to install or activate the stable Rust toolchain."

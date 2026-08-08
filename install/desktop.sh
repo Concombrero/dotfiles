@@ -177,7 +177,7 @@ gtk_theme_is_installed() {
 }
 
 install_solarc_gtk_theme() {
-    local tmp_dir source_dir build_dir candidate
+    local tmp_dir source_dir build_dir build_log candidate
 
     if gtk_theme_is_installed; then
         log "SolArc GTK theme is already available."
@@ -191,6 +191,7 @@ install_solarc_gtk_theme() {
 
     tmp_dir="$(mktemp -d)"
     source_dir="$tmp_dir/solarc-theme"
+    build_log="$tmp_dir/solarc-build.log"
 
     if ! mkdir -p "$HOME/.local/share/themes"; then
         error "Failed to prepare the SolArc GTK theme directory."
@@ -212,10 +213,12 @@ install_solarc_gtk_theme() {
         return 1
     fi
 
+    info "Generating the SolArc GTK theme..."
     if ! (
         cd "$source_dir" &&
         ./solarize.sh
-    ); then
+    ) >"$build_log" 2>&1; then
+        cat "$build_log" >&2
         error "Failed to patch Arc with the Solarized Light palette."
         rm -rf "$tmp_dir"
         return 1
@@ -234,6 +237,7 @@ install_solarc_gtk_theme() {
         return 1
     fi
 
+    info "Building the SolArc GTK theme..."
     if ! (
         cd "$build_dir" &&
         ./autogen.sh \
@@ -249,7 +253,8 @@ install_solarc_gtk_theme() {
             --disable-openbox &&
         make &&
         make install
-    ); then
+    ) >>"$build_log" 2>&1; then
+        cat "$build_log" >&2
         error "Failed to build or install the SolArc GTK theme."
         rm -rf "$tmp_dir"
         return 1
@@ -407,7 +412,7 @@ install_fonts() {
             continue
         fi
 
-        if ! sudo unzip -qo "$TMP_DIR/$font.zip" -d "$FONT_DIR" -x "LICENSE*" "README*"; then
+        if ! sudo unzip -qo "$TMP_DIR/$font.zip" -d "$FONT_DIR"; then
             warn "Failed to extract font $font."
             had_failure=true
             rm -rf "$TMP_DIR"
@@ -762,25 +767,21 @@ install_i3lock_color() {
         return 1
     fi
 
-    if ! /usr/local/bin/i3lock --help >/dev/null 2>&1 && ! /usr/local/bin/i3lock -h >/dev/null 2>&1; then
-        error "i3lock-color installed but the binary failed a basic smoke test."
+    current_tag="$(detect_i3lock_version /usr/local/bin/i3lock || true)"
+    if [ -z "$current_tag" ]; then
+        error "i3lock-color installed but did not report a parseable version."
         rm -rf "$tmp_dir"
         return 1
     fi
 
-    current_tag="$(detect_i3lock_version /usr/local/bin/i3lock || true)"
-    if [ -n "$current_tag" ] && [ "$current_tag" != "$latest_tag" ]; then
+    if [ "$current_tag" != "$latest_tag" ]; then
         error "i3lock-color installed but reported version '$current_tag' instead of '$latest_tag'."
         rm -rf "$tmp_dir"
         return 1
     fi
 
     rm -rf "$tmp_dir"
-    if [ -n "$current_tag" ]; then
-        log "i3lock-color ${current_tag} installed to /usr/local/bin/i3lock."
-    else
-        log "i3lock-color installed to /usr/local/bin/i3lock."
-    fi
+    log "i3lock-color ${current_tag} installed to /usr/local/bin/i3lock."
 }
 
 set_wallpaper() {

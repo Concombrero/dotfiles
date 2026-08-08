@@ -1,14 +1,14 @@
--- CATPPUCCIN (Dark theme with purple accents)
+-- CATPPUCCIN (light theme aligned with the Solarized workspace)
 return {
   "catppuccin/nvim",
   name = "catppuccin",
   priority = 1000, -- make sure to load this before all the other start plugins
   config = function()
     require("catppuccin").setup({
-      flavour = "mocha", -- mocha is the darkest variant with purple accents
+      flavour = "latte",
       transparent_background = true,
       background = {
-        dark = "mocha",
+        light = "latte",
       },
       integrations = {
         cmp = true,
@@ -21,24 +21,21 @@ return {
         -- Add any other plugins you use
       },
       highlight_overrides = {
-        mocha = function(mocha)
+        latte = function(latte)
           return {
-            -- Enhance purple elements
-            Comment = { fg = mocha.lavender },
-            LineNr = { fg = mocha.overlay1 },
-            CursorLineNr = { fg = mocha.lavender },
-            -- Float bg matches editor bg (base) to prevent visible bleed
-            -- around border characters. Catppuccin defaults use "mantle"
-            -- which is darker, but thin border lines don't fill terminal
-            -- cells fully, so the darker bg shows through as a rectangle.
-            NormalFloat = { bg = mocha.base },
-            FloatBorder = { bg = mocha.base },
-            FloatTitle = { bg = mocha.base },
+            Normal = { fg = "#000000" },
+            NormalNC = { fg = "#000000" },
+            Comment = { fg = "#586e75" },
+            LineNr = { fg = "#839496" },
+            CursorLineNr = { fg = "#268bd2" },
+            NormalFloat = { fg = "#000000", bg = latte.base },
+            FloatBorder = { fg = latte.blue, bg = latte.base },
+            FloatTitle = { fg = "#000000", bg = latte.base },
           }
         end,
       },
     })
-    require("catppuccin").load("mocha")
+    require("catppuccin").load("latte")
   end,
 }
 

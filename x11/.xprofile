@@ -1,1 +1,7 @@
 export GTK_USE_PORTAL=1
+
+# Establish FR AZERTY before the window manager and terminal start. Clear any
+# inherited options so Escape cannot accidentally behave as Caps Lock.
+if command -v setxkbmap >/dev/null 2>&1; then
+    setxkbmap -layout fr -option '' -option caps:escape
+fi

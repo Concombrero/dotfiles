@@ -8,15 +8,15 @@ return {
 
     local function get_colors()
       local colors = {
-        text = "#cdd6f4",
-        muted = "#7f849c",
-        mid = "#1e1e2e",
-        light = "#313244",
-        accent = "#cba6f7",
+        text = "#000000",
+        muted = "#657b83",
+        mid = "#fdf6e3",
+        light = "#eee8d5",
+        accent = "#268bd2",
       }
 
       local palette_ok, palette = pcall(function()
-        return require("catppuccin.palettes").get_palette("mocha")
+        return require("catppuccin.palettes").get_palette("latte")
       end)
 
       if palette_ok and palette then
@@ -24,7 +24,7 @@ return {
         colors.muted = palette.overlay1 or colors.muted
         colors.mid = palette.base or colors.mid
         colors.light = palette.surface0 or colors.light
-        colors.accent = palette.mauve or colors.accent
+        colors.accent = palette.blue or colors.accent
       end
 
       return colors
