@@ -95,6 +95,14 @@ julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/n
 julia --startup-file=no --history-file=no --project="$HOME/.julia/environments/nvim-lspconfig" -e 'using Pkg; Pkg.add(PackageSpec(name="LanguageServer", rev="main")); Pkg.add(PackageSpec(name="SymbolServer", rev="master")); Pkg.add(PackageSpec(name="StaticLint", rev="master")); Pkg.instantiate(); Pkg.precompile()'
 ```
 
+### Fedora SDDM keyboard recovery
+
+If the SDDM login screen remains QWERTY after setting the system layout with `localectl`, run this command from the dotfiles repository root. It forces the SDDM greeter to use X11, where the tracked setup script applies the French AZERTY layout. The final step restarts SDDM and immediately closes the current graphical session.
+
+```bash
+sudo install -Dm755 sddm/usr/local/share/sddm/scripts/tagarchy-xsetup /usr/local/share/sddm/scripts/tagarchy-xsetup && sudo install -Dm644 sddm/etc/sddm.conf.d/zz-tagarchy-theme.conf /etc/sddm.conf.d/zz-tagarchy-theme.conf && sudo systemctl restart sddm
+```
+
 ### Bitwarden and rofi-rbw setup
 
 Account details and API credentials remain machine-local. Configure your Bitwarden email, register the device, and download the vault from a terminal:
@@ -133,7 +141,8 @@ Package manager installs are preferred whenever they ship the latest version. De
 ### Arch/Fedora login manager theme
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`
 - theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf` 
-- custom X11 display setup script installed to `/usr/local/share/sddm/scripts/tagarchy-xsetup` to seed `Xcursor.theme` and `Xcursor.size` before the Qt6 greeter starts
+- SDDM greeter forced to X11 so the French AZERTY layout can be applied before login
+- custom X11 display setup script installed to `/usr/local/share/sddm/scripts/tagarchy-xsetup` to configure the keyboard and seed `Xcursor.theme` and `Xcursor.size` before the Qt6 greeter starts
 - blurred background generated from `~/Pictures/Wallpapers/wallpaper.jpg`
 
 ### Python Tools (via pipx)
