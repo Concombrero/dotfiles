@@ -558,6 +558,34 @@ configure_display_manager_services() {
     ensure_system_default_target graphical.target
 }
 
+configure_user_profile_picture() {
+    local picture_src="$DOTFILES_DIR/assets/pp.jpg"
+    local user_object="/org/freedesktop/Accounts/User$(id -u)"
+
+    if [ ! -f "$picture_src" ]; then
+        error "Profile picture not found at $picture_src."
+        return 1
+    fi
+
+    if ! install -m 0644 "$picture_src" "$HOME/.face" ||
+        ! install -m 0644 "$picture_src" "$HOME/.face.icon"; then
+        error "Failed to install the profile picture for $(id -un)."
+        return 1
+    fi
+
+    if has_cmd busctl &&
+        busctl --system call org.freedesktop.Accounts /org/freedesktop/Accounts \
+            org.freedesktop.Accounts FindUserByName s "$(id -un)" >/dev/null 2>&1; then
+        if ! sudo busctl --system call org.freedesktop.Accounts "$user_object" \
+            org.freedesktop.Accounts.User SetIconFile s "$HOME/.face.icon" >/dev/null; then
+            warn "Failed to register the profile picture with AccountsService."
+            return 1
+        fi
+    fi
+
+    log "Profile picture configured for $(id -un)."
+}
+
 generate_sddm_background() {
     local wallpaper=$1
     local theme_dst=$2
@@ -1009,5 +1037,6 @@ install_desktop_extras() {
     run_step "default terminal configuration" configure_default_terminal
     run_step "GTK4/libadwaita theme sync" sync_gtk4_theme_support
     run_step "wallpaper setup" set_wallpaper
+    run_step "profile picture setup" configure_user_profile_picture
     run_step "MIME configuration" configure_mime
 }

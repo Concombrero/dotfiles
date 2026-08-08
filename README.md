@@ -126,6 +126,10 @@ Defined in distro-specific package lists:
 
 Package manager installs are preferred whenever they ship the latest version. Debian/Ubuntu and Fedora still rely on a few upstream binaries and source builds where repo packages lag or are missing. Arch remains the closest path to an all-package-managed install.
 
+### Desktop account profile
+- `assets/pp.jpg` is installed as the profile picture for the user running the installer.
+- The image is exposed through the standard `~/.face` and `~/.face.icon` files and registered with AccountsService when available.
+
 ### Arch/Fedora login manager theme
 - `tagarchy` SDDM theme installed to `/usr/share/sddm/themes/tagarchy`
 - theme selection config installed to `/etc/sddm.conf.d/zz-tagarchy-theme.conf` 
