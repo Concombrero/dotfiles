@@ -38,6 +38,10 @@ The X11 session and SDDM greeter use the French AZERTY layout. Caps Lock acts as
 
 The repository includes wallpaper assets under `wallpapers/Pictures/Wallpapers/`.
 
+## Learn the Setup
+
+Complete the [Workstation Scavenger Hunt](WORKSTATION_SCAVENGER_HUNT.md) after installation for a hands-on tour of the keyboard workflow, terminal stack, core applications, and desktop integrations.
+
 
 ## Installation Guide
 
