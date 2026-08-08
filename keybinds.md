@@ -197,6 +197,144 @@ Sources: [`nvim/.config/nvim/lua/config/keymaps.lua`](nvim/.config/nvim/lua/conf
 
 Modes are abbreviated as Normal, Insert, Visual, Select, Command, and Terminal. `Leader` is `Space`.
 
+Neovim commands are usually sequences. For example, `Leader+fk` means press `Space`, then `f`, then `k`; `ciw` means press `c`, then `i`, then `w`. Do not hold the keys together unless modifiers such as `Ctrl` or `Shift` are shown.
+
+### Changing Modes
+
+Neovim starts in Normal mode. Use Normal mode for navigation and commands, then enter another mode only for the operation being performed.
+
+| Key | Starting mode | Result |
+|---|---|---|
+| `Escape` or `Caps Lock` | Any editing mode | Return to Normal mode |
+| `i` | Normal | Insert before the cursor |
+| `a` | Normal | Insert after the cursor |
+| `I` | Normal | Insert at the first nonblank character of the line |
+| `A` | Normal | Insert at the end of the line |
+| `o` | Normal | Open a new line below and enter Insert mode |
+| `O` | Normal | Open a new line above and enter Insert mode |
+| `v` | Normal | Start character-wise Visual selection |
+| `V` | Normal | Start line-wise Visual selection |
+| `Ctrl+v` | Normal | Start block-wise Visual selection |
+| `R` | Normal | Enter Replace mode and overwrite text as you type |
+| `:` | Normal | Enter Command-line mode |
+| `Ctrl+\`, then `Ctrl+n` | Terminal | Return to Terminal-Normal mode; plain `Escape` already does this in configured non-Yazi terminals |
+
+In Visual mode, move the cursor to extend the selection, press `o` to switch which end is active, `gv` to reselect the last selection, or `Escape` to cancel.
+
+### Basic Movement
+
+Motions can be used by themselves or after an operator such as `y`, `d`, or `c`.
+
+| Key | Action |
+|---|---|
+| `h/j/k/l` | Move left/down/up/right |
+| `w` / `b` | Move to the next/previous word start |
+| `e` | Move to the end of the word |
+| `0` / `^` | Move to the first column/first nonblank character |
+| `$` | Move to the end of the line |
+| `gg` / `G` | Go to the first/last line |
+| `{` / `}` | Go to the previous/next paragraph |
+| `%` | Jump between matching brackets |
+| `f{character}` / `F{character}` | Find a character forward/backward on the current line |
+| `t{character}` / `T{character}` | Move just before a character forward/backward |
+| `Ctrl+o` / `Ctrl+i` | Move backward/forward through the jump list |
+
+A number repeats a command or motion: `5j` moves down five lines, `3w` moves forward three words, and `2dd` cuts two lines.
+
+### Text Objects
+
+Text objects select meaningful regions without manually positioning both ends. Use `i` for **inside** and `a` for **around**, including delimiters or surrounding whitespace.
+
+| Text object | Region |
+|---|---|
+| `iw` / `aw` | Inner word/around word |
+| `is` / `as` | Inner sentence/around sentence |
+| `ip` / `ap` | Inner paragraph/around paragraph |
+| `i"` / `a"` | Text inside/around double quotes |
+| `i'` / `a'` | Text inside/around single quotes |
+| `i)` / `a)` | Text inside/around parentheses |
+| `i]` / `a]` | Text inside/around square brackets |
+| `i}` / `a}` | Text inside/around braces |
+
+Combine an operator with a text object: `yiw` copies the current word, `di"` cuts inside quotes, and `ci)` replaces the contents of parentheses.
+
+### Copy, Cut, Change, and Paste
+
+Vim calls copying **yanking**. Delete and change operations also save removed text in a register, so they behave like cutting. This configuration routes the standard `y`, `p`, and `P` operations through Yanky and keeps a 50-entry in-memory yank history.
+
+| Key | Mode | Action |
+|---|---|---|
+| `yy` | Normal | Copy the current line |
+| `Y` | Normal | Copy from the cursor to the end of the line |
+| `y{motion}` | Normal | Copy through a motion, such as `yw`, `y$`, or `y}` |
+| `y` | Visual | Copy the selection and return to Normal mode |
+| `dd` | Normal | Cut the current line |
+| `d{motion}` | Normal | Cut through a motion, such as `dw`, `d$`, or `dG` |
+| `d` or `x` | Visual | Cut the selection |
+| `x` / `X` | Normal | Cut the character under/before the cursor |
+| `cc` | Normal | Cut the current line and enter Insert mode |
+| `c{motion}` | Normal | Cut through a motion and enter Insert mode |
+| `c` | Visual | Replace the selection by entering Insert mode |
+| `s` / `S` | Normal | Replace the current character/current line |
+| `p` / `P` | Normal | Paste after/before the cursor or current line |
+| `p` / `P` | Visual | Replace the selection with the copied text |
+| `gp` / `gP` | Normal | Paste after/before and leave the cursor after the inserted text |
+| `Leader+fy` | Normal | Browse and restore entries from Yanky's history |
+
+Common examples:
+
+| Sequence | Action |
+|---|---|
+| `viw`, then `y` | Select and copy the current word |
+| `V`, move with `j/k`, then `y` | Select and copy complete lines |
+| `Ctrl+v`, move, then `y` | Copy a rectangular block |
+| `diw` | Cut the current word |
+| `ciw` | Replace the current word and enter Insert mode |
+| `daw` | Cut the current word and its surrounding whitespace |
+| `yyp` | Duplicate the current line below |
+| `ddp` | Move the current line down |
+| `ddkP` | Move the current line up |
+
+### System Clipboard and Registers
+
+Source: [`nvim/.config/nvim/lua/config/options.lua`](nvim/.config/nvim/lua/config/options.lua)
+
+Clipboard behavior changes depending on whether Neovim is running inside tmux:
+
+- **Outside tmux:** `clipboard=unnamedplus`, so ordinary `y`, `d`, `c`, `p`, and `P` use the desktop clipboard by default.
+- **Inside tmux:** ordinary edits use Neovim's unnamed register to avoid an OSC 52 write on every delete. Use the explicit `+` register to copy to the desktop clipboard: `"+y`, `"+yy`, or `"+y{motion}`.
+- **Pasting external clipboard text inside tmux:** enter Insert mode and press `Ctrl+Shift+v` so Kitty performs the paste. OSC 52 cannot read the desktop clipboard, so `"+p` falls back to Neovim's unnamed register in this setup.
+
+The `"` key chooses a register for the next operation. It is a prefix, so `"+yy` means press `"`, then `+`, then `y`, then `y`.
+
+| Register sequence | Action |
+|---|---|
+| `"+y{motion}` / `"+yy` | Copy to the desktop clipboard explicitly |
+| `"+p` / `"+P` | Paste from the desktop clipboard outside tmux |
+| `"0p` | Paste the most recently yanked text, ignoring later deletes |
+| `"ayy` / `"ap` | Copy a line into named register `a`/paste register `a` |
+| `"_d{motion}` | Delete into the black-hole register without replacing copied text |
+| `:registers` | Display register contents |
+| `Leader+fr` | Search registers with Telescope |
+
+### Undo, Repeat, and Search
+
+| Key | Action |
+|---|---|
+| `u` | Undo the last change |
+| `Ctrl+r` | Redo the last undone change |
+| `.` | Repeat the last change |
+| `/text`, then `Enter` | Search forward for `text` |
+| `?text`, then `Enter` | Search backward for `text` |
+| `n` / `N` | Go to the next/previous match |
+| `*` / `#` | Search forward/backward for the word under the cursor |
+| `Enter` | Clear search highlighting in Normal mode |
+| `:%s/old/new/g` | Replace every `old` with `new` in the file |
+| `:%s/old/new/gc` | Replace throughout the file and confirm each match |
+| `:'<,'>s/old/new/g` | Replace within the current Visual selection |
+
+Use `:earlier 5m` to return to the file state from five minutes ago and `:later 5m` to move forward again. Persistent undo is enabled, so undo history survives reopening a file.
+
 ### Main Leader Bindings
 
 | Key | Modes | Action |
